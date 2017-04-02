@@ -1,0 +1,169 @@
+#ifndef GTX_H
+#define GTX_H
+
+#include <QByteArray>
+#include "ftex.h"
+
+class GX2
+{
+public:
+  GX2(QByteArray data, FTEX::header_t* ftexHeader = nullptr);
+
+  enum gx2Format_t
+  {
+    GX2_FMT_INVALID = 0x0,
+    GX2_FMT_8 = 0x1,
+    GX2_FMT_4_4 = 0x2,
+    GX2_FMT_3_3_2 = 0x3,
+    GX2_FMT_RESERVED_4 = 0x4,
+    GX2_FMT_16 = 0x5,
+    GX2_FMT_16_FLOAT = 0x6,
+    GX2_FMT_8_8 = 0x7,
+    GX2_FMT_5_6_5 = 0x8,
+    GX2_FMT_6_5_5 = 0x9,
+    GX2_FMT_1_5_5_5 = 0xA,
+    GX2_FMT_4_4_4_4 = 0xB,
+    GX2_FMT_5_5_5_1 = 0xC,
+    GX2_FMT_32 = 0xD,
+    GX2_FMT_32_FLOAT = 0xE,
+    GX2_FMT_16_16 = 0xF,
+    GX2_FMT_16_16_FLOAT = 0x10,
+    GX2_FMT_8_24 = 0x11,
+    GX2_FMT_8_24_FLOAT = 0x12,
+    GX2_FMT_24_8 = 0x13,
+    GX2_FMT_24_8_FLOAT = 0x14,
+    GX2_FMT_10_11_11 = 0x15,
+    GX2_FMT_10_11_11_FLOAT = 0x16,
+    GX2_FMT_11_11_10 = 0x17,
+    GX2_FMT_11_11_10_FLOAT = 0x18,
+    GX2_FMT_2_10_10_10 = 0x19,
+    GX2_FMT_8_8_8_8 = 0x1A,
+    GX2_FMT_10_10_10_2 = 0x1B,
+    GX2_FMT_X24_8_32_FLOAT = 0x1C,
+    GX2_FMT_32_32 = 0x1D,
+    GX2_FMT_32_32_FLOAT = 0x1E,
+    GX2_FMT_16_16_16_16 = 0x1F,
+    GX2_FMT_16_16_16_16_FLOAT = 0x20,
+    GX2_FMT_RESERVED_33 = 0x21,
+    GX2_FMT_32_32_32_32 = 0x22,
+    GX2_FMT_32_32_32_32_FLOAT = 0x23,
+    GX2_FMT_RESERVED_36 = 0x24,
+    GX2_FMT_1 = 0x25,
+    GX2_FMT_1_REVERSED = 0x26,
+    GX2_FMT_GB_GR = 0x27,
+    GX2_FMT_BG_RG = 0x28,
+    GX2_FMT_32_AS_8 = 0x29,
+    GX2_FMT_32_AS_8_8 = 0x2A,
+    GX2_FMT_5_9_9_9_SHAREDEXP = 0x2B,
+    GX2_FMT_8_8_8 = 0x2C,
+    GX2_FMT_16_16_16 = 0x2D,
+    GX2_FMT_16_16_16_FLOAT = 0x2E,
+    GX2_FMT_32_32_32 = 0x2F,
+    GX2_FMT_32_32_32_FLOAT = 0x30,
+    GX2_FMT_BC1_UNORM = 0x31,
+    GX2_FMT_BC2_UNORM = 0x32,
+    GX2_FMT_BC3 = 0x33,
+    GX2_FMT_BC4 = 0x34,
+    GX2_FMT_BC5 = 0x35,
+    GX2_FMT_BC6 = 0x36,
+    GX2_FMT_BC7 = 0x37,
+    GX2_FMT_32_AS_32_32_32_32 = 0x38,
+    GX2_FMT_APC3 = 0x39,
+    GX2_FMT_APC4 = 0x3A,
+    GX2_FMT_APC5 = 0x3B,
+    GX2_FMT_APC6 = 0x3C,
+    GX2_FMT_APC7 = 0x3D,
+    GX2_FMT_CTX1 = 0x3E,
+    GX2_FMT_RESERVED_63 = 0x3F,
+    GX2_FMT_BC1_SRGB = 0x431,
+    GX2_FMT_BC2_SRGB = 0x432,
+  };
+
+  enum gx2TileMode_t : quint32
+  {
+    GX2_TILING_LINEAR_GENERAL = 0x0,
+    GX2_TILING_LINEAR_ALIGNED = 0x1,
+    GX2_TILING_1D_TILED_THIN1 = 0x2,
+    GX2_TILING_1D_TILED_THICK = 0x3,
+    GX2_TILING_2D_TILED_THIN1 = 0x4,
+    GX2_TILING_2D_TILED_THIN2 = 0x5,
+    GX2_TILING_2D_TILED_THIN4 = 0x6,
+    GX2_TILING_2D_TILED_THICK = 0x7,
+    GX2_TILING_2B_TILED_THIN1 = 0x8,
+    GX2_TILING_2B_TILED_THIN2 = 0x9,
+    GX2_TILING_2B_TILED_THIN4 = 0xA,
+    GX2_TILING_2B_TILED_THICK = 0xB,
+    GX2_TILING_3D_TILED_THIN1 = 0xC,
+    GX2_TILING_3D_TILED_THICK = 0xD,
+    GX2_TILING_3B_TILED_THIN1 = 0xE,
+    GX2_TILING_3B_TILED_THICK = 0xF,
+    GX2_TILING_LINEAR_SPECIAL = 0x10,
+    GX2_TILING_2D_TILED_XTHICK = 0x10,
+    GX2_TILING_3D_TILED_XTHICK = 0x11,
+    GX2_TILING_POWER_SAVE = 0x12,
+    GX2_TILING_COUNT = 0x13,
+  };
+
+  enum gx2MicroTileType_t : quint32
+  {
+    GX2_MICRO_TILING_DISPLAYABLE = 0x0,
+    GX2_MICRO_TILING_NON_DISPLAYABLE = 0x1,
+    GX2_MICRO_TILING_DEPTH_SAMPLE_ORDER = 0x2,
+    GX2_MICRO_TILING_THICK_TILING = 0x3,
+  };
+
+  int ReadImageFromData();
+
+private:
+  // Pixel Address Computation
+  quint64 ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32 slice, quint32 sample,
+                                                quint32 bpp, quint32 m_pitch, quint32 height,
+                                                quint32 numSamples, bool isDepth, quint32 tileBase,
+                                                quint32 compBits, quint32 pipeSwizzle,
+                                                quint32 bankSwizzle, quint32* pBitPosition);
+
+  quint32 ComputePixelIndexWithinMicroTile(quint32 x, quint32 y, quint32 z, quint32 bpp,
+                                           gx2MicroTileType_t tileType);
+
+  gx2MicroTileType_t GetTileType(bool isDepth);
+
+  void ComputeSurfaceThickness();
+  void ComputeSurfaceRotationFromTileMode();
+  void ComputeThickMicroTiling();
+  void ComputeBankSwappedTileMode();
+
+  quint32 ComputeMacroTileAspectRatio(gx2TileMode_t tileMode);
+
+  quint32 ComputeSurfaceBankSwappedWidth(gx2TileMode_t tileMode, quint32 bpp, quint32 numSamples,
+                                         quint32 m_pitch, quint32* pSlicesPerTile);
+
+  quint32 ComputePipeFromCoordWoRotation(quint32 x, quint32 y);
+
+  quint32 ComputeBankFromCoordWoRotation(quint32 x, quint32 y);
+
+  QByteArray rawImageData;
+  QByteArray deswizzledImageData;
+  QImage* image;
+
+  quint32 m_width;
+  quint32 m_height;
+  quint32 m_num_mips;
+  quint32 m_depth;
+  quint32 m_swizzle;
+  quint32 m_pitch;
+  quint32 m_image_size;
+
+  quint32 m_pipes = 2;
+  quint32 m_banks = 4;
+  quint32 m_split_size = 2048;
+
+  gx2Format_t format;
+  gx2TileMode_t tileMode;
+
+  quint32 microTileThickness;
+  bool thickMacroTiled;
+  bool bankSwappedTileMode;
+  quint32 rotate;
+};
+
+#endif  // GTX_H

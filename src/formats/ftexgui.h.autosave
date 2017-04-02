@@ -1,0 +1,41 @@
+#ifndef FTEXGUI_H
+#define FTEXGUI_H
+
+#include <QObject>
+#include <QScrollArea>
+#include <QStandardItemModel>
+#include <QTableView>
+#include <QVBoxLayout>
+
+#include "ftex.h"
+#include "nodegroup.h"
+#include "customdelegate.h"
+#include "imageview.h"
+
+class FTEXNode : public Node
+{
+  Q_OBJECT
+public:
+  explicit FTEXNode(FTEX* ftex, QObject* parent = 0);
+  int LoadAttributeArea();
+  int LoadMainWidget();
+
+private:
+  FTEX* ftex;
+  FTEX::header_t header;
+
+  CustomDelegate::delegateGroup_t m_delegate_group;
+  QTableView* tableView;
+
+  QScrollArea* sectionsContainer;
+  QVBoxLayout* sectionsLay;
+  
+//signals:
+//  void NewAttributesArea(QScrollArea*);
+
+//private slots:
+//  void HandleNodeClick(QStandardItem* item);
+//  void HandleAttributeItemChange(QStandardItem* item);
+};
+
+#endif  // FTEXGUI_H
