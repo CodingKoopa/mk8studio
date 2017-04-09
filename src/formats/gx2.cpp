@@ -22,6 +22,9 @@ ResultCode GX2::ReadImageFromData()
   quint32 height = m_header->height;
 
   m_num_samples = 1;
+  m_pipe_swizzle = GET_BIT(m_header->swizzle, 8);
+  // TODO: GET_BITS?
+  m_bank_swizzle = (m_header->swizzle >> 9) & 3;
 
   switch (m_header->format)
   {
@@ -46,25 +49,100 @@ ResultCode GX2::ReadImageFromData()
   default:
     return RESULT_UNSUPPORTED_FILE_FORMAT;
   }
-  // deswizzledImageData = QByteArray();
-  deswizzledImageData.resize(m_header->data_length);
-  deswizzledImageData.fill(0);
+
+  switch (m_header->tile_mode)
+  {
+  // Macro Tiled
+  case GX2_TILING_2D_TILED_THIN1:
+  case GX2_TILING_2D_TILED_THIN2:
+  case GX2_TILING_2D_TILED_THIN4:
+  case GX2_TILING_2D_TILED_THICK:
+  case GX2_TILING_2B_TILED_THIN1:
+  case GX2_TILING_2B_TILED_THIN2:
+  case GX2_TILING_2B_TILED_THIN4:
+  case GX2_TILING_2B_TILED_THICK:
+    m_macro_tile_pitch = 8 * m_banks;
+    m_macro_tile_height = 8 * m_pipes;
+
+    if (m_header->tile_mode == GX2_TILING_2D_TILED_THIN2 ||
+        m_header->tile_mode == GX2_TILING_2B_TILED_THIN2)
+    {
+      m_macro_tile_pitch /= 2;
+      m_macro_tile_height *= 2;
+    }
+
+    if (m_header->tile_mode == GX2_TILING_2D_TILED_THIN4 ||
+        m_header->tile_mode == GX2_TILING_2B_TILED_THIN4)
+    {
+      m_macro_tile_pitch /= 4;
+      m_macro_tile_height *= 4;
+    }
+
+  // Micro Tiled
+  case GX2_TILING_1D_TILED_THIN1:
+  case GX2_TILING_1D_TILED_THICK:
+    // TODO: maybe just move everything in the function here?
+    ComputeMicroTileType();
+
+    // The number of pixels in each micro tile *
+    // The thickness of each micro tile =
+    // Number of pixels in each micro tile with thickness taken in into account.
+
+    // Recalculated number of pixels in each micro tile *
+    // Number of bits in one pixel =
+    // Number of bits in one sample of a micro tile.
+
+    // Number of bits in one sample of a micro tile *
+    // Number of samples =
+    // Number of bits in one micro tile with all samples.
+    m_num_micro_tile_bits =
+        m_num_micro_tile_pixels * m_micro_tile_thickness * m_bpp * m_num_samples;
+
+    // Number of bits in one micro tile with all samples /
+    // Number of bits in a byte =
+    // Number of bytes in one micro tile with all samples.
+    // TODO: lambda for conversion to bits or something?
+    m_num_micro_tile_bytes = m_num_micro_tile_bits / 8;
+
+    // Number of bytes in one micro tile with all samples /
+    // How many samples there are =
+    // Number of bytes in one sample of a micro tile.
+    m_bytes_per_sample = m_num_micro_tile_bytes / m_num_samples;
+    break;
+
+  case GX2_TILING_LINEAR_GENERAL:
+  case GX2_TILING_LINEAR_ALIGNED:
+  default:
+    return RESULT_UNSUPPORTED_FILE_FORMAT;
+  }
+
+  deswizzled_image_data.resize(m_header->data_length);
+  deswizzled_image_data.fill(0);
 
   for (quint32 y = 0; y < height; ++y)
   {
     for (quint32 x = 0; x < width; ++x)
     {
-      qint32 origOffset;
+      qint32 original_offset;
       // Get the offset of the pixel at the current coordinate.
       switch (m_header->tile_mode)
       {
+      // Macro Tiled
       case GX2_TILING_2D_TILED_THIN1:
+      case GX2_TILING_2D_TILED_THIN2:
+      case GX2_TILING_2D_TILED_THIN4:
+      case GX2_TILING_2D_TILED_THICK:
+      case GX2_TILING_2B_TILED_THIN1:
+      case GX2_TILING_2B_TILED_THIN2:
+      case GX2_TILING_2B_TILED_THIN4:
+      case GX2_TILING_2B_TILED_THICK:
+        original_offset = ComputeSurfaceAddrFromCoordMacroTiled(x, y, 0, 0, 0, 0, 0);
+        break;
       default:
-        origOffset = ComputeSurfaceAddrFromCoordMacroTiled(
-            x, y, 0, 0, 0, 0, 0, ((m_header->swizzle >> 8) & 1), ((m_header->swizzle >> 9) & 3), 0);
+        return RESULT_UNSUPPORTED_FILE_FORMAT;
       }
 
-      qint32 new_pos;
+      qint32 new_offset;
 
       // Write the new pixels in their normal order to the new byte array.
       switch (m_header->format)
@@ -74,31 +152,31 @@ ResultCode GX2::ReadImageFromData()
       case GX2_FMT_BC4_UNORM:
       case GX2_FMT_BC4_SNORM:
       {
-        new_pos = (y * width + x) * 8;
+        new_offset = (y * width + x) * 8;
         break;
       }
       default:
-        new_pos = (y * width + x) * 16;
+        new_offset = (y * width + x) * 16;
         break;
       }
 
       // TODO: there's probably a better way of approaching this
       for (int i = 0; i < 8; i++)
       {
-        if (origOffset + i > raw_image_data.size())
+        if (original_offset + i > raw_image_data.size())
         {
           qDebug("Error: Tried to read pixel outside of image data. "
                  "Skipping pixel.");
           continue;
         }
-        if (new_pos + i > deswizzledImageData.size())
+        if (new_offset + i > deswizzled_image_data.size())
         {
           qDebug() << "Error: Tried to write pixel outside of image data. "
                       "Skipping pixel.";
           continue;
         }
         // qDebug("Writing raw offset %04X to %04X...", origOffset + i, newPos + i);
-        deswizzledImageData[new_pos + i] = raw_image_data[origOffset + i];
+        deswizzled_image_data[new_offset + i] = raw_image_data[original_offset + i];
         // qDebug("Deswizzled data using at(): %0X.",
         // rawImageData.at(newPos + i));
         // qDebug("Size: %i", deswizzledImageData.size());
@@ -106,7 +184,7 @@ ResultCode GX2::ReadImageFromData()
       }
     }
   }
-  DDS dds(&deswizzledImageData);
+  DDS dds(&deswizzled_image_data);
   dds.MakeHeader(m_header->width, m_header->height, m_header->depth, m_header->num_mips, true,
                  m_header->format);
   dds.WriteFile(m_name);
@@ -114,76 +192,73 @@ ResultCode GX2::ReadImageFromData()
 }
 
 quint64 GX2::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32 slice,
-                                                   quint32 sample, bool isDepth, quint32 tileBase,
-                                                   quint32 compBits, quint32 pipeSwizzle,
-                                                   quint32 bankSwizzle, quint32* pBitPosition)
+                                                   quint32 sample, quint32 tileBase,
+                                                   quint32 compBits, quint32* pBitPosition)
 {
-  quint64 numPipes = m_pipes;
-  quint64 numBanks = m_banks;
-  quint64 numGroupBits = m_group_bit_count;
-  quint64 numPipeBits = m_pipe_bit_count;
-  quint64 numBankBits = m_bank_bit_count;
-
-  // The number of pixels in each micro tile * The thickness of each micro tile
-  // = Number of pixels in each micro tile with thickness taken In into account.
-  // Recalculated number of pixels in each micro tile * The number of bits in
-  // one pixel
-  // = Number of bits in one sample of a micro tile.
-  // Number of bits in one sample of a micro tile * The number of samples
-  // = The number of bits in one micro tile, including all samples.
-  quint64 microTileBits = MicroTilePixels * m_micro_tile_thickness * m_bpp * m_num_samples;
-  // Convert the number of bits to bytes.
-  quint64 microTileBytes = microTileBits / 8;
+  // The commenting in this function will eventually be removed in favor of a dedicated document
+  // explaining the whole thing.
+  quint64 num_pipes = m_pipes;
+  quint64 num_banks = m_banks;
+  quint64 num_group_bits = m_group_bit_count;
+  quint64 num_pipe_bits = m_pipe_bit_count;
+  quint64 num_bank_bits = m_bank_bit_count;
 
   // Get the pixel index within the micro tile.
-  quint64 pixelIndex = ComputePixelIndexWithinMicroTile(x, y, slice, GetTileType(isDepth));
+  quint64 pixel_index_within_micro_tile = ComputePixelIndexWithinMicroTile(x, y, slice);
 
-  // The offset of the beginning of the micro tiles in the current sample.
-  quint64 sampleOffset;
-  // The offset of the current pixel relative to the beginning of the current
+  // Offset of the beginning of the current sample of the current tile.
+  quint64 sample_offset_within_micro_tile;
+  // Offset of the current pixel relative to the beginning of the current
   // sample.
-  quint64 pixelOffset;
+  quint64 pixel_offset_within_sample;
 
-  if (isDepth)
+  if (m_has_depth)
   {
     if (compBits && compBits != m_bpp)
     {
-      sampleOffset = tileBase + compBits * sample;
-      pixelOffset = m_num_samples * compBits * pixelIndex;
+      sample_offset_within_micro_tile = tileBase + compBits * sample;
+      pixel_offset_within_sample = m_num_samples * compBits * pixel_index_within_micro_tile;
     }
     else
     {
-      sampleOffset = m_bpp * sample;
-      pixelOffset = m_num_samples * m_bpp * pixelIndex;
+      sample_offset_within_micro_tile = m_bpp * sample;
+      pixel_offset_within_sample = m_num_samples * m_bpp * pixel_index_within_micro_tile;
     }
   }
   else
   {
-    // The number of bits in one micro tile / The number of samples = The number
-    // of bits in one micro tile in one sample.
-    // The number of bits in one micro tile in one sample * The current sample
-    // we're in = The offset of the start of the micro tiles for our sample.
-    sampleOffset = sample * (microTileBits / m_num_samples);
-    //    qDebug("Sample Offset: %04llX", sampleOffset);
-    // The number of bits in one pixel * The pixel index = The offset of the
-    // current pixel relative to the beginning of the current sample.
-    pixelOffset = m_bpp * pixelIndex;
-    //    qDebug("Pixel Offset: %04llX", pixelOffset);
+    // Number of bytes in one micro tile with all samples /
+    // Number of samples =
+    // Number of bits in one micro tile in one sample.
+
+    // Number of bits in one micro tile in one sample *
+    // Current sample we're in =
+    // Offset of the start of the micro tile sample.
+
+    // This works because the structure is like so:
+    // Micro Tile 1:
+    // Sample 1
+    // Sample 2
+    // Micro Tile 2:
+    // Sample 1
+    // Sample 2
+    sample_offset_within_micro_tile = (m_num_micro_tile_bits / m_num_samples) * sample;
+    // Number of bits in one pixel *
+    // The pixel index =
+    // The offset of the current pixel relative to the beginning of the current sample.
+    pixel_offset_within_sample = m_bpp * pixel_index_within_micro_tile;
   }
 
-  // The offset of the pixel + The offset of the beginning of the current sample
-  // = The recalculated pixel offset with sampling in mind.
-  quint64 elemOffset = pixelOffset + sampleOffset;
-  // qDebug("Elem Offset: %04llX", elemOffset);
+  // Offset of the pixel within the sample +
+  // Offset of the beginning of the current sample =
+  // Pixel offset relative to the beginning of the micro tile.
+  quint64 elemOffset = pixel_offset_within_sample + sample_offset_within_micro_tile;
 
   // ???
   if (pBitPosition != nullptr)
     *pBitPosition = static_cast<quint32>(elemOffset % 8);
 
-  // The number of bytes in one micro tile, including all samples / How many
-  // samples there are = The number of bytes in one micro tile in one sample.
-  quint64 bytesPerSample = microTileBytes / m_num_samples;
-  // How many samples there are in each slice (/ layer?)
+  // How many samples there are in each slice
   quint64 samplesPerSlice;
   // ???
   quint64 numSampleSplits;
@@ -192,11 +267,12 @@ quint64 GX2::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32
   quint64 tileSliceBits;
 
   // If there's more than one sample, and ???
-  if (m_num_samples > 1 && microTileBytes > static_cast<quint64>(m_split_size))
+  if (m_num_samples > 1 && m_num_micro_tile_bytes > static_cast<quint64>(m_split_size))
   {
-    // The size of one split / The number of bytes in one micro tile in one
-    // sample = The number of samples (Micro tiles) that can fit in each slice.
-    samplesPerSlice = m_split_size / bytesPerSample;
+    // Size of one split /
+    // Number of bytes in one micro tile in one sample =
+    // The number of samples that can fit in each slice.
+    samplesPerSlice = m_split_size / m_bytes_per_sample;
     // The number of samples / The number of samples that can fit in each slice
     // = The number of splits (Dunno what a split is, maybe the boundary between
     // two slices?)
@@ -204,7 +280,7 @@ quint64 GX2::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32
     m_num_samples = static_cast<quint32>(samplesPerSlice);
 
     // The number of bits in one micro tile / the number of sample splits = ?
-    tileSliceBits = microTileBits / numSampleSplits;
+    tileSliceBits = m_num_micro_tile_bits / numSampleSplits;
     // The recalculated pixel offset / tileSliceBits = ?
     sampleSlice = elemOffset / tileSliceBits;
     elemOffset %= tileSliceBits;
@@ -220,62 +296,49 @@ quint64 GX2::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32
     sampleSlice = 0;
   }
 
-  // This might have some correlation with pBitPosition
+  // This might have some correlation with pBitPosition?
   elemOffset /= 8;
 
-  // Each of the Wii U's RAM chips has 2 pipes, here we select a seemingly
+  // Each of the Wii U's RAM chips has 2 channels, here we select a seemingly
   // "random" one using an algorithm to generate one from the coordinates.
   quint64 pipe = ComputePipeFromCoordWoRotation(x, y);
   // The Wii U has 4 RAM chips, here we select a seemingly "random" one using an
   // algorithm to generate one from the coordinates.
   quint64 bank = ComputeBankFromCoordWoRotation(x, y);
-  //  qDebug() << "X: " << x << "Y: " << y << "Bank: " << bank;
-  //  qDebug() << "X: " << x << "Y: " << y << "Pipe: " << pipe;
 
-  // The maximum number of pipes * The random bank index = ?
-  // The product + The random pipe index = The bank and pipe together in a
-  // variable, here no larger than 7.
-  quint64 bankPipe = pipe + numPipes * bank;
-  // ?
-  quint64 swizzle = pipeSwizzle + numPipes * bankSwizzle;
+  // Number of pipes *
+  // Random bank index =
+  // Random bank index, shifted over in its correct spot.
+  // Shifted bank index +
+  // Random pipe index =
+  // Three bits containing the random bank and pipe.
+  quint64 bank_pipe = pipe + num_pipes * bank;
+  // Number of pipes *
+  // Bank index specified by texture =
+  // Bank index specified by texture, shifted over in its correct spot.
+  // Shifted specified bank index +
+  // Specified pipe index =
+  // Three bits containing the bank and pipe specified by the texture.
+  quint64 swizzle = m_pipe_swizzle + num_pipes * m_bank_swizzle;
   // The current slice the pixel is in.
   quint64 sliceIn = slice;
 
-  if (thickMacroTiled)
+  if (m_is_thick_macro_tiled)
     sliceIn /= ThickTileThickness;
 
   // Algorithm to recalculate bank and pipe?
-  bankPipe ^= numPipes * sampleSlice * ((numBanks >> 1) + 1) ^ (swizzle + sliceIn * rotate);
-  bankPipe %= numPipes * numBanks;
-  pipe = bankPipe % numPipes;
-  bank = bankPipe / numPipes;
+  bank_pipe ^= num_pipes * sampleSlice * ((num_banks >> 1) + 1) ^ (swizzle + sliceIn * rotate);
+  bank_pipe %= num_pipes * num_banks;
+  pipe = bank_pipe % num_pipes;
+  bank = bank_pipe / num_pipes;
 
   ComputeSliceInfo(slice, sampleSlice, numSampleSplits);
 
-  quint64 macroTilePitch = 8 * m_banks;
-  quint64 macroTileHeight = 8 * m_pipes;
-
-  switch (m_header->tile_mode)
-  {
-  case GX2_TILING_2D_TILED_THIN2:
-  case GX2_TILING_2B_TILED_THIN2:
-    macroTilePitch /= 2;
-    macroTileHeight *= 2;
-    break;
-  case GX2_TILING_2D_TILED_THIN4:
-  case GX2_TILING_2B_TILED_THIN4:
-    macroTilePitch /= 4;
-    macroTileHeight *= 4;
-    break;
-  default:
-    break;
-  }
-
-  quint64 macroTilesPerRow = m_header->pitch / macroTilePitch;
+  quint64 macroTilesPerRow = m_header->pitch / m_macro_tile_pitch;
   quint64 macroTileBytes = BITS_TO_BYTES(m_num_samples * m_micro_tile_thickness * m_bpp *
-                                         macroTileHeight * macroTilePitch);
-  quint64 macroTileIndexX = x / macroTilePitch;
-  quint64 macroTileIndexY = y / macroTileHeight;
+                                         m_macro_tile_height * m_macro_tile_pitch);
+  quint64 macroTileIndexX = x / m_macro_tile_pitch;
+  quint64 macroTileIndexY = y / m_macro_tile_height;
   quint64 macroTileOffset = macroTileBytes * (macroTileIndexX + macroTilesPerRow * macroTileIndexY);
 
   // Do bank swapping if needed
@@ -290,7 +353,7 @@ quint64 GX2::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32
   {
     static const quint32 bankSwapOrder[] = {0, 1, 3, 2, 6, 7, 5, 4, 0, 0};
     quint64 bank_swap_width = ComputeSurfaceBankSwappedWidth(m_header->pitch, nullptr);
-    quint64 swap_index = macroTilePitch * macroTileIndexX / bank_swap_width;
+    quint64 swap_index = m_macro_tile_pitch * macroTileIndexX / bank_swap_width;
     quint64 bank_mask = m_banks - 1;
     bank ^= bankSwapOrder[swap_index & bank_mask];
     break;
@@ -301,14 +364,14 @@ quint64 GX2::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32
 
   // Calculate final offset
   // Get mask targeting every group bit.
-  quint64 group_mask = (1 << numGroupBits) - 1;
+  quint64 group_mask = (1 << num_group_bits) - 1;
   quint64 total_offset =
-      elemOffset + ((macroTileOffset + m_slice_offset) >> (numBankBits + numPipeBits));
+      elemOffset + ((macroTileOffset + m_slice_offset) >> (num_bank_bits + num_pipe_bits));
 
-  quint64 offset_high = (total_offset & ~group_mask) << (numBankBits + numPipeBits);
+  quint64 offset_high = (total_offset & ~group_mask) << (num_bank_bits + num_pipe_bits);
   quint64 offset_low = total_offset & group_mask;
-  quint64 bankBits = bank << (numPipeBits + numGroupBits);
-  quint64 pipeBits = pipe << numGroupBits;
+  quint64 bankBits = bank << (num_pipe_bits + num_group_bits);
+  quint64 pipeBits = pipe << num_group_bits;
   quint64 offset = bankBits | pipeBits | offset_low | offset_high;
 
 #ifdef DEBUG
@@ -334,8 +397,7 @@ quint64 GX2::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32
   return offset;
 }
 
-quint32 GX2::ComputePixelIndexWithinMicroTile(quint32 x, quint32 y, quint32 z,
-                                              gx2MicroTileType_t tileType)
+quint32 GX2::ComputePixelIndexWithinMicroTile(quint32 x, quint32 y, quint32 z)
 {
   quint32 pixelBit0 = 0;
   quint32 pixelBit1 = 0;
@@ -358,7 +420,7 @@ quint32 GX2::ComputePixelIndexWithinMicroTile(quint32 x, quint32 y, quint32 z,
   quint32 z1 = GET_BIT(z, 1);
   quint32 z2 = GET_BIT(z, 2);
 
-  if (tileType == GX2_MICRO_TILING_THICK_TILING)
+  if (m_micro_tile_type == GX2_MICRO_TILING_THICK_TILING)
   {
     pixelBit0 = x0;
     pixelBit1 = y0;
@@ -371,7 +433,7 @@ quint32 GX2::ComputePixelIndexWithinMicroTile(quint32 x, quint32 y, quint32 z,
   }
   else
   {
-    if (tileType != GX2_MICRO_TILING_DISPLAYABLE)
+    if (m_micro_tile_type != GX2_MICRO_TILING_DISPLAYABLE)
     {
       pixelBit0 = x0;
       pixelBit1 = y0;
@@ -450,16 +512,12 @@ quint32 GX2::ComputePixelIndexWithinMicroTile(quint32 x, quint32 y, quint32 z,
   return pixelNumber;
 }
 
-GX2::gx2MicroTileType_t GX2::GetTileType(bool isDepth)
+void GX2::ComputeMicroTileType()
 {
-  if (isDepth)
-  {
-    return GX2_MICRO_TILING_DISPLAYABLE;
-  }
+  if (m_has_depth)
+    m_micro_tile_type = GX2_MICRO_TILING_DISPLAYABLE;
   else
-  {
-    return GX2_MICRO_TILING_DISPLAYABLE;
-  }
+    m_micro_tile_type = GX2_MICRO_TILING_DISPLAYABLE;
 }
 
 void GX2::ComputeSurfaceThickness()
@@ -520,9 +578,9 @@ void GX2::ComputeThickMicroTiling()
   case GX2_TILING_2B_TILED_THICK:
   case GX2_TILING_3D_TILED_THICK:
   case GX2_TILING_3B_TILED_THICK:
-    thickMacroTiled = true;
+    m_is_thick_macro_tiled = true;
   default:
-    thickMacroTiled = false;
+    m_is_thick_macro_tiled = false;
   }
 }
 
@@ -595,7 +653,7 @@ quint32 GX2::ComputeSurfaceBankSwappedWidth(quint32 pitch, quint32* pSlicesPerTi
 
   quint32 num_samples = m_num_samples;
 
-  if (thickMacroTiled)
+  if (m_is_thick_macro_tiled)
   {
     num_samples = 4;
   }

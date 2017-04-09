@@ -11,7 +11,7 @@ public:
   GX2();
   ~GX2();
 
-  enum GX2Format
+  enum Format
   {
     GX2_FMT_INVALID = 0x0,
     GX2_FMT_8 = 0x1,
@@ -83,7 +83,7 @@ public:
     GX2_FMT_BC2_SRGB = 0x432
   };
 
-  enum GX2TileMode : quint32
+  enum TileMode
   {
     GX2_TILING_LINEAR_GENERAL = 0x0,
     GX2_TILING_LINEAR_ALIGNED = 0x1,
@@ -108,7 +108,7 @@ public:
     GX2_TILING_COUNT = 0x13,
   };
 
-  enum gx2MicroTileType_t : quint32
+  enum MicroTileType
   {
     GX2_MICRO_TILING_DISPLAYABLE = 0x0,
     GX2_MICRO_TILING_NON_DISPLAYABLE = 0x1,
@@ -126,8 +126,8 @@ public:
     quint32 swizzle;
     quint32 pitch;
     quint32 data_length;
-    GX2Format format;
-    GX2TileMode tile_mode;
+    Format format;
+    TileMode tile_mode;
   };
 
   ResultCode ReadImageFromData();
@@ -140,17 +140,16 @@ protected:
   QByteArray raw_image_data;
 
 private:
-  // (What in) Pixel Address Computation
+  // Get the address of a pixel from a coordinate, within a macro tiled texture
   quint64 ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32 slice, quint32 sample,
-                                                bool isDepth, quint32 tileBase, quint32 compBits,
-                                                quint32 pipeSwizzle, quint32 bankSwizzle,
+                                                quint32 tileBase, quint32 compBits,
                                                 quint32* pBitPosition);
 
-  quint32 ComputePixelIndexWithinMicroTile(quint32 x, quint32 y, quint32 z,
-                                           gx2MicroTileType_t tileType);
+  // Get the index of a pixel from a coordinate, within a micro tile
+  quint32 ComputePixelIndexWithinMicroTile(quint32 x, quint32 y, quint32 z);
 
-  gx2MicroTileType_t GetTileType(bool isDepth);
-
+  // Computation of various things.
+  void ComputeMicroTileType();
   void ComputeSurfaceThickness();
   void ComputeSurfaceRotationFromTileMode();
   void ComputeThickMicroTiling();
@@ -165,8 +164,9 @@ private:
 
   quint32 ComputeBankFromCoordWoRotation(quint32 x, quint32 y);
 
-  QByteArray deswizzledImageData;
+  QByteArray deswizzled_image_data;
 
+  // Constants
   quint32 m_pipes = 2;
   quint32 m_banks = 4;
   quint32 m_group_bit_count = 8;
@@ -176,16 +176,35 @@ private:
   quint32 m_swap_size = 256;
   quint32 m_row_size = 2048;
   quint32 m_pipe_interleave_bytes = 256;
+  const quint32 m_micro_tile_width = 8;
+  const quint32 m_micro_tile_height = 8;
+  const quint32 m_num_micro_tile_pixels = m_micro_tile_width * m_micro_tile_height;
+  const quint32 ThickTileThickness = 4;
+  const quint32 XThickTileThickness = 8;
+  const quint32 HtileCacheBits = 16384;
 
-  quint64 m_slice_bytes;
-  quint64 m_slice_offset;
+  // TODO: reorder these more logically
   quint32 m_bpp;
   quint32 m_num_samples;
-
+  quint32 m_pipe_swizzle;
+  quint32 m_bank_swizzle;
+  MicroTileType m_micro_tile_type;
+  quint64 m_slice_bytes;
+  quint64 m_slice_offset;
   quint32 m_micro_tile_thickness;
-  bool thickMacroTiled;
+  bool m_is_thick_macro_tiled;
   bool bankSwappedTileMode;
+  bool m_has_depth;
   quint32 rotate;
+
+  // Micro Tiling Info
+  quint64 m_num_micro_tile_bits;
+  quint64 m_num_micro_tile_bytes;
+  quint64 m_bytes_per_sample;
+
+  // Macro Tiling info
+  quint64 m_macro_tile_pitch;
+  quint64 m_macro_tile_height;
 
   // temporary identifier
   QString m_name;

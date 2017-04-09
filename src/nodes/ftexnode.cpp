@@ -1,123 +1,131 @@
-#include <QDebug>
+#include "ftexnode.h"
+
 #include <QHeaderView>
 #include <QLabel>
-
-#include "customdelegate.h"
-
-#include "ftexnode.h"
 
 FTEXNode::FTEXNode(FTEX* ftex, QObject* parent) : Node(parent), m_ftex(ftex)
 {
   // TODO: empty / one liners should maybe just be moved to headers?
 }
 
+FTEXNode::~FTEXNode()
+{
+  delete m_table_view;
+}
+
 ResultCode FTEXNode::LoadAttributeArea()
 {
-  QStandardItemModel* sectionHeaderModel = new QStandardItemModel(0, 2);
+  QStandardItemModel* header_attributes_model = new QStandardItemModel();
   // TODO: get result code from this
   m_ftex->ReadHeader();
   header = m_ftex->GetHeader();
   int row = 0;
 
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Magic File Identifier"));
-  sectionHeaderModel->setItem(row, 1, new QStandardItem(header.magic));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Magic File Identifier"));
+  header_attributes_model->setItem(row, 1, new QStandardItem(header.magic));
   m_delegate_group.line_edit_delegates << 0;
   row++;
 
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Header Offset"));
-  sectionHeaderModel->setItem(row, 1, new QStandardItem(QString::number(m_ftex->GetStart(), 16)));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Header Offset"));
+  header_attributes_model->setItem(row, 1,
+                                   new QStandardItem(QString::number(m_ftex->GetStart(), 16)));
   row++;
 
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Texture Offset"));
-  sectionHeaderModel->setItem(row, 1,
-                              new QStandardItem("0x" + QString::number(header.data_offset, 16)));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Texture Offset"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(header.data_offset, 16)));
   row++;
 
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Texture Length"));
-  sectionHeaderModel->setItem(row, 1,
-                              new QStandardItem("0x" + QString::number(header.data_length, 16)));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Texture Length"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(header.data_length, 16)));
   row++;
 
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Mipmap Texture Offset"));
-  sectionHeaderModel->setItem(row, 1,
-                              new QStandardItem("0x" + QString::number(header.mipmapOffset, 16)));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Mipmap Texture Offset"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(header.mipmapOffset, 16)));
   row++;
 
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Mipmap Size"));
-  sectionHeaderModel->setItem(row, 1,
-                              new QStandardItem("0x" + QString::number(header.mipSize, 16)));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Mipmap Size"));
+  header_attributes_model->setItem(row, 1,
+                                   new QStandardItem("0x" + QString::number(header.mipSize, 16)));
   row++;
 
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Number of Mipmaps"));
-  sectionHeaderModel->setItem(row, 1,
-                              new QStandardItem("0x" + QString::number(header.num_mips, 16)));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Number of Mipmaps"));
+  header_attributes_model->setItem(row, 1,
+                                   new QStandardItem("0x" + QString::number(header.num_mips, 16)));
   row++;
 
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Width"));
-  sectionHeaderModel->setItem(row, 1, new QStandardItem(QString::number(header.width)));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Width"));
+  header_attributes_model->setItem(row, 1, new QStandardItem(QString::number(header.width)));
   row++;
 
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Height"));
-  sectionHeaderModel->setItem(row, 1, new QStandardItem(QString::number(header.height)));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Height"));
+  header_attributes_model->setItem(row, 1, new QStandardItem(QString::number(header.height)));
   row++;
 
   // TODO: make this a combobox with all available values
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Format"));
-  sectionHeaderModel->setItem(row, 1, new QStandardItem("0x" + QString::number(header.format, 16)));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Format"));
+  header_attributes_model->setItem(row, 1,
+                                   new QStandardItem("0x" + QString::number(header.format, 16)));
   row++;
 
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Usage"));
-  sectionHeaderModel->setItem(row, 1, new QStandardItem("0x" + QString::number(header.usage, 16)));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Usage"));
+  header_attributes_model->setItem(row, 1,
+                                   new QStandardItem("0x" + QString::number(header.usage, 16)));
   row++;
 
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Tiling"));
-  sectionHeaderModel->setItem(row, 1,
-                              new QStandardItem("0x" + QString::number(header.tile_mode, 16)));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Tiling"));
+  header_attributes_model->setItem(row, 1,
+                                   new QStandardItem("0x" + QString::number(header.tile_mode, 16)));
   row++;
 
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("AA Mode"));
-  sectionHeaderModel->setItem(row, 1, new QStandardItem("0x" + QString::number(header.aaMode, 16)));
+  header_attributes_model->setItem(row, 0, new QStandardItem("AA Mode"));
+  header_attributes_model->setItem(row, 1,
+                                   new QStandardItem("0x" + QString::number(header.aaMode, 16)));
   row++;
 
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Swizzle"));
-  sectionHeaderModel->setItem(row, 1,
-                              new QStandardItem("0x" + QString::number(header.swizzle, 16)));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Swizzle"));
+  header_attributes_model->setItem(row, 1,
+                                   new QStandardItem("0x" + QString::number(header.swizzle, 16)));
   row++;
 
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Depth"));
-  sectionHeaderModel->setItem(row, 1, new QStandardItem("0x" + QString::number(header.depth, 16)));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Depth"));
+  header_attributes_model->setItem(row, 1,
+                                   new QStandardItem("0x" + QString::number(header.depth, 16)));
   row++;
 
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Dim"));
-  sectionHeaderModel->setItem(row, 1, new QStandardItem("0x" + QString::number(header.dim, 16)));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Dim"));
+  header_attributes_model->setItem(row, 1,
+                                   new QStandardItem("0x" + QString::number(header.dim, 16)));
   row++;
 
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Pitch"));
-  sectionHeaderModel->setItem(row, 1, new QStandardItem("0x" + QString::number(header.pitch, 16)));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Pitch"));
+  header_attributes_model->setItem(row, 1,
+                                   new QStandardItem("0x" + QString::number(header.pitch, 16)));
   row++;
 
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Alignment"));
-  sectionHeaderModel->setItem(row, 1,
-                              new QStandardItem("0x" + QString::number(header.alignment, 16)));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Alignment"));
+  header_attributes_model->setItem(row, 1,
+                                   new QStandardItem("0x" + QString::number(header.alignment, 16)));
   row++;
 
-  sectionHeaderModel->setRowCount(row);
+  header_attributes_model->setRowCount(row);
+  header_attributes_model->setColumnCount(2);
 
-  QObject::connect(sectionHeaderModel, SIGNAL(itemChanged(QStandardItem*)), this,
+  QObject::connect(header_attributes_model, SIGNAL(itemChanged(QStandardItem*)), this,
                    SLOT(HandleAttributeItemChange(QStandardItem*)));
 
-  // at this point, the model is ready to go, and be put into a view
+  m_table_view = new QTableView;
 
-  tableView = new QTableView;
-
-  tableView->setModel(sectionHeaderModel);
+  m_table_view->setModel(header_attributes_model);
   // stretch out table to fit space
-  tableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-  tableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-  tableView->verticalHeader()->hide();
-  tableView->horizontalHeader()->hide();
+  m_table_view->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+  m_table_view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+  m_table_view->verticalHeader()->hide();
+  m_table_view->horizontalHeader()->hide();
 
-  tableView->setItemDelegate(new CustomDelegate(m_delegate_group));
+  m_table_view->setItemDelegate(new CustomDelegate(m_delegate_group));
 
   // To have all editors open by default, uncomment this out
   // PROS: Looks nicer, possibly more convienient
@@ -127,12 +135,12 @@ ResultCode FTEXNode::LoadAttributeArea()
   // for (int i = 0; i < sectionHeaderModel->rowCount(); i++)
   // tableView->openPersistentEditor(sectionHeaderModel->index(i, 1));
 
-  QVBoxLayout* sectionsLay = new QVBoxLayout();
-  sectionsLay->addWidget(new QLabel("Header"));
-  sectionsLay->addWidget(tableView);
+  QVBoxLayout* attributes_layout = new QVBoxLayout();
+  attributes_layout->addWidget(new QLabel("Header"));
+  attributes_layout->addWidget(m_table_view);
 
   QScrollArea* sectionsContainer = new QScrollArea();
-  sectionsContainer->setLayout(sectionsLay);
+  sectionsContainer->setLayout(attributes_layout);
 
   emit NewAttributesArea(sectionsContainer);
   return RESULT_SUCCESS;
@@ -146,8 +154,8 @@ ResultCode FTEXNode::LoadMainWidget()
     emit NewStatus(res);
     return res;
   }
-  ImageView* imageView = new ImageView(m_ftex->GetImage());
-  emit NewMainWidget(imageView);
+  ImageView* image_view = new ImageView(m_ftex->GetImage());
+  emit NewMainWidget(image_view);
   emit NewStatus(res);
   return RESULT_SUCCESS;
 }
@@ -156,5 +164,6 @@ void FTEXNode::HandleAttributeItemChange(QStandardItem* item)
 {
   // this is where changes made in the table would be handled
   // see: BFRESGUI::handleHeaderItemChange
-  qDebug() << item->data().toString();
+  // (temp obviously)
+  item = item;
 }

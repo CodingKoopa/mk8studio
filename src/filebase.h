@@ -34,7 +34,7 @@ public:
   quint8 Read8();
   quint16 Read16();
   quint32 Read32();
-  char* readBytes(quint32 len);
+  char* ReadBytes(quint32 len);
   QString ReadStringASCII(quint32 len);
 
   void Write8(quint8 val);

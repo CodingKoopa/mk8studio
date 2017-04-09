@@ -52,8 +52,13 @@ public:
     Node* right_node = nullptr;
   };
 
+  enum GroupType
+  {
+    GROUP_FMDL = 0,
+    GROUP_FTEX = 1
+  };
+
   ResultCode ReadHeader();
-  ResultCode WriteHeader();
   int ReadIndexGroups();
 
   BFRESHeader getHeader();
@@ -68,8 +73,9 @@ public:
   void SetRawNodeLists(QVector<QVector<Node*>> raw_node_lists);
 
 private:
-  void ReadSubtreeFromNode(Node* node, quint32 group, int blacklist_node = -1);
+  void ReadSubtreeFromNode(Node* node, quint32 group);
   void DeleteSubtreeFromNode(Node* node);
+
   Node* ReadNodeAtOffset(quint64 offset);
 
   // http://mk8.tockdom.com/wiki/BFRES_(File_Format)

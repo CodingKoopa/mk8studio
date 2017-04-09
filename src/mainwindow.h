@@ -40,7 +40,6 @@ private slots:
   void UpdateStatus(ResultCode status = RESULT_SUCCESS, QString message = QString());
 
   void OpenFile();
-  void SaveFile();
 };
 
 #endif  // MAINWINDOW_H

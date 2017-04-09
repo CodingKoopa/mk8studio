@@ -20,22 +20,17 @@ public:
   ResultCode LoadAttributeArea() override;
   ResultCode LoadFileTreeArea() override;
   ResultCode LoadGroupAttributeArea(int groupNum);
-  ResultCode SaveFile() override;
 
 private:
-  QStandardItem* MakeListItemFromRawList(QVector<BFRES::Node*> list, int group);
+  QStandardItem* MakeListItemFromRawList(QVector<BFRES::Node*> list, BFRES::GroupType group);
   QStandardItem* MakeTreeItemFromSubtree(BFRES::Node* node, int blacklist_node = -1);
 
   BFRES m_bfres;
   BFRES::BFRESHeader m_bfres_header;
 
-  CustomDelegate::delegateGroup_t m_delegate_group;
+  // TODO: might not be necessary
 
-  // *******
-  // TODO this shouldn't be a member variable
-  // (just a note to myself because it's like almost 2 sooo)
-  QTableView* tableView;
-  QTreeView* treeView;
+  CustomDelegate::DelegateGroup m_delegate_group;
 
   QScrollArea* m_file_tree_container;
   QVBoxLayout* m_file_tree_layout;
@@ -44,11 +39,12 @@ private:
 
   QVector<int> m_node_blacklist;
 
-  enum entryType_t
+  enum NodeType
   {
-    ROOT_ITEM,
-    BFRES_GROUP,
-    FTEX_NODE
+    NODE_ROOT_ITEM,
+    NODE_BFRES_GROUP,
+    NODE_FTEX,
+    NODE_NONE
   };
 
 private slots:

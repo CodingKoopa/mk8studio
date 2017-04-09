@@ -1,4 +1,3 @@
-#include <QDebug>
 #include <QHeaderView>
 #include <QLabel>
 #include <QMessageBox>
@@ -38,50 +37,50 @@ ResultCode BFRESNode::LoadFileTreeArea()
   QStandardItemModel* fileTreeModel = new QStandardItemModel(0, 1);
 
   QStandardItem* rootItem = new QStandardItem(QString(m_bfres_header.file_name + " (BFRES)"));
-  rootItem->setData(ROOT_ITEM, Qt::UserRole + 1);
+  rootItem->setData(NODE_ROOT_ITEM, Qt::UserRole + 1);
   for (int group = 0; group < m_bfres_header.file_counts.size(); group++)
   {
     if (m_bfres_header.file_counts[group] != 0)
     {
       // For BST testing, use this:
-      //      if (bfres.GetRootNodes()[group])
+      //      if (m_bfres.GetRootNodes()[group])
       //      {
-      //        QStandardItem* group_item = MakeTreeItemFromSubtree(bfres.GetRootNodes()[group]);
+      //        QStandardItem* group_item = MakeTreeItemFromSubtree(m_bfres.GetRootNodes()[group]);
       //        m_node_blacklist.clear();
-      // (/BST stuff)
-      QStandardItem* group_item = MakeListItemFromRawList(raw_node_list[group], group);
+      QStandardItem* group_item =
+          MakeListItemFromRawList(raw_node_list[group], (BFRES::GroupType)group);
       if (group_item)
       {
         // the string to be displayed
         group_item->setData("Group " + QString::number(group), Qt::DisplayRole);
         // the type of item
-        group_item->setData(BFRES_GROUP, Qt::UserRole + 1);
+        group_item->setData(NODE_BFRES_GROUP, Qt::UserRole + 1);
         // the data itself
         group_item->setData(group, Qt::UserRole + 2);
 
         rootItem->appendRow(group_item);
       }
-      //}
+      //      }
     }
   }
   fileTreeModel->appendRow(rootItem);
 
-  // TODO: this might not have to be a member var?
-  treeView = new QTreeView;
+  QTreeView* tree_view = new QTreeView;
+  // stretch out table to fit space
+  tree_view->header()->hide();
   // there might be a right click menu delegate here in the (probably far)
   // future
-  CustomDelegate* customDelegate = new CustomDelegate(CustomDelegate::delegateGroup_t());
-  treeView->setItemDelegate(customDelegate);
-  treeView->setModel(fileTreeModel);
+  tree_view->setItemDelegate(new CustomDelegate(CustomDelegate::DelegateGroup()));
+  tree_view->setModel(fileTreeModel);
   // todo: this only works with mouse clicking, i still have to figure out
   // keyboard arrow navigation
-  connect(treeView, SIGNAL(clicked(QModelIndex)), this, SLOT(handleFileTreeClick(QModelIndex)));
-  connect(treeView, SIGNAL(doubleClicked(QModelIndex)), this,
+  connect(tree_view, SIGNAL(clicked(QModelIndex)), this, SLOT(handleFileTreeClick(QModelIndex)));
+  connect(tree_view, SIGNAL(doubleClicked(QModelIndex)), this,
           SLOT(handleFileTreeClick(QModelIndex)));
   m_file_tree_container = new QScrollArea();
 
   m_file_tree_layout = new QVBoxLayout();
-  m_file_tree_layout->addWidget(treeView);
+  m_file_tree_layout->addWidget(tree_view);
 
   m_file_tree_container = new QScrollArea();
   m_file_tree_container->setLayout(m_file_tree_layout);
@@ -96,129 +95,107 @@ ResultCode BFRESNode::LoadAttributeArea()
 {
   emit NewStatus(RESULT_STATUS_BAR_UPDATE, "Loading file info...");
 
-  QStandardItemModel* sectionHeaderModel = new QStandardItemModel(7, 2);
+  QStandardItemModel* header_attributes_model = new QStandardItemModel();
+  m_delegate_group = CustomDelegate::DelegateGroup();
 
   int row = 0;
 
   // Magic
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Magic File Identifier"));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Magic File Identifier"));
   QStandardItem* magicValueItem = new QStandardItem(m_bfres_header.magic);
-  sectionHeaderModel->setItem(row, 1, magicValueItem);
-  m_delegate_group.line_edit_delegates << 0;
+  header_attributes_model->setItem(row, 1, magicValueItem);
+  m_delegate_group.line_edit_delegates << row;
   row++;
 
   // Unknown A
-  // this probably isn't really necessary to show
-  //  sectionHeaderModel->setItem(row, 0, new QStandardItem("Unknown 1"));
-  //  QStandardItem* magicValueItem = new QStandardItem(m_bfres_header.unknown_a);
-  //  sectionHeaderModel->setItem(row, 1, magicValueItem);
-  //  m_delegate_group.line_edit_delegates << 0;
-  //  row++;
+  header_attributes_model->setItem(row, 0, new QStandardItem("Unknown 1"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_a, 16))));
+  m_delegate_group.spin_box_delegates << row;
+  row++;
+  // TODO: the other unknowns
 
   // Endianess
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Endianess"));
-  QStandardItemModel* endianEntries = new QStandardItemModel(2, 0);
-  endianEntries->setItem(0, 0, new QStandardItem("Big"));
-  endianEntries->setItem(1, 0, new QStandardItem("Little"));
-  m_delegate_group.combo_box_entries << endianEntries;
-  m_delegate_group.combo_box_delegates << 1;
+  header_attributes_model->setItem(row, 0, new QStandardItem("Endianess"));
+  QStandardItemModel* endian_entries = new QStandardItemModel(2, 0);
+  // Make a list of possible entries for the endianness
+  endian_entries->setItem(0, 0, new QStandardItem("Big"));
+  endian_entries->setItem(1, 0, new QStandardItem("Little"));
+  m_delegate_group.combo_box_entries << endian_entries;
+  m_delegate_group.combo_box_delegates << row;
 
-  QStandardItem* endianTableItem = new QStandardItem();
+  QStandardItem* endianness_item = new QStandardItem();
 
   if (m_bfres_header.bom == 0xFEFF)
   {
-    // Visually set text
-    endianTableItem->setText("Big");
+    // Visually set text shown without the combobox activated.
+    endianness_item->setText("Big");
     // Internally set index
     m_delegate_group.combo_box_selections << 0;
   }
   else if (m_bfres_header.bom == 0xFFFE)
   {
-    endianTableItem->setText("Little");
+    endianness_item->setText("Little");
     m_delegate_group.combo_box_selections << 1;
   }
   else
   {
     NewStatus(RESULT_BFRES_ENDIANNESS);
-    return RESULT_SUCCESS;
+    return RESULT_BFRES_ENDIANNESS;
   }
-  sectionHeaderModel->setItem(row, 1, endianTableItem);
+  header_attributes_model->setItem(row, 1, endianness_item);
   row++;
 
   // Length
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Length"));
-  sectionHeaderModel->setItem(row, 1, new QStandardItem(QString::number(m_bfres_header.length)));
-  m_delegate_group.spin_box_delegates << 2;
+  header_attributes_model->setItem(row, 0, new QStandardItem("Length"));
+  header_attributes_model->setItem(row, 1,
+                                   new QStandardItem(QString::number(m_bfres_header.length)));
+  m_delegate_group.spin_box_delegates << row;
   row++;
 
   // Alignment
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("Alignment"));
-  sectionHeaderModel->setItem(
+  header_attributes_model->setItem(row, 0, new QStandardItem("Alignment"));
+  header_attributes_model->setItem(
       row, 1, new QStandardItem("0x" + QString::number(m_bfres_header.alignment, 16)));
   row++;
 
   // File name offset
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("File Name Offset"));
-  sectionHeaderModel->setItem(
+  header_attributes_model->setItem(row, 0, new QStandardItem("File Name Offset"));
+  header_attributes_model->setItem(
       row, 1, new QStandardItem("0x" + QString::number(m_bfres_header.file_name_offset, 16)));
   // TODO: hex spinbox delegate maybe?
   row++;
 
   // String table length
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("String Table Length"));
-  sectionHeaderModel->setItem(
+  header_attributes_model->setItem(row, 0, new QStandardItem("String Table Length"));
+  header_attributes_model->setItem(
       row, 1, new QStandardItem("0x" + QString::number(m_bfres_header.string_table_length, 16)));
   row++;
 
   // String table offset
-  sectionHeaderModel->setItem(row, 0, new QStandardItem("String Table Offset"));
-  sectionHeaderModel->setItem(
+  header_attributes_model->setItem(row, 0, new QStandardItem("String Table Offset"));
+  header_attributes_model->setItem(
       row, 1, new QStandardItem("0x" + QString::number(m_bfres_header.string_table_offset, 16)));
   row++;
 
-  // Row 7+: File group offsets
-  for (int i = 0; i < m_bfres_header.file_offsets.size(); i++)
-  {
-    if (m_bfres_header.file_offsets[i] != 0)
-    {
-      sectionHeaderModel->setItem(row, 0,
-                                  new QStandardItem("Group " + QString::number(i) + " Offset"));
-      sectionHeaderModel->setItem(
-          row, 1, new QStandardItem("0x" + QString::number(m_bfres_header.file_offsets[i], 16)));
-      row += 2;
-    }
-  }
-  row++;
+  header_attributes_model->setRowCount(row);
+  header_attributes_model->setColumnCount(2);
 
-  // Row 8+: File group count
-  for (int i = 0; i < m_bfres_header.file_counts.size(); i++)
-  {
-    if (m_bfres_header.file_counts[i] != 0)
-    {
-      sectionHeaderModel->setItem(
-          row, 0, new QStandardItem("Number of files in group " + QString::number(i)));
-      sectionHeaderModel->setItem(
-          row, 1, new QStandardItem(QString::number(m_bfres_header.file_counts[i])));
-      m_delegate_group.spin_box_delegates << row;
-      row += 2;
-    }
-  }
-
-  QObject::connect(sectionHeaderModel, SIGNAL(itemChanged(QStandardItem*)), this,
+  QObject::connect(header_attributes_model, SIGNAL(itemChanged(QStandardItem*)), this,
                    SLOT(HandleAttributeItemChange(QStandardItem*)));
 
   // at this point, the model is ready to go, and be put into a view
 
-  tableView = new QTableView;
+  QTableView* table_view = new QTableView();
 
-  tableView->setModel(sectionHeaderModel);
+  table_view->setModel(header_attributes_model);
   // stretch out table to fit space
-  tableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-  tableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-  tableView->verticalHeader()->hide();
-  tableView->horizontalHeader()->hide();
+  table_view->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+  table_view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+  table_view->verticalHeader()->hide();
+  table_view->horizontalHeader()->hide();
 
-  tableView->setItemDelegate(new CustomDelegate(m_delegate_group));
+  table_view->setItemDelegate(new CustomDelegate(m_delegate_group));
 
   // To have all editors open by default, uncomment this out
   // PROS: Looks nicer, possibly more convienient
@@ -230,7 +207,7 @@ ResultCode BFRESNode::LoadAttributeArea()
 
   QVBoxLayout* sections_layout = new QVBoxLayout();
   sections_layout->addWidget(new QLabel("Header"));
-  sections_layout->addWidget(tableView);
+  sections_layout->addWidget(table_view);
 
   QScrollArea* attributes_container = new QScrollArea();
   attributes_container->setLayout(sections_layout);
@@ -243,32 +220,40 @@ ResultCode BFRESNode::LoadAttributeArea()
 
 ResultCode BFRESNode::LoadGroupAttributeArea(int groupNum)
 {
-  QStandardItemModel* sectionGroupModel = new QStandardItemModel(7, 2);
+  m_delegate_group = CustomDelegate::DelegateGroup();
 
-  sectionGroupModel->setItem(0, 0,
-                             new QStandardItem("Group " + QString::number(groupNum) + " Offset"));
+  QStandardItemModel* group_attributes_model = new QStandardItemModel();
 
-  QStandardItem* stringTblOffItem =
-      new QStandardItem("0x" + QString::number(m_bfres_header.file_offsets[groupNum], 16));
-  sectionGroupModel->setItem(0, 1, stringTblOffItem);
+  int row = 0;
 
-  // TODO: add number of files
+  group_attributes_model->setItem(row, 0, new QStandardItem("Offset"));
+  group_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_bfres_header.file_offsets[groupNum], 16)));
+  row++;
 
-  tableView = new QTableView;
-  tableView->setModel(sectionGroupModel);
+  group_attributes_model->setItem(row, 0, new QStandardItem("Number of files"));
+  group_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_bfres_header.file_counts[groupNum], 16)));
+  m_delegate_group.spin_box_delegates.append(1);
+
+  group_attributes_model->setRowCount(row);
+  group_attributes_model->setColumnCount(2);
+
+  QTableView* table_view = new QTableView;
+  table_view->setModel(group_attributes_model);
   // stretch out table to fit space
-  tableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-  tableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-  tableView->verticalHeader()->hide();
-  tableView->horizontalHeader()->hide();
+  table_view->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+  table_view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+  table_view->verticalHeader()->hide();
+  table_view->horizontalHeader()->hide();
 
   CustomDelegate* customDelegate = new CustomDelegate(m_delegate_group);
-  tableView->setItemDelegate(customDelegate);
+  table_view->setItemDelegate(customDelegate);
 
   // TODO: if this is called more than once, might be a memory leak
   QVBoxLayout* sections_layout = new QVBoxLayout();
-  sections_layout->addWidget(new QLabel("lol"));
-  sections_layout->addWidget(tableView);
+  sections_layout->addWidget(new QLabel("Group " + QString::number(groupNum)));
+  sections_layout->addWidget(table_view);
 
   QScrollArea* attributes_container = new QScrollArea();
   attributes_container->setLayout(sections_layout);
@@ -277,15 +262,8 @@ ResultCode BFRESNode::LoadGroupAttributeArea(int groupNum)
   return RESULT_SUCCESS;
 }
 
-ResultCode BFRESNode::SaveFile()
-{
-  emit NewStatus(RESULT_STATUS_BAR_UPDATE, "Saving BFRES file...");
-  ResultCode ret = m_bfres.WriteHeader();
-  emit NewStatus(ret);
-  return ret;
-}
-
-QStandardItem* BFRESNode::MakeListItemFromRawList(QVector<BFRES::Node*> list, int group)
+QStandardItem* BFRESNode::MakeListItemFromRawList(QVector<BFRES::Node*> list,
+                                                  BFRES::GroupType group)
 {
   QStandardItem* item = new QStandardItem();
   // Skip the root node
@@ -294,8 +272,16 @@ QStandardItem* BFRESNode::MakeListItemFromRawList(QVector<BFRES::Node*> list, in
     QStandardItem* child_item = new QStandardItem;
     child_item->setText(list[row]->name);
     // TODO: this is hardcoded, do smth else, with the group
-    child_item->setData(FTEX_NODE, Qt::UserRole + 1);
-    child_item->setData(row, Qt::UserRole + 2);
+    switch (group)
+    {
+    case BFRES::GROUP_FTEX:
+      child_item->setData(NODE_FTEX, Qt::UserRole + 1);
+      child_item->setData(row, Qt::UserRole + 2);
+      break;
+    default:
+      child_item->setData(NODE_NONE, Qt::UserRole + 1);
+      break;
+    }
     item->appendRow(child_item);
   }
   return item;
@@ -305,11 +291,12 @@ QStandardItem* BFRESNode::MakeTreeItemFromSubtree(BFRES::Node* node, int blackli
 {
   if (node)
   {
-    // [!] TODO: Free this up
+    // TODO: Might have to free this up
     QStandardItem* item = new QStandardItem();
     item->setData(node->name, Qt::DisplayRole);
     if (!m_node_blacklist.contains(node->left_index))
     {
+      // TODO: use the better way in BFRES class
       if (blacklist_node != -1)
         m_node_blacklist.append(blacklist_node);
 
@@ -365,14 +352,14 @@ void BFRESNode::HandleAttributeItemChange(QStandardItem* item)
 
 void BFRESNode::handleFileTreeClick(QModelIndex index)
 {
-  if (index.data(Qt::UserRole + 1) == ROOT_ITEM)
+  if (index.data(Qt::UserRole + 1) == NODE_ROOT_ITEM)
     LoadAttributeArea();
 
-  else if (index.data(Qt::UserRole + 1) == BFRES_GROUP)
+  else if (index.data(Qt::UserRole + 1) == NODE_BFRES_GROUP)
     // todo: generate returns an int error code, do something with it
     LoadGroupAttributeArea(index.data(Qt::UserRole + 2).toInt());
 
-  else if (index.data(Qt::UserRole + 1) == FTEX_NODE)
+  else if (index.data(Qt::UserRole + 1) == NODE_FTEX)
   {
     FTEX* ftex =
         new FTEX(m_bfres.getFile(),

@@ -16,6 +16,7 @@ class FTEXNode : public Node
   Q_OBJECT
 public:
   explicit FTEXNode(FTEX* m_ftex, QObject* parent = 0);
+  ~FTEXNode();
   ResultCode LoadAttributeArea() override;
   ResultCode LoadMainWidget() override;
 
@@ -23,8 +24,8 @@ private:
   FTEX* m_ftex;
   FTEX::FTEXHeader header;
 
-  CustomDelegate::delegateGroup_t m_delegate_group;
-  QTableView* tableView;
+  CustomDelegate::DelegateGroup m_delegate_group;
+  QTableView* m_table_view;
 
 private slots:
   void HandleAttributeItemChange(QStandardItem* item);

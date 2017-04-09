@@ -8,7 +8,7 @@ DDS::DDS(QByteArray* imageData) : imageData(imageData)
 
 // TODO: Add uncompressed support
 int DDS::MakeHeader(quint32 width, quint32 height, quint32 depth, quint32 num_mips, bool compressed,
-                    GX2::GX2Format format)
+                    GX2::Format format)
 {
   if (compressed)
   {
@@ -74,14 +74,17 @@ int DDS::MakeHeader(quint32 width, quint32 height, quint32 depth, quint32 num_mi
       break;
     }
     case GX2::GX2_FMT_BC4_UNORM:
+    {
+      m_header.pixel_format.magic = "BC4U";
+      break;
+    }
     case GX2::GX2_FMT_BC4_SNORM:
     {
-      m_header.pixel_format.magic = "ATI ";
+      m_header.pixel_format.magic = "BC4S";
       break;
     }
     case GX2::GX2_FMT_BC5_UNORM:
     {
-      // dunno if this is right? the gimp plugin rejects it
       m_header.pixel_format.magic = "BC5U";
       break;
     }
@@ -109,9 +112,9 @@ int DDS::MakeHeader(quint32 width, quint32 height, quint32 depth, quint32 num_mi
     m_header.pixel_format.alpha_bit_mask = 0;
   }
 
-  m_header.complexityFlags = DDS_COMP_FLAG_TEXTURE;
+  m_header.complexity_flags = DDS_COMP_FLAG_TEXTURE;
   if (num_mips > 1)
-    m_header.complexityFlags |= DDS_COMP_FLAG_COMPLEX | DDS_COMP_FLAG_HASMIPMAPS;
+    m_header.complexity_flags |= DDS_COMP_FLAG_COMPLEX | DDS_COMP_FLAG_HASMIPMAPS;
 
   // TODO: could this be important?
   m_header.caps2 = 0;
@@ -129,22 +132,13 @@ int DDS::WriteFile(QString path)
 {
   FileBase file(path);
   file.SetByteOrder(QDataStream::LittleEndian);
-  qDebug("WRITING DDS HEADER:");
-  qDebug() << path;
   file.WriteStringASCII(m_header.magic, 4);
-  qDebug("Header size: %0X", m_header.header_size);
   file.Write32(m_header.header_size);
-  qDebug("Flags: %0X", m_header.flags);
   file.Write32(m_header.flags);
-  qDebug("Height: %0X", m_header.height);
   file.Write32(m_header.height);
-  qDebug("Width: %0X", m_header.width);
   file.Write32(m_header.width);
-  qDebug("Linear size: %0X", m_header.pitch_or_linear_size);
   file.Write32(m_header.pitch_or_linear_size);
-  qDebug("Depth: %0X", m_header.depth);
   file.Write32(m_header.depth);
-  qDebug("Num Mips: %0X", m_header.num_mips);
   file.Write32(m_header.num_mips);
   file.Skip(44);
   file.Write32(m_header.pixel_format.formatSize);
@@ -155,12 +149,12 @@ int DDS::WriteFile(QString path)
   file.Write32(m_header.pixel_format.green_bit_mask);
   file.Write32(m_header.pixel_format.blue_bit_mask);
   file.Write32(m_header.pixel_format.alpha_bit_mask);
-  file.Write32(m_header.complexityFlags);
+  file.Write32(m_header.complexity_flags);
   file.Write32(m_header.caps2);
   file.Write32(m_header.caps3);
   file.Write32(m_header.caps4);
   file.Write32(m_header.reserved2);
-  qDebug() << file.WriteBytes(imageData->data(), imageData->size()) << "Bytes written";
+  int ret = file.WriteBytes(imageData->data(), imageData->size());
   file.Save();
-  return 0;
+  return ret;
 }

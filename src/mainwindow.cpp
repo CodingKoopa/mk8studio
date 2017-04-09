@@ -25,7 +25,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
   m_ui->setupUi(this);
 
   connect(m_ui->action_open, SIGNAL(triggered()), this, SLOT(OpenFile()));
-  connect(m_ui->action_save, SIGNAL(triggered()), this, SLOT(SaveFile()));
 
   // Splitter for the left side of the UI
   m_file_tree_attributes_splitter = new QSplitter();
@@ -34,6 +33,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
   m_left_right_splitter->addWidget(m_file_tree_attributes_splitter);
 
   // m_left_right_splitter->show();
+
+  m_ui->welcome_widget->show();
 
   m_ui->statusbar->showMessage("Ready.");
 
@@ -72,16 +73,7 @@ void MainWindow::OpenFile()
   if (m_current_file_node->LoadAttributeArea() != RESULT_SUCCESS)
     return;
 
-  m_ui->welcome_widget->hide();
   setCentralWidget(m_left_right_splitter);
-
-  // temp
-  SaveFile();
-}
-
-void MainWindow::SaveFile()
-{
-  m_current_file_node->SaveFile();
 }
 
 void MainWindow::MakeNodeConnections(Node* node)

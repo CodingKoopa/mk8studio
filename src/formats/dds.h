@@ -35,7 +35,7 @@ public:
     quint32 num_mips;
     quint32 reserved1[11];
     pixelFormat_t pixel_format;
-    quint32 complexityFlags;
+    quint32 complexity_flags;
     quint32 caps2;
     quint32 caps3;
     quint32 caps4;
@@ -43,7 +43,7 @@ public:
   };
 
   int MakeHeader(quint32 width, quint32 height, quint32 depth, quint32 num_mips, bool compressed,
-                 GX2::GX2Format format);
+                 GX2::Format format);
 
   int WriteFile(QString path);
 

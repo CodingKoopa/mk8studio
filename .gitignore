@@ -25,6 +25,8 @@ Source/Core/Common/scmrev.h
 CMakeLists.txt.user
 # Ignore files created by posix people
 *~
+# Ignore backups.
+*.autosave
 # Ignore vim swapfiles
 *.swp
 # Ignore emacs temp files

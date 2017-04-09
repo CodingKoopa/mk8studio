@@ -48,39 +48,9 @@ ResultCode BFRES::ReadHeader()
     return RESULT_BFRES_HEADER_SIZE_ERROR;
 
   m_file->Seek(m_header.file_name_offset);
+  // TODO: apparantly the string table stores the lengths of strings too, so a better way of doing
+  // this might be seeking back 4 bytes, reading the length, and calling readstring with that length
   m_header.file_name = m_file->ReadStringASCII(0);
-  return RESULT_SUCCESS;
-}
-
-ResultCode BFRES::WriteHeader()
-{
-  FileBase* file = new FileBase("/home/kyle/External/new.bfres");
-  file->WriteStringASCII(m_header.magic, 4);
-  file->Write8(m_header.unknown_a);
-  file->Write8(m_header.unknown_b);
-  file->Write8(m_header.unknown_c);
-  file->Write8(m_header.unknown_d);
-  file->Write16(m_header.bom);
-  file->Write16(m_header.unknown_e);
-  file->Write32(m_header.length);
-  file->Write32(m_header.alignment);
-  file->Write32(m_header.file_name_offset - file->Pos());
-  // this string table stuff will probably be temporary, we'll probably have to recalculate the size
-  // and write it at a later time
-  file->Write32(m_header.string_table_length);
-  file->Write32(m_header.string_table_offset);
-  for (int i = 0; i < 12; i++)
-  {
-    if (m_header.file_offsets[i] != 0)
-      file->Write32(m_header.file_offsets[i] - file->Pos());
-    else
-      file->Write32(0);
-  }
-  for (int i = 0; i < 12; i++)
-    file->Write32(m_header.file_counts[i] - file->Pos());
-  // TODO: FIX HANDLING OF INVALID GROUPS
-  file->Write32(m_header.unknown_f);
-  file->Save();
   return RESULT_SUCCESS;
 }
 
@@ -165,7 +135,7 @@ FileBase* BFRES::getFile()
   return m_file;
 }
 
-void BFRES::ReadSubtreeFromNode(Node* node, quint32 group, int blacklist_node)
+void BFRES::ReadSubtreeFromNode(Node* node, quint32 group)
 {
   if (node)
   {
@@ -174,22 +144,28 @@ void BFRES::ReadSubtreeFromNode(Node* node, quint32 group, int blacklist_node)
     if (node->left_index != 0 && m_raw_node_lists[group].indexOf(node) != node->left_index &&
         !node->left_node && !m_node_blacklist.contains(node->left_index))
     {
-      if (blacklist_node != -1)
-        m_node_blacklist.append(blacklist_node);
+      m_node_blacklist.append(node->left_index);
 
       // Get index of current node
       node->left_node = m_raw_node_lists[group][node->left_index];
-      ReadSubtreeFromNode(node->left_node, group, node->left_index);
+      ReadSubtreeFromNode(node->left_node, group);
+    }
+    else
+    {
+      node->left_node = nullptr;
     }
 
     if (node->right_index && m_raw_node_lists[group].indexOf(node) != node->right_index &&
         !node->right_node && !m_node_blacklist.contains(node->right_index))
     {
-      if (blacklist_node != -1)
-        m_node_blacklist.append(blacklist_node);
+      m_node_blacklist.append(node->right_index);
 
       node->right_node = m_raw_node_lists[group][node->right_index];
-      ReadSubtreeFromNode(node->right_node, group, node->right_index);
+      ReadSubtreeFromNode(node->right_node, group);
+    }
+    else
+    {
+      node->right_node = nullptr;
     }
   }
 }

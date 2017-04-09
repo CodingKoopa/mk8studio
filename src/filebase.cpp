@@ -75,7 +75,7 @@ quint32 FileBase::Read32()
   return ret;
 }
 
-char* FileBase::readBytes(quint32 len)
+char* FileBase::ReadBytes(quint32 len)
 {
   char* buffer = new char[len];
 

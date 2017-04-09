@@ -5,15 +5,11 @@
 #include <QList>
 #include <QStandardItemModel>
 
-#ifdef CUSTOMDELEGATE_DEBUG
-#include <QTextStream>
-#endif
-
 class CustomDelegate : public QItemDelegate
 {
   Q_OBJECT
 public:
-  struct delegateGroup_t
+  struct DelegateGroup
   {
     QList<int> line_edit_delegates;
     QList<int> spin_box_delegates;
@@ -22,7 +18,7 @@ public:
     QList<int> combo_box_selections;
   };
 
-  CustomDelegate(delegateGroup_t delegates);
+  CustomDelegate(DelegateGroup delegates);
 
   QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem&,
                         const QModelIndex& index) const;
@@ -30,10 +26,7 @@ public:
   void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const;
 
 private:
-  delegateGroup_t m_delegates;
-#ifdef CUSTOMDELEGATE_DEBUG
-  QTextStream* console;
-#endif
+  DelegateGroup m_delegates;
 };
 
 #endif  // CUSTOMDELEGATE_H
