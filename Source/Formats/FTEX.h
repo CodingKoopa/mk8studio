@@ -3,32 +3,28 @@
 
 #include <QString>
 
-#include "filebase.h"
-#include "gx2.h"
+#include "FileBase.h"
+#include "GX2ImageBase.h"
 
-class FTEX : public GX2
+class FTEX : public GX2ImageBase
 {
 public:
-  FTEX(FileBase* file, quint64 pos);
-  ~FTEX();
+  FTEX(FileBase* file, quint64 pos) : file(file), start(pos), m_ftex_header(nullptr) {}
+  ~FTEX()
+  {
+    if (m_ftex_header)
+      delete m_ftex_header;
+  }
 
   struct FTEXHeader : ImageHeader
   {
     QString magic;
     quint32 dim;
-    // Width is inherited
-    // Height is inherited
-    // Depth is inherited
-    // Number of mips is inherited
-    quint32 aaMode;
     quint32 usage;
-    // Deta length is inherited
     quint32 mipSize;
-    // Swizzle is inherited
     quint32 alignment;
-    // Pitch is inherited
     quint32 data_offset;
-    quint32 mipmapOffset;
+    quint32 mipmap_offset;
   };
 
   int ReadHeader();

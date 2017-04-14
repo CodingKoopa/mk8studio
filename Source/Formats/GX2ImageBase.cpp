@@ -1,17 +1,8 @@
-#include "gx2.h"
+#include "GX2ImageBase.h"
 
-#include "dds.h"
+#include "DDS.h"
 
-GX2::GX2()
-{
-}
-
-GX2::~GX2()
-{
-  delete m_header;
-}
-
-ResultCode GX2::ReadImageFromData()
+ResultCode GX2ImageBase::ReadImageFromData()
 {
   ComputeSurfaceThickness();
   ComputeSurfaceRotationFromTileMode();
@@ -21,7 +12,10 @@ ResultCode GX2::ReadImageFromData()
   quint32 width = m_header->width;
   quint32 height = m_header->height;
 
-  m_num_samples = 1;
+  if (m_header->aa_mode == 0)
+    m_num_samples = 1;
+  else
+    m_num_samples = m_header->aa_mode;
   m_pipe_swizzle = GET_BIT(m_header->swizzle, 8);
   // TODO: GET_BITS?
   m_bank_swizzle = (m_header->swizzle >> 9) & 3;
@@ -50,6 +44,7 @@ ResultCode GX2::ReadImageFromData()
     return RESULT_UNSUPPORTED_FILE_FORMAT;
   }
 
+  // Setup variables that are constant throughout the texture.
   switch (m_header->tile_mode)
   {
   // Macro Tiled
@@ -77,24 +72,52 @@ ResultCode GX2::ReadImageFromData()
       m_macro_tile_pitch /= 4;
       m_macro_tile_height *= 4;
     }
+    m_macro_tiles_per_row = m_header->pitch / m_macro_tile_pitch;
+
+    // Number of samples in one macro tile *
+    // Thickness of one micro tile =
+    // Number to multiply with to account for sampling and thickness.
+
+    // Height of one macro tile *
+    // Pitch of one macro tile =
+    // Number of pixels in each macro tile.
+
+    // Number of pixels in one macro tile *
+    // Number of bits in one pixel =
+    // Number of bits in one macro tile.
+
+    // Number of bits in one macro tile *
+    // Number to multiply with to account for sampling and thickness =
+    // Number of bits in one macro tile including all samples.
+
+    // Number of bits in one macro tile including all samples -> Bytes =
+    // Number of bytes in one macro tile.
+    m_num_macro_tile_bytes = BITS_TO_BYTES(m_num_samples * m_micro_tile_thickness * m_bpp *
+                                           m_macro_tile_height * m_macro_tile_pitch);
+
+    //
+    m_slice_bytes = BITS_TO_BYTES(m_header->pitch * m_header->height * m_micro_tile_thickness *
+                                  m_bpp * m_num_samples);
 
   // Micro Tiled
   case GX2_TILING_1D_TILED_THIN1:
   case GX2_TILING_1D_TILED_THICK:
-    // TODO: maybe just move everything in the function here?
-    ComputeMicroTileType();
+    if (m_has_depth)
+      m_micro_tile_type = GX2_MICRO_TILING_DISPLAYABLE;
+    else
+      m_micro_tile_type = GX2_MICRO_TILING_DISPLAYABLE;
 
-    // The number of pixels in each micro tile *
-    // The thickness of each micro tile =
-    // Number of pixels in each micro tile with thickness taken in into account.
+    // Number of pixels in one micro tile *
+    // Thickness of one micro tile =
+    // Number of pixels in one micro tile with thickness taken into account.
 
-    // Recalculated number of pixels in each micro tile *
+    // Recalculated number of pixels in one micro tile *
     // Number of bits in one pixel =
     // Number of bits in one sample of a micro tile.
 
     // Number of bits in one sample of a micro tile *
-    // Number of samples =
-    // Number of bits in one micro tile with all samples.
+    // Number of samples in one micro tile =
+    // Number of bits in one micro tile including all samples.
     m_num_micro_tile_bits =
         m_num_micro_tile_pixels * m_micro_tile_thickness * m_bpp * m_num_samples;
 
@@ -105,7 +128,7 @@ ResultCode GX2::ReadImageFromData()
     m_num_micro_tile_bytes = m_num_micro_tile_bits / 8;
 
     // Number of bytes in one micro tile with all samples /
-    // How many samples there are =
+    // Number of samples in each micro tile =
     // Number of bytes in one sample of a micro tile.
     m_bytes_per_sample = m_num_micro_tile_bytes / m_num_samples;
     break;
@@ -191,9 +214,9 @@ ResultCode GX2::ReadImageFromData()
   return RESULT_SUCCESS;
 }
 
-quint64 GX2::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32 slice,
-                                                   quint32 sample, quint32 tileBase,
-                                                   quint32 compBits, quint32* pBitPosition)
+quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32 slice,
+                                                            quint32 sample, quint32 tileBase,
+                                                            quint32 compBits, quint32* pBitPosition)
 {
   // The commenting in this function will eventually be removed in favor of a dedicated document
   // explaining the whole thing.
@@ -202,6 +225,7 @@ quint64 GX2::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32
   quint64 num_group_bits = m_group_bit_count;
   quint64 num_pipe_bits = m_pipe_bit_count;
   quint64 num_bank_bits = m_bank_bit_count;
+  quint32 num_samples = m_num_samples;
 
   // Get the pixel index within the micro tile.
   quint64 pixel_index_within_micro_tile = ComputePixelIndexWithinMicroTile(x, y, slice);
@@ -217,18 +241,18 @@ quint64 GX2::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32
     if (compBits && compBits != m_bpp)
     {
       sample_offset_within_micro_tile = tileBase + compBits * sample;
-      pixel_offset_within_sample = m_num_samples * compBits * pixel_index_within_micro_tile;
+      pixel_offset_within_sample = num_samples * compBits * pixel_index_within_micro_tile;
     }
     else
     {
       sample_offset_within_micro_tile = m_bpp * sample;
-      pixel_offset_within_sample = m_num_samples * m_bpp * pixel_index_within_micro_tile;
+      pixel_offset_within_sample = num_samples * m_bpp * pixel_index_within_micro_tile;
     }
   }
   else
   {
     // Number of bytes in one micro tile with all samples /
-    // Number of samples =
+    // Number of samples in each micro tile =
     // Number of bits in one micro tile in one sample.
 
     // Number of bits in one micro tile in one sample *
@@ -242,7 +266,7 @@ quint64 GX2::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32
     // Micro Tile 2:
     // Sample 1
     // Sample 2
-    sample_offset_within_micro_tile = (m_num_micro_tile_bits / m_num_samples) * sample;
+    sample_offset_within_micro_tile = (m_num_micro_tile_bits / num_samples) * sample;
     // Number of bits in one pixel *
     // The pixel index =
     // The offset of the current pixel relative to the beginning of the current sample.
@@ -259,39 +283,34 @@ quint64 GX2::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32
     *pBitPosition = static_cast<quint32>(elemOffset % 8);
 
   // How many samples there are in each slice
-  quint64 samplesPerSlice;
+  quint64 samples_per_slice;
   // ???
-  quint64 numSampleSplits;
+  quint64 num_sample_splits;
   // Which slice the sample lies in?
   quint64 sampleSlice;
-  quint64 tileSliceBits;
+  quint64 tile_slice_bits;
 
-  // If there's more than one sample, and ???
-  if (m_num_samples > 1 && m_num_micro_tile_bytes > static_cast<quint64>(m_split_size))
+  // If there's more than one sample, and one micro tile can't fit in one split.
+  // TODO: some of this might be able to be moved to readimagefromdata?
+  // TODO: This is currently undocumented because I have no AA textures to work off of.
+  if (num_samples > 1 && m_num_micro_tile_bytes > static_cast<quint64>(m_split_size))
   {
-    // Size of one split /
-    // Number of bytes in one micro tile in one sample =
-    // The number of samples that can fit in each slice.
-    samplesPerSlice = m_split_size / m_bytes_per_sample;
-    // The number of samples / The number of samples that can fit in each slice
-    // = The number of splits (Dunno what a split is, maybe the boundary between
-    // two slices?)
-    numSampleSplits = m_num_samples / samplesPerSlice;
-    m_num_samples = static_cast<quint32>(samplesPerSlice);
+    samples_per_slice = m_split_size / m_bytes_per_sample;
+    num_sample_splits = num_samples / samples_per_slice;
+    num_samples = static_cast<quint32>(samples_per_slice);
 
-    // The number of bits in one micro tile / the number of sample splits = ?
-    tileSliceBits = m_num_micro_tile_bits / numSampleSplits;
+    tile_slice_bits = m_num_micro_tile_bits / num_sample_splits;
     // The recalculated pixel offset / tileSliceBits = ?
-    sampleSlice = elemOffset / tileSliceBits;
-    elemOffset %= tileSliceBits;
+    sampleSlice = elemOffset / tile_slice_bits;
+    elemOffset %= tile_slice_bits;
   }
   else
   {
-    // How many samples can fit in one slice, here it can just be 1 (Or 0,
-    // depending on m_num_samples.).
-    samplesPerSlice = m_num_samples;
-    // The number of splits?
-    numSampleSplits = 1;
+    // The number of samples in each micro tile =
+    // The number of samples in each slice.
+    samples_per_slice = num_samples;
+    // ???
+    num_sample_splits = 1;
     // ???
     sampleSlice = 0;
   }
@@ -332,14 +351,25 @@ quint64 GX2::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32
   pipe = bank_pipe % num_pipes;
   bank = bank_pipe / num_pipes;
 
-  ComputeSliceInfo(slice, sampleSlice, numSampleSplits);
+  m_slice_offset =
+      m_slice_bytes * ((sampleSlice + num_sample_splits * slice) / m_micro_tile_thickness);
 
-  quint64 macroTilesPerRow = m_header->pitch / m_macro_tile_pitch;
-  quint64 macroTileBytes = BITS_TO_BYTES(m_num_samples * m_micro_tile_thickness * m_bpp *
-                                         m_macro_tile_height * m_macro_tile_pitch);
-  quint64 macroTileIndexX = x / m_macro_tile_pitch;
-  quint64 macroTileIndexY = y / m_macro_tile_height;
-  quint64 macroTileOffset = macroTileBytes * (macroTileIndexX + macroTilesPerRow * macroTileIndexY);
+  quint64 macro_tile_index_x = x / m_macro_tile_pitch;
+  quint64 macro_tile_index_y = y / m_macro_tile_height;
+
+  // Y index of the macro tile *
+  // Number of macro tiles in each row =
+  // Index of the first macro tile in the current row.
+
+  // Index of the first macro tile in the current row +
+  // X index of the macro tile =
+  // Index of the macro tile.
+
+  // Number of bytes in one macro tile *
+  // Index of the macro tile =
+  // Offset of the macro tile.
+  quint64 macro_tile_offset =
+      m_num_macro_tile_bytes * (macro_tile_index_x + m_macro_tiles_per_row * macro_tile_index_y);
 
   // Do bank swapping if needed
   switch (m_header->tile_mode)
@@ -353,7 +383,7 @@ quint64 GX2::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32
   {
     static const quint32 bankSwapOrder[] = {0, 1, 3, 2, 6, 7, 5, 4, 0, 0};
     quint64 bank_swap_width = ComputeSurfaceBankSwappedWidth(m_header->pitch, nullptr);
-    quint64 swap_index = m_macro_tile_pitch * macroTileIndexX / bank_swap_width;
+    quint64 swap_index = m_macro_tile_pitch * macro_tile_index_x / bank_swap_width;
     quint64 bank_mask = m_banks - 1;
     bank ^= bankSwapOrder[swap_index & bank_mask];
     break;
@@ -365,13 +395,32 @@ quint64 GX2::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32
   // Calculate final offset
   // Get mask targeting every group bit.
   quint64 group_mask = (1 << num_group_bits) - 1;
-  quint64 total_offset =
-      elemOffset + ((macroTileOffset + m_slice_offset) >> (num_bank_bits + num_pipe_bits));
+  // Offset of the macro tile +
+  // Offset of the slice relative to the beginning of the macro tile =
+  // Absolute offset of the slice.
 
+  // Number of bits containing the bank +
+  // Number of bits containing the pipe =
+  // Number of bits containing the bank and pipe.
+
+  // Absolute offset of the slice >>
+  // Number of bits containing the bank and pipe =
+  // Shifted absolute offset of the slice.
+
+  // Pixel offset relative to the beginning of the micro tile +
+  // Shifted absolute offset of the slice +
+  // Offset of the pixel.
+  quint64 total_offset =
+      elemOffset + ((macro_tile_offset + m_slice_offset) >> (num_bank_bits + num_pipe_bits));
+
+  // Get the part of the pixel offset left of the pipe and bank.
   quint64 offset_high = (total_offset & ~group_mask) << (num_bank_bits + num_pipe_bits);
+  // Get the part of the pixel offset right of the pipe and bank.
   quint64 offset_low = total_offset & group_mask;
+  // Get the actual pipe and bank.
   quint64 bankBits = bank << (num_pipe_bits + num_group_bits);
   quint64 pipeBits = pipe << num_group_bits;
+  // Put it all together.
   quint64 offset = bankBits | pipeBits | offset_low | offset_high;
 
 #ifdef DEBUG
@@ -397,7 +446,7 @@ quint64 GX2::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32
   return offset;
 }
 
-quint32 GX2::ComputePixelIndexWithinMicroTile(quint32 x, quint32 y, quint32 z)
+quint32 GX2ImageBase::ComputePixelIndexWithinMicroTile(quint32 x, quint32 y, quint32 z)
 {
   quint32 pixelBit0 = 0;
   quint32 pixelBit1 = 0;
@@ -512,15 +561,7 @@ quint32 GX2::ComputePixelIndexWithinMicroTile(quint32 x, quint32 y, quint32 z)
   return pixelNumber;
 }
 
-void GX2::ComputeMicroTileType()
-{
-  if (m_has_depth)
-    m_micro_tile_type = GX2_MICRO_TILING_DISPLAYABLE;
-  else
-    m_micro_tile_type = GX2_MICRO_TILING_DISPLAYABLE;
-}
-
-void GX2::ComputeSurfaceThickness()
+void GX2ImageBase::ComputeSurfaceThickness()
 {
   switch (m_header->tile_mode)
   {
@@ -538,7 +579,7 @@ void GX2::ComputeSurfaceThickness()
   }
 }
 
-void GX2::ComputeSurfaceRotationFromTileMode()
+void GX2ImageBase::ComputeSurfaceRotationFromTileMode()
 {
   switch (m_header->tile_mode)
   {
@@ -570,7 +611,7 @@ void GX2::ComputeSurfaceRotationFromTileMode()
   }
 }
 
-void GX2::ComputeThickMicroTiling()
+void GX2ImageBase::ComputeThickMicroTiling()
 {
   switch (m_header->tile_mode)
   {
@@ -584,7 +625,7 @@ void GX2::ComputeThickMicroTiling()
   }
 }
 
-void GX2::ComputeBankSwappedTileMode()
+void GX2ImageBase::ComputeBankSwappedTileMode()
 {
   switch (m_header->tile_mode)
   {
@@ -600,15 +641,7 @@ void GX2::ComputeBankSwappedTileMode()
   }
 }
 
-void GX2::ComputeSliceInfo(quint32 slice, quint32 sampleSlice, quint32 numSampleSplits)
-{
-  m_slice_bytes = BITS_TO_BYTES(m_header->pitch * m_header->height * m_micro_tile_thickness *
-                                m_bpp * m_num_samples);
-  m_slice_offset =
-      m_slice_bytes * ((sampleSlice + numSampleSplits * slice) / m_micro_tile_thickness);
-}
-
-quint32 GX2::ComputeMacroTileAspectRatio()
+quint32 GX2ImageBase::ComputeMacroTileAspectRatio()
 {
   switch (m_header->tile_mode)
   {
@@ -627,7 +660,7 @@ quint32 GX2::ComputeMacroTileAspectRatio()
   }
 }
 
-quint32 GX2::ComputeSurfaceBankSwappedWidth(quint32 pitch, quint32* pSlicesPerTile)
+quint32 GX2ImageBase::ComputeSurfaceBankSwappedWidth(quint32 pitch, quint32* pSlicesPerTile)
 {
   auto bankSwapWidth = quint32{0};
   auto numBanks = m_banks;
@@ -680,7 +713,7 @@ quint32 GX2::ComputeSurfaceBankSwappedWidth(quint32 pitch, quint32* pSlicesPerTi
   return bankSwapWidth;
 }
 
-quint32 GX2::ComputePipeFromCoordWoRotation(quint32 x, quint32 y)
+quint32 GX2ImageBase::ComputePipeFromCoordWoRotation(quint32 x, quint32 y)
 {
   quint32 pipe;
   quint32 pipeBit0 = 0;
@@ -717,7 +750,7 @@ quint32 GX2::ComputePipeFromCoordWoRotation(quint32 x, quint32 y)
   return pipe;
 }
 
-quint32 GX2::ComputeBankFromCoordWoRotation(quint32 x, quint32 y)
+quint32 GX2ImageBase::ComputeBankFromCoordWoRotation(quint32 x, quint32 y)
 {
   quint32 numPipes = m_pipes;
   quint32 numBanks = m_banks;
@@ -770,7 +803,7 @@ quint32 GX2::ComputeBankFromCoordWoRotation(quint32 x, quint32 y)
   return bank;
 }
 
-void GX2::SetName(const QString& value)
+void GX2ImageBase::SetName(const QString& value)
 {
   m_name = value;
 }

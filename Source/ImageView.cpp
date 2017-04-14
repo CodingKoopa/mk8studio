@@ -1,6 +1,6 @@
 #include <QPainter>
 
-#include "imageview.h"
+#include "ImageView.h"
 
 ImageView::ImageView(QImage* image, QWidget* parent) : QWidget(parent), image(image)
 {

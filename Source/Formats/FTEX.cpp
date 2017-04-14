@@ -1,17 +1,7 @@
 #include <QImage>
 
-#include <QDebug>
-#include "ftex.h"
-#include "gx2.h"
-
-FTEX::FTEX(FileBase* file, quint64 pos) : file(file), start(pos)
-{
-}
-
-FTEX::~FTEX()
-{
-  delete m_ftex_header;
-}
+#include "FTEX.h"
+#include "GX2ImageBase.h"
 
 int FTEX::ReadHeader()
 {
@@ -24,7 +14,7 @@ int FTEX::ReadHeader()
   m_ftex_header->depth = file->Read32();
   m_ftex_header->num_mips = file->Read32();
   m_ftex_header->format = static_cast<Format>(file->Read32());
-  m_ftex_header->aaMode = file->Read32();
+  m_ftex_header->aa_mode = file->Read32();
   m_ftex_header->usage = file->Read32();
   m_ftex_header->data_length = file->Read32();
   file->Skip(4);
@@ -36,10 +26,10 @@ int FTEX::ReadHeader()
   m_ftex_header->pitch = file->Read32();
   file->Skip(0x6C);
   m_ftex_header->data_offset = file->Pos() + file->Read32();
-  m_ftex_header->mipmapOffset = file->Pos() + file->Read32();
+  m_ftex_header->mipmap_offset = file->Pos() + file->Read32();
   file->Skip(8);
 
-  m_header = dynamic_cast<ImageHeader*>(m_ftex_header);
+  m_header = static_cast<ImageHeader*>(m_ftex_header);
 
   if (file->Pos() != start + 0xC0)
     return -1;
@@ -50,7 +40,6 @@ int FTEX::ReadHeader()
 ResultCode FTEX::ReadImageData()
 {
   file->Seek(m_ftex_header->data_offset);
-  // imageData->resize(header.dataLength);
   char* buffer = file->ReadBytes(m_header->data_length);
   raw_image_data.append(buffer, m_header->data_length);
   raw_image_data.resize(m_header->data_length);

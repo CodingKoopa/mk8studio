@@ -2,7 +2,7 @@
 #include <QLineEdit>
 #include <QSpinBox>
 
-#include "customdelegate.h"
+#include "CustomDelegate.h"
 
 CustomDelegate::CustomDelegate(CustomDelegate::DelegateGroup delegates) : m_delegates(delegates)
 {

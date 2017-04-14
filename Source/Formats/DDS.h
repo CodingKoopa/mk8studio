@@ -3,15 +3,16 @@
 
 #include <QByteArray>
 
-#include "common.h"
-#include "gx2.h"
+#include "Common.h"
+#include "FormatBase.h"
+#include "GX2ImageBase.h"
 
-class DDS
+class DDS : FormatBase
 {
 public:
-  DDS(QByteArray* imageData = nullptr);
+  DDS(QByteArray* image_data = nullptr);
 
-  struct pixelFormat_t
+  struct PixelFormat
   {
     quint32 formatSize;
     quint32 pixelFlags;
@@ -23,7 +24,7 @@ public:
     quint32 alpha_bit_mask;
   };
 
-  struct header_t
+  struct DDSHeader
   {
     QString magic;
     quint32 header_size;
@@ -34,7 +35,7 @@ public:
     quint32 depth;
     quint32 num_mips;
     quint32 reserved1[11];
-    pixelFormat_t pixel_format;
+    PixelFormat pixel_format;
     quint32 complexity_flags;
     quint32 caps2;
     quint32 caps3;
@@ -43,12 +44,12 @@ public:
   };
 
   int MakeHeader(quint32 width, quint32 height, quint32 depth, quint32 num_mips, bool compressed,
-                 GX2::Format format);
+                 GX2ImageBase::Format format);
 
   int WriteFile(QString path);
 
 private:
-  enum imageFlag_t
+  enum ImageFlag
   {
     DDS_FLAG_CAPS = 0x1,
     DDS_FLAG_HEIGHT = 0x2,
@@ -60,14 +61,14 @@ private:
     DDS_FLAG_DEPTH = 0x800000
   };
 
-  enum complexityFlag_t
+  enum ComplexityFlag
   {
     DDS_COMP_FLAG_COMPLEX = 0x8,
     DDS_COMP_FLAG_TEXTURE = 0x1000,
     DDS_COMP_FLAG_HASMIPMAPS = 0x400000
   };
 
-  enum pixelFlag_t
+  enum PixelFlag
   {
     DDS_PIX_FLAG_HASALPHA = 0x1,
     DDS_PIX_FLAG_UNCOMPESSEDALPHA = 0x2,
@@ -77,8 +78,8 @@ private:
     DDS_PIX_FLAG_LUMINANCE = 0x20000,
   };
 
-  QByteArray* imageData;
-  header_t m_header;
+  QByteArray* image_data;
+  DDSHeader m_header;
   quint32 m_block_size;
 };
 

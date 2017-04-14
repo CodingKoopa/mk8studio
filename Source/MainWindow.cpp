@@ -13,11 +13,11 @@
 #include <QTreeView>
 #include <QVBoxLayout>
 
-#include "mainwindow.h"
+#include "MainWindow.h"
 
-#include "customdelegate.h"
-#include "filebase.h"
-#include "nodes/bfresnode.h"
+#include "CustomDelegate.h"
+#include "FileBase.h"
+#include "Nodes/BFRESNode.h"
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::MainWindow)
@@ -63,7 +63,9 @@ void MainWindow::OpenFile()
     return;
   }
 
-  m_current_file_node = new BFRESNode(BFRES(file), this);
+  // Deallocated by BFRESNode's dtor.
+  BFRES* bfres = new BFRES(file);
+  m_current_file_node = new BFRESNode(bfres, this);
 
   // Make the connections for the BFRES node and any children.
   connect(m_current_file_node, SIGNAL(ConnectNode(Node*)), this, SLOT(MakeNodeConnections(Node*)));

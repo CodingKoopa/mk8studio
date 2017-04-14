@@ -1,21 +1,21 @@
-#include "dds.h"
-#include "filebase.h"
-#include "gx2.h"
+#include "DDS.h"
+#include "FileBase.h"
+#include "GX2ImageBase.h"
 
-DDS::DDS(QByteArray* imageData) : imageData(imageData)
+DDS::DDS(QByteArray* imageData) : image_data(imageData)
 {
 }
 
 // TODO: Add uncompressed support
 int DDS::MakeHeader(quint32 width, quint32 height, quint32 depth, quint32 num_mips, bool compressed,
-                    GX2::Format format)
+                    GX2ImageBase::Format format)
 {
   if (compressed)
   {
     switch (format)
     {
-    case GX2::GX2_FMT_BC1_UNORM:
-    case GX2::GX2_FMT_BC1_SRGB:
+    case GX2ImageBase::GX2_FMT_BC1_UNORM:
+    case GX2ImageBase::GX2_FMT_BC1_SRGB:
     {
       m_block_size = 8;
       break;
@@ -67,28 +67,28 @@ int DDS::MakeHeader(quint32 width, quint32 height, quint32 depth, quint32 num_mi
   {
     switch (format)
     {
-    case GX2::GX2_FMT_BC1_UNORM:
-    case GX2::GX2_FMT_BC1_SRGB:
+    case GX2ImageBase::GX2_FMT_BC1_UNORM:
+    case GX2ImageBase::GX2_FMT_BC1_SRGB:
     {
       m_header.pixel_format.magic = "DXT1";
       break;
     }
-    case GX2::GX2_FMT_BC4_UNORM:
+    case GX2ImageBase::GX2_FMT_BC4_UNORM:
     {
       m_header.pixel_format.magic = "BC4U";
       break;
     }
-    case GX2::GX2_FMT_BC4_SNORM:
+    case GX2ImageBase::GX2_FMT_BC4_SNORM:
     {
       m_header.pixel_format.magic = "BC4S";
       break;
     }
-    case GX2::GX2_FMT_BC5_UNORM:
+    case GX2ImageBase::GX2_FMT_BC5_UNORM:
     {
       m_header.pixel_format.magic = "BC5U";
       break;
     }
-    case GX2::GX2_FMT_BC5_SNORM:
+    case GX2ImageBase::GX2_FMT_BC5_SNORM:
     {
       // set to ATI1 for chrome
       // you'll see what i mean
@@ -154,7 +154,7 @@ int DDS::WriteFile(QString path)
   file.Write32(m_header.caps3);
   file.Write32(m_header.caps4);
   file.Write32(m_header.reserved2);
-  int ret = file.WriteBytes(imageData->data(), imageData->size());
+  int ret = file.WriteBytes(image_data->data(), image_data->size());
   file.Save();
   return ret;
 }

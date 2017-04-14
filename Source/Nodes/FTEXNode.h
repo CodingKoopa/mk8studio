@@ -6,17 +6,18 @@
 #include <QTableView>
 #include <QVBoxLayout>
 
-#include "customdelegate.h"
-#include "formats/ftex.h"
-#include "imageview.h"
-#include "nodegroup.h"
+#include "CustomDelegate.h"
+#include "Formats/FTEX.h"
+#include "ImageView.h"
+#include "Node.h"
 
 class FTEXNode : public Node
 {
   Q_OBJECT
 public:
-  explicit FTEXNode(FTEX* m_ftex, QObject* parent = 0);
-  ~FTEXNode();
+  explicit FTEXNode(FTEX* ftex, QObject* parent = 0) : Node(parent), m_ftex(ftex) {}
+  ~FTEXNode() { delete m_ftex; }
+  QStandardItem* MakeItem() override;
   ResultCode LoadAttributeArea() override;
   ResultCode LoadMainWidget() override;
 
@@ -24,11 +25,10 @@ private:
   FTEX* m_ftex;
   FTEX::FTEXHeader header;
 
-  CustomDelegate::DelegateGroup m_delegate_group;
   QTableView* m_table_view;
 
 private slots:
-  void HandleAttributeItemChange(QStandardItem* item);
+  void HandleAttributeItemChange(QStandardItem* item) override;
 };
 
 #endif  // FTEXGUI_H

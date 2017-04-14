@@ -1,16 +1,14 @@
-#include "ftexnode.h"
+#include "FTEXNode.h"
 
 #include <QHeaderView>
 #include <QLabel>
 
-FTEXNode::FTEXNode(FTEX* ftex, QObject* parent) : Node(parent), m_ftex(ftex)
+QStandardItem* FTEXNode::MakeItem()
 {
-  // TODO: empty / one liners should maybe just be moved to headers?
-}
-
-FTEXNode::~FTEXNode()
-{
-  delete m_table_view;
+  QStandardItem* item = new QStandardItem();
+  item->setData(QString(m_ftex->GetName() + " (FTEX)"), Qt::DisplayRole);
+  item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
+  return item;
 }
 
 ResultCode FTEXNode::LoadAttributeArea()
@@ -43,7 +41,7 @@ ResultCode FTEXNode::LoadAttributeArea()
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Mipmap Texture Offset"));
   header_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(header.mipmapOffset, 16)));
+      row, 1, new QStandardItem("0x" + QString::number(header.mipmap_offset, 16)));
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Mipmap Size"));
@@ -82,7 +80,7 @@ ResultCode FTEXNode::LoadAttributeArea()
 
   header_attributes_model->setItem(row, 0, new QStandardItem("AA Mode"));
   header_attributes_model->setItem(row, 1,
-                                   new QStandardItem("0x" + QString::number(header.aaMode, 16)));
+                                   new QStandardItem("0x" + QString::number(header.aa_mode, 16)));
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Swizzle"));

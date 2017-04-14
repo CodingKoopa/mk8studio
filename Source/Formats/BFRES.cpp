@@ -1,4 +1,4 @@
-#include "bfres.h"
+#include "BFRES.h"
 
 BFRES::BFRES(FileBase* file) : m_file(file)
 {
@@ -34,7 +34,6 @@ ResultCode BFRES::ReadHeader()
     qint64 pos = m_file->Pos();
     quint32 offset = m_file->Read32();
     if (offset != 0)
-      // TODO: append?
       m_header.file_offsets.append(pos + offset);
     else
       m_header.file_offsets.append(0);
@@ -98,7 +97,6 @@ int BFRES::ReadIndexGroups()
            rootNode.rightIndex, rootNode.namePtr, rootNode.dataPtr);
 #endif
 
-// ReadNodeAtOffset(m_group_offset + 0x8 + node->left_index * 0x10);
 #ifdef DEBUG
     qDebug("Node %i. Search: %08X Byte Index From Left: %08X Byte Index: "
            "%08X Left Index: %i Right Index: %i Name Pointer: %08X Data "
@@ -110,7 +108,7 @@ int BFRES::ReadIndexGroups()
   return 0;
 }
 
-BFRES::BFRESHeader BFRES::getHeader()
+BFRES::BFRESHeader BFRES::GetHeader()
 {
   return m_header;
 }
@@ -130,7 +128,7 @@ void BFRES::SetRootNodes(QVector<Node*> root_nodes)
   m_root_nodes = root_nodes;
 }
 
-FileBase* BFRES::getFile()
+FileBase* BFRES::GetFile()
 {
   return m_file;
 }
@@ -174,9 +172,9 @@ void BFRES::DeleteSubtreeFromNode(BFRES::Node* node)
 {
   if (node)
   {
-    if (node->left_index != 0 && node->left_node)
+    if (node->left_index && node->left_node)
       DeleteSubtreeFromNode(node->left_node);
-    if (node->right_index != 0 && node->right_node)
+    if (node->right_index && node->right_node)
       DeleteSubtreeFromNode(node->right_node);
     delete node;
   }

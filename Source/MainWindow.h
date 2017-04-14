@@ -8,9 +8,9 @@
 #include <QTableView>
 #include <QVBoxLayout>
 
-#include "common.h"
-#include "formats/bfres.h"
-#include "nodes/nodegroup.h"
+#include "Common.h"
+#include "Formats/BFRES.h"
+#include "Nodes/Node.h"
 
 namespace Ui
 {

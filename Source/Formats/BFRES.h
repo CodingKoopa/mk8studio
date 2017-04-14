@@ -3,10 +3,11 @@
 
 #include <QVector>
 
-#include "common.h"
-#include "filebase.h"
+#include "Common.h"
+#include "FileBase.h"
+#include "FormatBase.h"
 
-class BFRES
+class BFRES : FormatBase
 {
 public:
   BFRES(FileBase* m_file);
@@ -61,10 +62,10 @@ public:
   ResultCode ReadHeader();
   int ReadIndexGroups();
 
-  BFRESHeader getHeader();
+  BFRESHeader GetHeader();
   void setHeader(BFRESHeader value);
 
-  FileBase* getFile();
+  FileBase* GetFile();
 
   QVector<Node*> GetRootNodes();
   void SetRootNodes(QVector<Node*> root_nodes);
@@ -88,8 +89,6 @@ private:
   QVector<int> m_node_blacklist;
 
   FileBase* m_file;
-
-  quint64 m_group_offset;
 };
 
 #endif  // BFRES_H

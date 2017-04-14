@@ -3,14 +3,18 @@
 
 #include <QByteArray>
 
-#include "common.h"
+#include "Common.h"
+#include "FormatBase.h"
 
-class GX2
+class GX2ImageBase : public FormatBase
 {
 public:
-  GX2();
-  ~GX2();
-
+  GX2ImageBase() : m_header(nullptr) {}
+  ~GX2ImageBase()
+  {
+    if (m_header)
+      delete m_header;
+  }
   enum Format
   {
     GX2_FMT_INVALID = 0x0,
@@ -119,15 +123,17 @@ public:
   struct ImageHeader
   {
     virtual ~ImageHeader() {}
+    quint32 data_length;
     quint32 width;
     quint32 height;
-    quint32 num_mips;
-    quint32 depth;
-    quint32 swizzle;
     quint32 pitch;
-    quint32 data_length;
+    quint32 num_mips;
+    quint32 aa_mode;
     Format format;
     TileMode tile_mode;
+    quint32 swizzle;
+    // TODO: Do something with this when deswizzling, set m_has_depth?
+    quint32 depth;
   };
 
   ResultCode ReadImageFromData();
@@ -154,7 +160,6 @@ private:
   void ComputeSurfaceRotationFromTileMode();
   void ComputeThickMicroTiling();
   void ComputeBankSwappedTileMode();
-  void ComputeSliceInfo(quint32 slice, quint32 sampleSlice, quint32 numSampleSplits);
 
   quint32 ComputeMacroTileAspectRatio();
 
@@ -205,9 +210,8 @@ private:
   // Macro Tiling info
   quint64 m_macro_tile_pitch;
   quint64 m_macro_tile_height;
-
-  // temporary identifier
-  QString m_name;
+  quint64 m_macro_tiles_per_row;
+  quint64 m_num_macro_tile_bytes;
 };
 
 #endif  // GTX_H
