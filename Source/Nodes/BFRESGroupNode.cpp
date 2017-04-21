@@ -126,4 +126,5 @@ ResultCode BFRESGroupNode::LoadAttributeArea()
 void BFRESGroupNode::HandleAttributeItemChange(QStandardItem* item)
 {
   // TODO. See: BFRESNode::HandleAttributeItemChange
+  item = item;
 }

@@ -10,7 +10,7 @@
 class DDS : FormatBase
 {
 public:
-  DDS(QByteArray* image_data = nullptr);
+  DDS(QByteArray* image_data);
 
   struct PixelFormat
   {

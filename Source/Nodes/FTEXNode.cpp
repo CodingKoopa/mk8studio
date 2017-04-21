@@ -1,7 +1,12 @@
 #include "FTEXNode.h"
 
+#include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+
+#include "ExportDialog.h"
 
 QStandardItem* FTEXNode::MakeItem()
 {
@@ -15,12 +20,13 @@ ResultCode FTEXNode::LoadAttributeArea()
 {
   QStandardItemModel* header_attributes_model = new QStandardItemModel();
   // TODO: get result code from this
-  m_ftex->ReadHeader();
-  header = m_ftex->GetHeader();
+  if (!m_header_loaded)
+    m_ftex->ReadHeader();
+  m_header = m_ftex->GetHeader();
   int row = 0;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Magic File Identifier"));
-  header_attributes_model->setItem(row, 1, new QStandardItem(header.magic));
+  header_attributes_model->setItem(row, 1, new QStandardItem(m_header.magic));
   m_delegate_group.line_edit_delegates << 0;
   row++;
 
@@ -31,81 +37,81 @@ ResultCode FTEXNode::LoadAttributeArea()
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Texture Offset"));
   header_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(header.data_offset, 16)));
+      row, 1, new QStandardItem("0x" + QString::number(m_header.data_offset, 16)));
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Texture Length"));
   header_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(header.data_length, 16)));
+      row, 1, new QStandardItem("0x" + QString::number(m_header.data_length, 16)));
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Mipmap Texture Offset"));
   header_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(header.mipmap_offset, 16)));
+      row, 1, new QStandardItem("0x" + QString::number(m_header.mipmap_offset, 16)));
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Mipmap Size"));
   header_attributes_model->setItem(row, 1,
-                                   new QStandardItem("0x" + QString::number(header.mipSize, 16)));
+                                   new QStandardItem("0x" + QString::number(m_header.mipSize, 16)));
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Number of Mipmaps"));
-  header_attributes_model->setItem(row, 1,
-                                   new QStandardItem("0x" + QString::number(header.num_mips, 16)));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_header.num_mips, 16)));
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Width"));
-  header_attributes_model->setItem(row, 1, new QStandardItem(QString::number(header.width)));
+  header_attributes_model->setItem(row, 1, new QStandardItem(QString::number(m_header.width)));
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Height"));
-  header_attributes_model->setItem(row, 1, new QStandardItem(QString::number(header.height)));
+  header_attributes_model->setItem(row, 1, new QStandardItem(QString::number(m_header.height)));
   row++;
 
   // TODO: make this a combobox with all available values
   header_attributes_model->setItem(row, 0, new QStandardItem("Format"));
   header_attributes_model->setItem(row, 1,
-                                   new QStandardItem("0x" + QString::number(header.format, 16)));
+                                   new QStandardItem("0x" + QString::number(m_header.format, 16)));
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Usage"));
   header_attributes_model->setItem(row, 1,
-                                   new QStandardItem("0x" + QString::number(header.usage, 16)));
+                                   new QStandardItem("0x" + QString::number(m_header.usage, 16)));
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Tiling"));
-  header_attributes_model->setItem(row, 1,
-                                   new QStandardItem("0x" + QString::number(header.tile_mode, 16)));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_header.tile_mode, 16)));
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("AA Mode"));
   header_attributes_model->setItem(row, 1,
-                                   new QStandardItem("0x" + QString::number(header.aa_mode, 16)));
+                                   new QStandardItem("0x" + QString::number(m_header.aa_mode, 16)));
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Swizzle"));
   header_attributes_model->setItem(row, 1,
-                                   new QStandardItem("0x" + QString::number(header.swizzle, 16)));
+                                   new QStandardItem("0x" + QString::number(m_header.swizzle, 16)));
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Depth"));
   header_attributes_model->setItem(row, 1,
-                                   new QStandardItem("0x" + QString::number(header.depth, 16)));
+                                   new QStandardItem("0x" + QString::number(m_header.depth, 16)));
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Dim"));
   header_attributes_model->setItem(row, 1,
-                                   new QStandardItem("0x" + QString::number(header.dim, 16)));
+                                   new QStandardItem("0x" + QString::number(m_header.dim, 16)));
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Pitch"));
   header_attributes_model->setItem(row, 1,
-                                   new QStandardItem("0x" + QString::number(header.pitch, 16)));
+                                   new QStandardItem("0x" + QString::number(m_header.pitch, 16)));
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Alignment"));
-  header_attributes_model->setItem(row, 1,
-                                   new QStandardItem("0x" + QString::number(header.alignment, 16)));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_header.alignment, 16)));
   row++;
 
   header_attributes_model->setRowCount(row);
@@ -146,7 +152,9 @@ ResultCode FTEXNode::LoadAttributeArea()
 
 ResultCode FTEXNode::LoadMainWidget()
 {
-  ResultCode res = m_ftex->ReadImageData();
+  ResultCode res;
+  if (!m_image_loaded)
+    res = m_ftex->ReadImageData();
   if (res != RESULT_SUCCESS)
   {
     emit NewStatus(res);
@@ -164,4 +172,47 @@ void FTEXNode::HandleAttributeItemChange(QStandardItem* item)
   // see: BFRESGUI::handleHeaderItemChange
   // (temp obviously)
   item = item;
+}
+
+void FTEXNode::HandleExportActionClick()
+{
+  ExportDialog export_dialog;
+
+  QGroupBox* output_group = new QGroupBox("Output");
+  m_groups_list.append(output_group);
+  QVBoxLayout* output_layout = new QVBoxLayout();
+
+  QHBoxLayout* path_layout = new QHBoxLayout;
+  QLabel* path_text = new QLabel("Path: ");
+  path_layout->addWidget(path_text);
+  m_path_line_edit = new QLineEdit;
+  path_layout->addWidget(m_path_line_edit);
+  QPushButton* path_button = new QPushButton("...");
+  path_layout->addWidget(path_button);
+  export_dialog.ConnectFilePathPair(m_path_line_edit, path_button);
+  output_layout->addLayout(path_layout);
+
+  QHBoxLayout* format_layout = new QHBoxLayout;
+  QLabel* format_text = new QLabel("Format: ");
+  format_layout->addWidget(format_text);
+  QComboBox* format_combo_box = new QComboBox;
+  format_combo_box->addItem("DDS");
+  format_layout->addWidget(format_combo_box);
+  output_layout->addLayout(format_layout);
+
+  output_group->setLayout(output_layout);
+  export_dialog.AddGroup(output_group);
+
+  connect(&export_dialog, SIGNAL(StartExport()), this, SLOT(HandleExport()));
+  export_dialog.exec();
+}
+
+void FTEXNode::HandleExport()
+{
+  m_ftex->SetName(m_path_line_edit->text());
+  if (!m_header_loaded)
+    m_ftex->ReadHeader();
+  if (!m_image_loaded)
+    m_ftex->ReadImageData();
+  m_ftex->ExportToDDS();
 }

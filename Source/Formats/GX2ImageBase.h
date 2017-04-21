@@ -10,11 +10,6 @@ class GX2ImageBase : public FormatBase
 {
 public:
   GX2ImageBase() : m_header(nullptr) {}
-  ~GX2ImageBase()
-  {
-    if (m_header)
-      delete m_header;
-  }
   enum Format
   {
     GX2_FMT_INVALID = 0x0,
@@ -137,13 +132,11 @@ public:
   };
 
   ResultCode ReadImageFromData();
-
-  // temporary
-  void SetName(const QString& value);
+  ResultCode ExportToDDS();
 
 protected:
   ImageHeader* m_header;
-  QByteArray raw_image_data;
+  QByteArray* m_raw_image_data;
 
 private:
   // Get the address of a pixel from a coordinate, within a macro tiled texture
@@ -169,7 +162,7 @@ private:
 
   quint32 ComputeBankFromCoordWoRotation(quint32 x, quint32 y);
 
-  QByteArray deswizzled_image_data;
+  QByteArray* m_deswizzled_image_data;
 
   // Constants
   quint32 m_pipes = 2;

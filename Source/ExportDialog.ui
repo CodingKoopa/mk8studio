@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>455</width>
-    <height>300</height>
+    <width>411</width>
+    <height>297</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,33 +15,16 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
    <item>
-    <widget class="QWidget" name="main_widget" native="true"/>
-   </item>
-   <item>
     <layout class="QVBoxLayout" name="options_layout">
      <item>
-      <widget class="QLabel" name="path_label">
+      <widget class="QLabel" name="options_label">
        <property name="text">
-        <string>Path:</string>
+        <string>Options:</string>
        </property>
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="path_layout">
-       <item>
-        <widget class="QLineEdit" name="path_line_edit"/>
-       </item>
-       <item>
-        <widget class="QPushButton" name="path_button">
-         <property name="text">
-          <string>Edit</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <widget class="QPushButton" name="export_button">
+      <widget class="QPushButton" name="generate_button">
        <property name="text">
         <string>Export</string>
        </property>

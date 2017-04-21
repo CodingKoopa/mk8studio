@@ -139,8 +139,9 @@ ResultCode GX2ImageBase::ReadImageFromData()
     return RESULT_UNSUPPORTED_FILE_FORMAT;
   }
 
-  deswizzled_image_data.resize(m_header->data_length);
-  deswizzled_image_data.fill(0);
+  m_deswizzled_image_data = new QByteArray();
+  m_deswizzled_image_data->resize(m_header->data_length);
+  m_deswizzled_image_data->fill(0);
 
   for (quint32 y = 0; y < height; ++y)
   {
@@ -183,31 +184,33 @@ ResultCode GX2ImageBase::ReadImageFromData()
         break;
       }
 
-      // TODO: there's probably a better way of approaching this
-      for (int i = 0; i < 8; i++)
+      if (original_offset > m_raw_image_data->size())
       {
-        if (original_offset + i > raw_image_data.size())
-        {
-          qDebug("Error: Tried to read pixel outside of image data. "
-                 "Skipping pixel.");
-          continue;
-        }
-        if (new_offset + i > deswizzled_image_data.size())
-        {
-          qDebug() << "Error: Tried to write pixel outside of image data. "
-                      "Skipping pixel.";
-          continue;
-        }
-        // qDebug("Writing raw offset %04X to %04X...", origOffset + i, newPos + i);
-        deswizzled_image_data[new_offset + i] = raw_image_data[original_offset + i];
-        // qDebug("Deswizzled data using at(): %0X.",
-        // rawImageData.at(newPos + i));
-        // qDebug("Size: %i", deswizzledImageData.size());
-        //            qDebug("Done.");
+        qDebug("Error: Tried to read pixel outside of image data. "
+               "Skipping pixel.");
+        continue;
       }
+      if (new_offset > m_deswizzled_image_data->size())
+      {
+        qDebug() << "Error: Tried to write pixel outside of image data. "
+                    "Skipping pixel.";
+        continue;
+      }
+      // qDebug("Writing raw offset %04X to %04X...", origOffset + i, newPos + i);
+      m_deswizzled_image_data = &m_deswizzled_image_data->replace(
+          new_offset, 8, m_raw_image_data->constData() + original_offset);
+      // qDebug("Deswizzled data using at(): %0X.",
+      // rawImageData.at(newPos + i));
+      // qDebug("Size: %i", deswizzledImageData.size());
+      //            qDebug("Done.");
     }
   }
-  DDS dds(&deswizzled_image_data);
+  return RESULT_SUCCESS;
+}
+
+ResultCode GX2ImageBase::ExportToDDS()
+{
+  DDS dds(m_deswizzled_image_data);
   dds.MakeHeader(m_header->width, m_header->height, m_header->depth, m_header->num_mips, true,
                  m_header->format);
   dds.WriteFile(m_name);
@@ -801,9 +804,4 @@ quint32 GX2ImageBase::ComputeBankFromCoordWoRotation(quint32 x, quint32 y)
     break;
   }
   return bank;
-}
-
-void GX2ImageBase::SetName(const QString& value)
-{
-  m_name = value;
 }

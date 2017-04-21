@@ -15,7 +15,7 @@ class BFRESNode : public Node
 {
   Q_OBJECT
 public:
-  explicit BFRESNode(BFRES* m_bfres, QObject* parent = 0);
+  explicit BFRESNode(BFRES* bfres, QObject* parent = 0) : Node(parent), m_bfres(bfres) {}
   ~BFRESNode() { delete m_bfres; }
   ResultCode LoadFileTreeArea() override;
   ResultCode LoadAttributeArea() override;
@@ -31,17 +31,8 @@ private:
   QScrollArea* m_file_tree_container;
   QVBoxLayout* m_file_tree_layout;
 
-  QTreeView* m_tree_view;
-  QWidget* m_main_widget;
-
-  QModelIndex current_index;
-
 private slots:
   void HandleAttributeItemChange(QStandardItem* item) override;
-  void HandleTreeCustomContextMenuRequest(const QPoint& point) override;
-  void HandleFileTreeClick(QModelIndex index);
-
-  void HandleExport();
 };
 
 // Make this class known to the template-based functions to allow casting to and from a QVariant.

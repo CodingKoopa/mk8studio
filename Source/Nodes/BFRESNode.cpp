@@ -11,12 +11,7 @@
 #include "BFRESGroupNode.h"
 #include "Common.h"
 #include "CustomDelegate.h"
-#include "ExportDialog.h"
 #include "ImageView.h"
-
-BFRESNode::BFRESNode(BFRES* bfres, QObject* parent) : Node(parent), m_bfres(bfres)
-{
-}
 
 ResultCode BFRESNode::LoadFileTreeArea()
 {
@@ -54,8 +49,6 @@ ResultCode BFRESNode::LoadFileTreeArea()
   // todo: this only works with mouse clicking, i still have to figure out
   // keyboard arrow navigation
   connect(m_tree_view, SIGNAL(clicked(QModelIndex)), this, SLOT(HandleFileTreeClick(QModelIndex)));
-  connect(m_tree_view, SIGNAL(doubleClicked(QModelIndex)), this,
-          SLOT(HandleFileTreeClick(QModelIndex)));
   m_file_tree_container = new QScrollArea();
 
   m_file_tree_layout = new QVBoxLayout();
@@ -246,67 +239,4 @@ void BFRESNode::HandleAttributeItemChange(QStandardItem* item)
   }
   m_bfres->setHeader(m_bfres_header);
   // TODO: spin box reaction
-}
-
-void BFRESNode::HandleTreeCustomContextMenuRequest(const QPoint& point)
-{
-  qDebug() << "It's dude.";
-  current_index = m_tree_view->indexAt(point);
-
-  QMenu context_menu;
-
-  //  switch (current_index.data(Qt::UserRole + 2).toInt())
-  //  {
-  //  case NODE_FTEX:
-  //  {
-  //    QAction* action_export = new QAction("Export");
-  //    connect(action_export, SIGNAL(triggered()), this, SLOT(HandleExport()));
-  //    context_menu.addAction(action_export);
-  //    context_menu.exec(m_tree_view->mapToGlobal(point));
-  //    break;
-  //  }
-  //  default:
-  //    break;
-  //  }
-}
-
-void BFRESNode::HandleFileTreeClick(QModelIndex index)
-{
-  if (BFRESNode* bfres_node = qvariant_cast<BFRESNode*>(index.data(Qt::UserRole + 1)))
-    bfres_node->LoadAttributeArea();
-  else if (FTEXNode* ftex_node = qvariant_cast<FTEXNode*>(index.data(Qt::UserRole + 1)))
-  {
-    ftex_node->LoadAttributeArea();
-    ftex_node->LoadMainWidget();
-  }
-
-  //  case NODE_BFRES_GROUP:
-  //    // todo: generate returns an int error code, do something with it
-  //    LoadGroupAttributeArea(index.data(Qt::UserRole + 2).toInt());
-  //    break;
-
-  //  case NODE_FTEX:
-  //    FTEX* ftex =
-  //        new FTEX(m_bfres->getFile(),
-  //                 m_bfres->GetRawNodeLists()[1][index.data(Qt::UserRole + 2).toInt()]->data_ptr);
-  //    // temporary, should take a save file dialog eventually
-  //    ftex->SetName(QString("/home/kyle/External/" +
-  //                          m_bfres->GetRawNodeLists()[1][index.data(Qt::UserRole +
-  //                          2).toInt()]->name +
-  //                          ".dds"));
-  //    // qDebug("FTEX node clicked. Node %i", index.data(Qt::UserRole+2).toInt());
-  //    FTEXNode* ftexNode = new FTEXNode(ftex);
-
-  //    emit ConnectNode(ftexNode);
-  //    ftexNode->LoadAttributeArea();
-  //    ftexNode->LoadMainWidget();
-  //    break;
-  //  }
-}
-
-void BFRESNode::HandleExport()
-{
-  qDebug() << "yo dude";
-  ExportDialog export_dialog;
-  export_dialog.exec();
 }

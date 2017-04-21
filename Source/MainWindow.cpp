@@ -18,7 +18,7 @@
 #include "CustomDelegate.h"
 #include "FileBase.h"
 #include "Nodes/BFRESNode.h"
-#include "ui_mainwindow.h"
+#include "ui_MainWindow.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::MainWindow)
 {
@@ -32,14 +32,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
   m_left_right_splitter = new QSplitter();
   m_left_right_splitter->addWidget(m_file_tree_attributes_splitter);
 
-  // m_left_right_splitter->show();
-
   m_ui->welcome_widget->show();
 
   m_ui->statusbar->showMessage("Ready.");
-
-  // temp
-  OpenFile();
 }
 
 MainWindow::~MainWindow()
@@ -49,17 +44,15 @@ MainWindow::~MainWindow()
 
 void MainWindow::OpenFile()
 {
-  FileBase* file;
+  QString path =
+      QFileDialog::getOpenFileName(this, "Open File", QDir::homePath(), "BFRES Model (*.bfres)");
 
-  file = new FileBase("/home/kyle/External/Nokonoko.bfres");
-  //  file = new FileBase(
-  //      QFileDialog::getOpenFileName(this, tr("Open File"), tr("BFRES Model (*.bfres)")));
+  FileBase* file = new FileBase(path);
+
+  //  file = new FileBase(path);
   if (!file->GetCanRead())
   {
-    // TODO: throw error message the right way
-    QMessageBox::critical(
-        this, "Error",
-        QString("%0 could not be opened for reading.").arg("/home/kyle/External/Nokonoko.bfres"));
+    emit UpdateStatus(RESULT_FILE_NOT_FOUND, path);
     return;
   }
 
@@ -120,7 +113,7 @@ void MainWindow::UpdateMainWidget(QWidget* widget)
   m_left_right_splitter->addWidget(widget);
 }
 
-void MainWindow::UpdateStatus(ResultCode status, QString message)
+void MainWindow::UpdateStatus(ResultCode status, QString details)
 {
   switch (status)
   {
@@ -128,7 +121,11 @@ void MainWindow::UpdateStatus(ResultCode status, QString message)
     m_ui->statusbar->showMessage("Success.");
     break;
   case RESULT_STATUS_BAR_UPDATE:
-    m_ui->statusbar->showMessage(message);
+    m_ui->statusbar->showMessage(details);
+    break;
+  case RESULT_FILE_NOT_FOUND:
+    QMessageBox::critical(this, "Error",
+                          QString("Couldn't open file %0 for reading.").arg(details));
     break;
   case RESULT_BFRES_HEADER_SIZE_ERROR:
     QMessageBox::critical(this, "Error", "Failed to read BFRES header. This may be due to either a "

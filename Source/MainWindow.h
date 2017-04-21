@@ -37,7 +37,7 @@ private slots:
   void UpdateFileTreeContainer(QScrollArea* area);
   void UpdateSectionsContainer(QScrollArea* area);
   void UpdateMainWidget(QWidget* widget);
-  void UpdateStatus(ResultCode status = RESULT_SUCCESS, QString message = QString());
+  void UpdateStatus(ResultCode status = RESULT_SUCCESS, QString details = QString());
 
   void OpenFile();
 };

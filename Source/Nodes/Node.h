@@ -3,6 +3,7 @@
 
 #include <QScrollArea>
 #include <QStandardItem>
+#include <QTreeView>
 
 #include "Common.h"
 #include "CustomDelegate.h"
@@ -12,7 +13,9 @@ class Node : public QObject
 {
   Q_OBJECT
 public:
-  explicit Node(QObject* parent = 0) : QObject(parent) {}
+  explicit Node(QObject* parent = 0) : QObject(parent), m_tree_view(nullptr), m_main_widget(nullptr)
+  {
+  }
   // Optional because not every file type may have a file tree to show.
   // TODO: maybe a better way of going about making this optional?
   virtual ResultCode LoadFileTreeArea() { return RESULT_SUCCESS; }
@@ -26,6 +29,8 @@ public:
 protected:
   // List of what each table cell's editor should be.
   CustomDelegate::DelegateGroup m_delegate_group;
+  QTreeView* m_tree_view;
+  QWidget* m_main_widget;
 
 signals:
   void NewFileTreeArea(QScrollArea*);
@@ -34,8 +39,9 @@ signals:
   void ConnectNode(Node*);
   void NewStatus(ResultCode status = RESULT_SUCCESS, QString message = QString());
 
-private slots:
-  virtual void HandleTreeCustomContextMenuRequest(const QPoint&) { return; }
+protected slots:
+  void HandleFileTreeClick(QModelIndex index);
+  void HandleTreeCustomContextMenuRequest(const QPoint& point);
   virtual void HandleAttributeItemChange(QStandardItem* item) = 0;
 };
 

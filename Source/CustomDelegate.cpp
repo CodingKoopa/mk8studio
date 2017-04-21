@@ -38,7 +38,8 @@ QWidget* CustomDelegate::createEditor(QWidget* parent, const QStyleOptionViewIte
     editor->setModel(
         m_delegates.combo_box_entries.at(m_delegates.combo_box_delegates.indexOf(index.row())));
     // select the specified index
-    // editor->setCurrentIndex(comboBoxSelections.at(m_delegates.combo_box_delegates.indexOf(index.row())));
+    editor->setCurrentIndex(
+        m_delegates.combo_box_selections.at(m_delegates.combo_box_delegates.indexOf(index.row())));
     return editor;
   }
 

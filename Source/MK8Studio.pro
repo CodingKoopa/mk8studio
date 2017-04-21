@@ -24,7 +24,8 @@ SOURCES +=\
     Formats/FTEX.cpp \
     Formats/DDS.cpp \
     Formats/BFRES.cpp \
-    Formats/GX2ImageBase.cpp
+    Formats/GX2ImageBase.cpp \
+    Nodes/Node.cpp
 
 HEADERS  += \
     Common.h \

@@ -41,8 +41,8 @@ ResultCode FTEX::ReadImageData()
 {
   file->Seek(m_ftex_header->data_offset);
   char* buffer = file->ReadBytes(m_header->data_length);
-  raw_image_data.append(buffer, m_header->data_length);
-  raw_image_data.resize(m_header->data_length);
+  m_raw_image_data = new QByteArray();
+  m_raw_image_data->append(buffer, m_header->data_length);
   delete[] buffer;
 
   return ReadImageFromData();
