@@ -11,6 +11,7 @@ ExportDialog::ExportDialog(QWidget* parent)
     : QDialog(parent), m_ui(new Ui::ExportDialog), m_current_group(1)
 {
   m_ui->setupUi(this);
+  setWindowTitle("Export");
   connect(m_ui->generate_button, SIGNAL(clicked()), this, SIGNAL(StartExport()));
 }
 

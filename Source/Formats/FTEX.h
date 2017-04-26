@@ -21,7 +21,7 @@ public:
     QString magic;
     quint32 dim;
     quint32 usage;
-    quint32 mipSize;
+    quint32 mipmap_length;
     quint32 alignment;
     quint32 data_offset;
     quint32 mipmap_offset;

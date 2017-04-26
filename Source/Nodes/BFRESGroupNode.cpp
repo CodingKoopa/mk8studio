@@ -32,6 +32,14 @@ QStandardItem* BFRESGroupNode::MakeListItemFromRawList()
     {
       FTEX* ftex = new FTEX(m_bfres->GetFile(), m_bfres->GetRawNodeLists()[m_group][row]->data_ptr);
       ftex->SetName(m_bfres->GetRawNodeLists()[m_group][row]->name);
+      //      ftex->ReadHeader();
+      //      qDebug() << "FTEX Name: " << ftex->GetName();
+      //      qDebug() << "FTEX Image Data Offset:  0x" << ftex->GetHeader().data_offset;
+      //      qDebug() << "FTEX Image Data Length:  0x" << ftex->GetHeader().data_length << "Bytes";
+      //      qDebug() << "FTEX Mipmap Offset:      0x" << ftex->GetHeader().mipmap_offset;
+      //      qDebug() << "FTEX Mipmap Length:      0x" << ftex->GetHeader().mipmap_length <<
+      //      "Bytes";
+      //      qDebug() << "-----------------------";
       FTEXNode* child_node = new FTEXNode(ftex, this);
       connect(child_node, SIGNAL(ConnectNode(Node*)), this, SIGNAL(ConnectNode(Node*)));
       emit ConnectNode(child_node);

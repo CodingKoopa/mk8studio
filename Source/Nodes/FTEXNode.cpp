@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QSettings>
 
 #include "ExportDialog.h"
 
@@ -51,8 +52,8 @@ ResultCode FTEXNode::LoadAttributeArea()
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Mipmap Size"));
-  header_attributes_model->setItem(row, 1,
-                                   new QStandardItem("0x" + QString::number(m_header.mipSize, 16)));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_header.mipmap_length, 16)));
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Number of Mipmaps"));
@@ -153,6 +154,8 @@ ResultCode FTEXNode::LoadAttributeArea()
 ResultCode FTEXNode::LoadMainWidget()
 {
   ResultCode res;
+  if (!m_header_loaded)
+    m_ftex->ReadHeader();
   if (!m_image_loaded)
     res = m_ftex->ReadImageData();
   if (res != RESULT_SUCCESS)
@@ -160,8 +163,8 @@ ResultCode FTEXNode::LoadMainWidget()
     emit NewStatus(res);
     return res;
   }
-  ImageView* image_view = new ImageView(m_ftex->GetImage());
-  emit NewMainWidget(image_view);
+  QLabel* label = new QLabel("No in-editor texture viewing yet.");
+  emit NewMainWidget(label);
   emit NewStatus(res);
   return RESULT_SUCCESS;
 }
@@ -176,22 +179,30 @@ void FTEXNode::HandleAttributeItemChange(QStandardItem* item)
 
 void FTEXNode::HandleExportActionClick()
 {
+  QSettings settings;
+
   ExportDialog export_dialog;
 
   QGroupBox* output_group = new QGroupBox("Output");
   m_groups_list.append(output_group);
   QVBoxLayout* output_layout = new QVBoxLayout();
 
+  // Path to the exported file.
   QHBoxLayout* path_layout = new QHBoxLayout;
   QLabel* path_text = new QLabel("Path: ");
   path_layout->addWidget(path_text);
   m_path_line_edit = new QLineEdit;
+  settings.beginGroup("file_paths");
+  if (!settings.value("last_ftex_export_path").toString().isEmpty())
+    m_path_line_edit->setText(settings.value("last_ftex_export_path").toString());
+  settings.endGroup();
   path_layout->addWidget(m_path_line_edit);
   QPushButton* path_button = new QPushButton("...");
   path_layout->addWidget(path_button);
   export_dialog.ConnectFilePathPair(m_path_line_edit, path_button);
   output_layout->addLayout(path_layout);
 
+  // What format to export to.
   QHBoxLayout* format_layout = new QHBoxLayout;
   QLabel* format_text = new QLabel("Format: ");
   format_layout->addWidget(format_text);
@@ -203,12 +214,16 @@ void FTEXNode::HandleExportActionClick()
   output_group->setLayout(output_layout);
   export_dialog.AddGroup(output_group);
 
-  connect(&export_dialog, SIGNAL(StartExport()), this, SLOT(HandleExport()));
+  connect(&export_dialog, SIGNAL(StartExport()), this, SLOT(HandleExportButtonClick()));
   export_dialog.exec();
 }
 
-void FTEXNode::HandleExport()
+void FTEXNode::HandleExportButtonClick()
 {
+  QSettings settings;
+  settings.beginGroup("file_paths");
+  settings.setValue("last_ftex_export_path", m_path_line_edit->text());
+  settings.endGroup();
   m_ftex->SetName(m_path_line_edit->text());
   if (!m_header_loaded)
     m_ftex->ReadHeader();

@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QSettings>
 #include <QSplitter>
 #include <QStandardItemModel>
 #include <QTableView>
@@ -24,6 +25,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
 {
   m_ui->setupUi(this);
 
+  QCoreApplication::setOrganizationName("Mario Kart 8 Modding Central");
+  QCoreApplication::setApplicationName("Mario Kart 8 Studio");
+  setWindowTitle("Mario Kart 8 Studio");
+
+  QSettings settings;
+
   connect(m_ui->action_open, SIGNAL(triggered()), this, SLOT(OpenFile()));
 
   // Splitter for the left side of the UI
@@ -31,6 +38,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
   m_file_tree_attributes_splitter->setOrientation(Qt::Vertical);
   m_left_right_splitter = new QSplitter();
   m_left_right_splitter->addWidget(m_file_tree_attributes_splitter);
+
+  settings.beginGroup("file_paths");
+  if (!settings.value("last_main_file").toString().isEmpty())
+    OpenFile(settings.value("last_main_file").toString());
+  settings.endGroup();
 
   m_ui->welcome_widget->show();
 
@@ -42,10 +54,11 @@ MainWindow::~MainWindow()
   delete m_ui;
 }
 
-void MainWindow::OpenFile()
+void MainWindow::OpenFile(QString path)
 {
-  QString path =
-      QFileDialog::getOpenFileName(this, "Open File", QDir::homePath(), "BFRES Model (*.bfres)");
+  if (path.isEmpty())
+    path =
+        QFileDialog::getOpenFileName(this, "Open File", QDir::homePath(), "BFRES Model (*.bfres)");
 
   FileBase* file = new FileBase(path);
 
@@ -86,8 +99,10 @@ void MainWindow::UpdateFileTreeContainer(QScrollArea* area)
 {
   if (m_file_tree_attributes_splitter->widget(0))
   {
-    m_file_tree_attributes_splitter->widget(1)->hide();
-    delete m_file_tree_attributes_splitter->widget(1);
+    // Preserve the original area's height.
+    area->resize(area->width(), m_file_tree_attributes_splitter->widget(0)->height());
+    m_file_tree_attributes_splitter->widget(0)->hide();
+    delete m_file_tree_attributes_splitter->widget(0);
   }
   m_file_tree_attributes_splitter->addWidget(area);
 }
@@ -96,6 +111,7 @@ void MainWindow::UpdateSectionsContainer(QScrollArea* area)
 {
   if (m_file_tree_attributes_splitter->widget(1))
   {
+    area->resize(area->width(), m_file_tree_attributes_splitter->widget(1)->height());
     m_file_tree_attributes_splitter->widget(1)->hide();
     delete m_file_tree_attributes_splitter->widget(1);
   }
@@ -106,7 +122,7 @@ void MainWindow::UpdateMainWidget(QWidget* widget)
 {
   if (m_left_right_splitter->widget(1))
   {
-    // TODO: there's probably a better way of replacing this widget
+    widget->resize(m_left_right_splitter->widget(1)->width(), widget->height());
     m_left_right_splitter->widget(1)->hide();
     delete m_left_right_splitter->widget(1);
   }

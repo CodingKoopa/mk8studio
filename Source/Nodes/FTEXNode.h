@@ -38,7 +38,7 @@ private:
 private slots:
   void HandleAttributeItemChange(QStandardItem* item) override;
   void HandleExportActionClick();
-  void HandleExport();
+  void HandleExportButtonClick();
 };
 
 #endif  // FTEXGUI_H

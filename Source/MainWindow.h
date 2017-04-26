@@ -39,7 +39,7 @@ private slots:
   void UpdateMainWidget(QWidget* widget);
   void UpdateStatus(ResultCode status = RESULT_SUCCESS, QString details = QString());
 
-  void OpenFile();
+  void OpenFile(QString path = QString());
 };
 
 #endif  // MAINWINDOW_H

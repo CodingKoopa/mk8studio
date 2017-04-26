@@ -165,8 +165,7 @@ ResultCode GX2ImageBase::ReadImageFromData()
       default:
         return RESULT_UNSUPPORTED_FILE_FORMAT;
       }
-
-      qint32 new_offset;
+      quint32 block_size;
 
       // Write the new pixels in their normal order to the new byte array.
       switch (m_header->format)
@@ -176,13 +175,14 @@ ResultCode GX2ImageBase::ReadImageFromData()
       case GX2_FMT_BC4_UNORM:
       case GX2_FMT_BC4_SNORM:
       {
-        new_offset = (y * width + x) * 8;
+        block_size = 8;
         break;
       }
       default:
-        new_offset = (y * width + x) * 16;
+        block_size = 16;
         break;
       }
+      qint32 new_offset = (y * width + x) * block_size;
 
       if (original_offset > m_raw_image_data->size())
       {
@@ -196,9 +196,10 @@ ResultCode GX2ImageBase::ReadImageFromData()
                     "Skipping pixel.";
         continue;
       }
+      m_deswizzled_image_data->replace(new_offset, block_size,
+                                       m_raw_image_data->constData() + original_offset, block_size);
       // qDebug("Writing raw offset %04X to %04X...", origOffset + i, newPos + i);
-      m_deswizzled_image_data = &m_deswizzled_image_data->replace(
-          new_offset, 8, m_raw_image_data->constData() + original_offset);
+
       // qDebug("Deswizzled data using at(): %0X.",
       // rawImageData.at(newPos + i));
       // qDebug("Size: %i", deswizzledImageData.size());

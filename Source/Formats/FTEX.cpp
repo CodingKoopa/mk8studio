@@ -18,7 +18,7 @@ int FTEX::ReadHeader()
   m_ftex_header->usage = file->Read32();
   m_ftex_header->data_length = file->Read32();
   file->Skip(4);
-  m_ftex_header->mipSize = file->Read32();
+  m_ftex_header->mipmap_length = file->Read32();
   file->Skip(4);
   m_ftex_header->tile_mode = static_cast<TileMode>(file->Read32());
   m_ftex_header->swizzle = file->Read32();
