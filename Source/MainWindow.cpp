@@ -99,9 +99,6 @@ void MainWindow::UpdateFileTreeContainer(QScrollArea* area)
 {
   if (m_file_tree_attributes_splitter->widget(0))
   {
-    // Preserve the original area's height.
-    area->resize(area->width(), m_file_tree_attributes_splitter->widget(0)->height());
-    m_file_tree_attributes_splitter->widget(0)->hide();
     delete m_file_tree_attributes_splitter->widget(0);
   }
   m_file_tree_attributes_splitter->addWidget(area);
@@ -111,8 +108,7 @@ void MainWindow::UpdateSectionsContainer(QScrollArea* area)
 {
   if (m_file_tree_attributes_splitter->widget(1))
   {
-    area->resize(area->width(), m_file_tree_attributes_splitter->widget(1)->height());
-    m_file_tree_attributes_splitter->widget(1)->hide();
+    area->resize(m_file_tree_attributes_splitter->widget(1)->size());
     delete m_file_tree_attributes_splitter->widget(1);
   }
   m_file_tree_attributes_splitter->addWidget(area);
@@ -122,8 +118,7 @@ void MainWindow::UpdateMainWidget(QWidget* widget)
 {
   if (m_left_right_splitter->widget(1))
   {
-    widget->resize(m_left_right_splitter->widget(1)->width(), widget->height());
-    m_left_right_splitter->widget(1)->hide();
+    widget->resize(m_left_right_splitter->widget(1)->size());
     delete m_left_right_splitter->widget(1);
   }
   m_left_right_splitter->addWidget(widget);

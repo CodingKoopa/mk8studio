@@ -15,6 +15,7 @@ QStandardItem* BFRESGroupNode::MakeItem()
   bool use_bst = false;
   if (!use_bst)
     item = MakeListItemFromRawList();
+  item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
   return item;
 }
 
