@@ -44,7 +44,7 @@ public:
   };
 
   int MakeHeader(quint32 width, quint32 height, quint32 depth, quint32 num_mips, bool compressed,
-                 GX2ImageBase::Format format);
+                 GX2ImageBase::FormatInfo format_info);
 
   int WriteFile(QString path);
 
@@ -78,7 +78,7 @@ private:
     DDS_PIX_FLAG_LUMINANCE = 0x20000,
   };
 
-  QByteArray* image_data;
+  QByteArray* m_image_data;
   DDSHeader m_header;
   quint32 m_block_size;
 };

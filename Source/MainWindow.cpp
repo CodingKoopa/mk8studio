@@ -149,6 +149,11 @@ void MainWindow::UpdateStatus(ResultCode status, QString details)
   case RESULT_UNSUPPORTED_FILE_FORMAT:
     QMessageBox::critical(this, "Error", "Unsupported texture format.");
     break;
+  case RESULT_UNSUPPORTED_FILE_FORMAT_IMPORTANT:
+    QMessageBox::critical(this, "Error",
+                          "This texture has anti-aliasing, thickness, or is 3D, which is "
+                          "unsupported. Please send this file to Koopa ASAP!");
+    break;
   }
 
   // If there was an error.

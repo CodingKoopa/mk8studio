@@ -65,6 +65,7 @@ public:
   BFRESHeader GetHeader();
   void setHeader(BFRESHeader value);
 
+  // TODO: Reorder to put all get/set functions in the same place.
   FileBase* GetFile();
 
   QVector<Node*> GetRootNodes();

@@ -81,8 +81,17 @@ ResultCode FTEXNode::LoadAttributeArea()
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("Tiling"));
-  header_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(m_header.tile_mode, 16)));
+  QList<FTEX::TileModeInfo> tile_mode_info_list = m_ftex->GetTileModeInfoList();
+  QStandardItemModel* tiling_combo_box_entries =
+      new QStandardItemModel(tile_mode_info_list.size(), 0);
+  for (int tile_mode = 0; tile_mode < tile_mode_info_list.size(); tile_mode++)
+    tiling_combo_box_entries->setItem(tile_mode,
+                                      new QStandardItem(tile_mode_info_list[tile_mode].name));
+  m_delegate_group.combo_box_entries << tiling_combo_box_entries;
+  m_delegate_group.combo_box_delegates << row;
+  m_delegate_group.combo_box_selections << m_header.tile_mode;
+  header_attributes_model->setItem(row, 1,
+                                   new QStandardItem(tile_mode_info_list[m_header.tile_mode].name));
   row++;
 
   header_attributes_model->setItem(row, 0, new QStandardItem("AA Mode"));

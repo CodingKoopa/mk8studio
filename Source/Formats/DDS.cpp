@@ -2,20 +2,19 @@
 #include "FileBase.h"
 #include "GX2ImageBase.h"
 
-DDS::DDS(QByteArray* imageData) : image_data(imageData)
+DDS::DDS(QByteArray* image_data) : m_image_data(image_data)
 {
 }
 
 // TODO: Add uncompressed support
 int DDS::MakeHeader(quint32 width, quint32 height, quint32 depth, quint32 num_mips, bool compressed,
-                    GX2ImageBase::Format format)
+                    GX2ImageBase::FormatInfo format_info)
 {
   if (compressed)
   {
-    switch (format)
+    switch (format_info.format)
     {
-    case GX2ImageBase::GX2_FMT_BC1_UNORM:
-    case GX2ImageBase::GX2_FMT_BC1_SRGB:
+    case GX2ImageBase::Format::BC1:
     {
       m_block_size = 8;
       break;
@@ -65,41 +64,27 @@ int DDS::MakeHeader(quint32 width, quint32 height, quint32 depth, quint32 num_mi
 
   if (compressed)
   {
-    switch (format)
+    switch (format_info.format)
     {
-    case GX2ImageBase::GX2_FMT_BC1_UNORM:
-    case GX2ImageBase::GX2_FMT_BC1_SRGB:
-    {
+    case GX2ImageBase::Format::BC1:
       m_header.pixel_format.magic = "DXT1";
       break;
-    }
-    case GX2ImageBase::GX2_FMT_BC4_UNORM:
-    {
-      m_header.pixel_format.magic = "BC4U";
+    case GX2ImageBase::Format::BC4:
+      if (format_info.type == GX2ImageBase::FormatInfo::Type::UNorm)
+        m_header.pixel_format.magic = "BC4U";
+      else
+        m_header.pixel_format.magic = "BC4S";
       break;
-    }
-    case GX2ImageBase::GX2_FMT_BC4_SNORM:
-    {
-      m_header.pixel_format.magic = "BC4S";
+    case GX2ImageBase::Format::BC5:
+
+      if (format_info.type == GX2ImageBase::FormatInfo::Type::UNorm)
+        m_header.pixel_format.magic = "BC5U";
+      else
+        m_header.pixel_format.magic = "BC5S";
       break;
-    }
-    case GX2ImageBase::GX2_FMT_BC5_UNORM:
-    {
-      m_header.pixel_format.magic = "BC5U";
-      break;
-    }
-    case GX2ImageBase::GX2_FMT_BC5_SNORM:
-    {
-      // set to ATI1 for chrome
-      // you'll see what i mean
-      m_header.pixel_format.magic = "BC5S";
-      break;
-    }
     default:
-    {
       m_header.pixel_format.magic = QString();
       break;
-    }
     }
   }
 
@@ -154,7 +139,7 @@ int DDS::WriteFile(QString path)
   file.Write32(m_header.caps3);
   file.Write32(m_header.caps4);
   file.Write32(m_header.reserved2);
-  int ret = file.WriteBytes(image_data->data(), image_data->size());
+  int ret = file.WriteBytes(m_image_data->data(), m_image_data->size());
   file.Save();
   return ret;
 }
