@@ -19,11 +19,11 @@ FTEXNode::FTEXNode(FTEX* ftex, QObject* parent)
 {
   m_context_menu = new QMenu;
 
-  QAction* action_export = new QAction("Export");
+  QAction* action_export = new QAction("Export", this);
   connect(action_export, SIGNAL(triggered()), this, SLOT(HandleExportActionClick()));
   m_context_menu->addAction(action_export);
 
-  QAction* action_inject = new QAction("Inject");
+  QAction* action_inject = new QAction("Inject", this);
   connect(action_inject, SIGNAL(triggered()), this, SLOT(HandleInjectActionClick()));
   m_context_menu->addAction(action_inject);
 }
@@ -111,7 +111,7 @@ ResultCode FTEXNode::LoadAttributeArea()
       new QStandardItemModel(tile_mode_info_list.size(), 0);
   for (int tile_mode = 0; tile_mode < tile_mode_info_list.size(); tile_mode++)
     tiling_combo_box_entries->setItem(tile_mode,
-                                      new QStandardItem(tile_mode_info_list[tile_mode].name));
+                                      new QStandardItem(m_ftex->GetTileModeInfo().name));
   m_delegate_group.combo_box_entries << tiling_combo_box_entries;
   m_delegate_group.combo_box_delegates << row;
   m_delegate_group.combo_box_selections << m_ftex_header->tile_mode;

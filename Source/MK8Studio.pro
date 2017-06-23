@@ -8,8 +8,6 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-QMAKE_CXXFLAGS += -Wall -pedantic -std=c++14
-
 TARGET = MK8Studio
 TEMPLATE = app
 

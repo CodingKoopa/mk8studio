@@ -12,6 +12,7 @@ class GX2ImageBase : public FormatBase
 public:
   GX2ImageBase() : m_base_header(nullptr) {}
 
+  // Format enumerations just for convienience.
   enum class Format
   {
     Invalid = 0x0,
@@ -42,7 +43,7 @@ public:
   struct FormatInfo
   {
     // This is used in both info structs, but making a base class would make them become non
-    // aggregates
+    // aggregates. C++17 will allow public inherited base classes in aggregates.
     quint32 id;
     QString name;
 
@@ -58,11 +59,10 @@ public:
       SInt,
       SRGB,
       Float
-    } type = Type::Invalid;
-
-    SharedFormatInfo shared_info = SharedFormatInfo();
+    } type;
   };
 
+  // Tile Mode enumerations just for convienience.
   enum class TileMode
   {
     Linear,
@@ -92,8 +92,6 @@ public:
 
     quint32 aspect_ratio;
     bool swap_banks;
-
-    SharedTileModeInfo shared_info = SharedTileModeInfo();
   };
 
   struct ImageHeaderBase
@@ -128,6 +126,7 @@ public:
 
   FormatInfo GetFormatInfo() { return m_format_info; }
   quint32 GetFormatInfoIndex() { return m_format_info_index; }
+  TileModeInfo GetTileModeInfo() { return m_tile_mode_info; }
 
 protected:
   ImageHeaderBase* m_base_header;
@@ -179,6 +178,8 @@ private:
       {Format::BC4, 64, SharedFormatInfo::Use::Texture, true},
       {Format::BC5, 128, SharedFormatInfo::Use::Texture, true}};
 
+  const FormatInfo zerp {0x0, "GX2_SURFACE_FORMAT_INVALID", Format::Invalid, FormatInfo::Type::Invalid};
+
   // Very incomplete list of formats.
   const QList<FormatInfo> m_format_info_list{
       // Invalid
@@ -194,6 +195,7 @@ private:
       {0x431, "GX2_SURFACE_FORMAT_SRGB_BC1", Format::BC1, FormatInfo::Type::SRGB}};
 
   const QList<SharedTileModeInfo> m_shared_tile_mode_info_list{
+      // TODO: add INVALID entry?
       {TileMode::Linear, 0},
       {TileMode::Micro, m_tile_mode_2_rotation},
       {TileMode::Macro, m_tile_mode_3_rotation}};
@@ -257,8 +259,11 @@ private:
   quint64 m_num_macro_tile_bytes;
 
   FormatInfo m_format_info;
+  // The index of the current format, in the list.
   quint32 m_format_info_index;
+  SharedFormatInfo m_shared_format_info;
   TileModeInfo m_tile_mode_info;
+  SharedTileModeInfo m_shared_tile_mode_info;
 };
 
 #endif  // GTX_H

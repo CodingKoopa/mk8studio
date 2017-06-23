@@ -17,23 +17,25 @@ void GX2ImageBase::SetupInfoStructs()
     }
   }
 
-  m_format_info.shared_info = m_shared_format_info_list[0];
+  m_shared_format_info = m_shared_format_info_list[0];
   for (int i = 0; i < m_shared_format_info_list.size(); i++)
   {
     if (m_format_info.format == m_shared_format_info_list[i].format)
     {
-      m_format_info.shared_info = m_shared_format_info_list[i];
+      m_shared_format_info = m_shared_format_info_list[i];
       break;
     }
   }
 
-  // Default to a dummy value.
   m_tile_mode_info = m_tile_mode_info_list[m_base_header->tile_mode];
+
+  // Default to a dummy value.
+  m_shared_tile_mode_info = m_shared_tile_mode_info_list[0];
   for (int i = 0; i < m_shared_tile_mode_info_list.size(); i++)
   {
     if (m_tile_mode_info.mode == m_shared_tile_mode_info_list[i].mode)
     {
-      m_tile_mode_info.shared_info = m_shared_tile_mode_info_list[i];
+      m_shared_tile_mode_info = m_shared_tile_mode_info_list[i];
       break;
     }
   }
@@ -82,7 +84,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray*& destination,
   // Temporary hack to find special textures.
   if (m_base_header->aa_mode != 0 || static_cast<quint32>(m_tile_mode_info.thickness) > 1 ||
       m_format_info.name == "GX2_SURFACE_FORMAT_INVALID" ||
-      m_format_info.shared_info.format == Format::Invalid)
+      m_shared_format_info.format == Format::Invalid)
     return RESULT_UNSUPPORTED_FILE_FORMAT_IMPORTANT;
 
   m_num_samples = 1 << m_base_header->aa_mode;
@@ -90,12 +92,12 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray*& destination,
   m_pipe_swizzle = Bit(m_base_header->swizzle, 8);
   m_bank_swizzle = GetBits(m_base_header->swizzle, 9, 3);
 
-  if (m_format_info.shared_info.use == SharedFormatInfo::Use::DepthBuffer)
+  if (m_shared_format_info.use == SharedFormatInfo::Use::DepthBuffer)
     m_has_depth = true;
   else
     m_has_depth = false;
 
-  if (m_format_info.shared_info.compressed)
+  if (m_shared_format_info.compressed)
   {
     // Split into 4 by 4 compressed blocks of pixels.
     width /= 4;
@@ -137,7 +139,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray*& destination,
     // Number of bits in all samples of a macro tile including thickness -> Bytes =
     // Number of bytes in one macro tile (All .
     m_num_macro_tile_bytes =
-        BitsToBytes(m_macro_tile_pitch * m_macro_tile_height * m_format_info.shared_info.bpp *
+        BitsToBytes(m_macro_tile_pitch * m_macro_tile_height * m_shared_format_info.bpp *
                     static_cast<quint32>(m_tile_mode_info.thickness) * m_num_samples);
 
     // Physical width of a row of the whole texture *
@@ -159,7 +161,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray*& destination,
     // Number of bits in the whole texture -> Bytes =
     // Number of bytes in the whole texture.
     m_num_slice_bytes =
-        BitsToBytes(m_base_header->pitch * m_base_header->height * m_format_info.shared_info.bpp *
+        BitsToBytes(m_base_header->pitch * m_base_header->height * m_shared_format_info.bpp *
                     static_cast<quint32>(m_tile_mode_info.thickness) * m_num_samples);
   // Fallthrough
   // (This comment is here to prevent compiler warnings.)
@@ -185,7 +187,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray*& destination,
 
     // Number of bits in all samples of a micro tile including thickness -> Bytes =
     // Number of bytes in one micro tile.
-    m_num_micro_tile_bits = m_num_micro_tile_pixels * m_format_info.shared_info.bpp *
+    m_num_micro_tile_bits = m_num_micro_tile_pixels * m_shared_format_info.bpp *
                             static_cast<quint32>(m_tile_mode_info.thickness) * m_num_samples;
 
     // Number of bits in one micro tile /
@@ -284,7 +286,7 @@ quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y
 
   if (m_has_depth)
   {
-    if (comp_bits && comp_bits != m_format_info.shared_info.bpp)
+    if (comp_bits && comp_bits != m_shared_format_info.bpp)
     {
       sample_offset_within_micro_tile = tile_base + comp_bits * sample;
       pixel_offset_within_sample = num_samples * comp_bits * pixel_index_within_micro_tile;
@@ -294,9 +296,9 @@ quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y
       // Number of bits in one pixel *
       // Current sample we're in =
       //
-      sample_offset_within_micro_tile = m_format_info.shared_info.bpp * sample;
+      sample_offset_within_micro_tile = m_shared_format_info.bpp * sample;
       pixel_offset_within_sample =
-          num_samples * m_format_info.shared_info.bpp * pixel_index_within_micro_tile;
+          num_samples * m_shared_format_info.bpp * pixel_index_within_micro_tile;
     }
   }
   else
@@ -320,7 +322,7 @@ quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y
     // Number of bits in one pixel *
     // The pixel index =
     // The offset of the current pixel relative to the beginning of the current sample.
-    pixel_offset_within_sample = m_format_info.shared_info.bpp * pixel_index_within_micro_tile;
+    pixel_offset_within_sample = m_shared_format_info.bpp * pixel_index_within_micro_tile;
   }
 
   // Offset of the pixel within the sample +
@@ -404,7 +406,7 @@ quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y
 
   // Algorithm to recalculate bank and pipe?
   bank_pipe ^= (sample_slice * ((m_num_banks >> 1) + 1)) << m_pipe_bit_count ^
-               (swizzle + sliceIn * m_tile_mode_info.shared_info.rotation);
+               (swizzle + sliceIn * m_shared_tile_mode_info.rotation);
   bank_pipe %= m_num_pipes * m_num_banks;
   pipe = bank_pipe % m_num_pipes;
   bank = bank_pipe / m_num_pipes;
@@ -528,7 +530,7 @@ quint32 GX2ImageBase::ComputePixelIndexWithinMicroTile(quint32 x, quint32 y, qui
     }
     else
     {
-      switch (m_format_info.shared_info.bpp)
+      switch (m_shared_format_info.bpp)
       {
       case 8:
         pixel_bit_0 = x_0;
@@ -598,7 +600,7 @@ quint32 GX2ImageBase::ComputeSurfaceBankSwappedWidth(quint32 pitch)
 
   quint32 num_samples = m_num_samples;
   // TODO: Same as m_bytes_per_sample?
-  quint32 bytes_per_sample = 8 * m_format_info.shared_info.bpp;
+  quint32 bytes_per_sample = 8 * m_shared_format_info.bpp;
   quint32 samples_per_tile = m_split_size / bytes_per_sample;
 
   if (m_split_size / m_bytes_per_sample)
@@ -615,10 +617,10 @@ quint32 GX2ImageBase::ComputeSurfaceBankSwappedWidth(quint32 pitch)
 
   if (m_tile_mode_info.thickness == TileModeInfo::Thickness::Thick)
   {
-    auto swapTiles = qMax<uint32_t>(1u, (m_swap_size >> 1) / m_format_info.shared_info.bpp);
+    auto swapTiles = qMax<uint32_t>(1u, (m_swap_size >> 1) / m_shared_format_info.bpp);
     quint64 swapWidth = swapTiles * 8 * m_num_banks;
     auto heightBytes = num_samples * m_tile_mode_info.aspect_ratio * m_num_pipes *
-                       m_format_info.shared_info.bpp / slices_per_tile;
+                       m_shared_format_info.bpp / slices_per_tile;
     quint64 swapMax = m_num_pipes * m_num_banks * m_row_size / heightBytes;
     quint64 swapMin = m_pipe_interleave_bytes * 8 * m_num_banks / bytes_per_tile_slice;
 
