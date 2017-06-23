@@ -39,10 +39,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
   m_left_right_splitter = new QSplitter();
   m_left_right_splitter->addWidget(m_file_tree_attributes_splitter);
 
-  settings.beginGroup("file_paths");
-  if (!settings.value("last_main_file").toString().isEmpty())
-    OpenFile(settings.value("last_main_file").toString());
-  settings.endGroup();
+  //  settings.beginGroup("file_paths");
+  //  if (!settings.value("last_main_file").toString().isEmpty())
+  //    OpenFile(settings.value("last_main_file").toString());
+  //  settings.endGroup();
 
   m_ui->welcome_widget->show();
 
@@ -137,6 +137,11 @@ void MainWindow::UpdateStatus(ResultCode status, QString details)
   case RESULT_FILE_NOT_FOUND:
     QMessageBox::critical(this, "Error",
                           QString("Couldn't open file %0 for reading.").arg(details));
+    break;
+  case RESULT_NO_BYTES_WRITTEN:
+    QMessageBox::critical(
+        this, "Error", QString("No bytes were written to the file. This may be due to it not being "
+                               "found, or this application not having sufficient permissions."));
     break;
   case RESULT_BFRES_HEADER_SIZE_ERROR:
     QMessageBox::critical(this, "Error", "Failed to read BFRES header. This may be due to either a "

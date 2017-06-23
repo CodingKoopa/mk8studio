@@ -13,7 +13,8 @@ class Node : public QObject
 {
   Q_OBJECT
 public:
-  explicit Node(QObject* parent = 0) : QObject(parent), m_tree_view(nullptr), m_main_widget(nullptr)
+  explicit Node(QObject* parent = 0)
+      : QObject(parent), m_tree_view(nullptr), m_main_widget(nullptr), m_context_menu(nullptr)
   {
   }
   // Optional because not every file type may have a file tree to show.
@@ -26,11 +27,15 @@ public:
   virtual ResultCode LoadMainWidget() { return RESULT_SUCCESS; }
   // Optional.
   virtual ResultCode SaveFile() { return RESULT_SUCCESS; }
+
+  QMenu* GetContextMenu();
+
 protected:
   // List of what each table cell's editor should be.
-  CustomDelegate::DelegateGroup m_delegate_group;
+  CustomItemDelegate::DelegateGroup m_delegate_group;
   QTreeView* m_tree_view;
   QWidget* m_main_widget;
+  QMenu* m_context_menu;
 
 signals:
   void NewFileTreeArea(QScrollArea*);

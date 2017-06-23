@@ -10,7 +10,7 @@
 class GX2ImageBase : public FormatBase
 {
 public:
-  GX2ImageBase() : m_header(nullptr) {}
+  GX2ImageBase() : m_base_header(nullptr) {}
 
   enum class Format
   {
@@ -24,8 +24,7 @@ public:
   struct SharedFormatInfo
   {
     Format format;
-    // These are assigned by ReadImageFromData(), from the format.
-    quint32 bpp = 0;
+    quint32 bpp;
 
     enum class Use
     {
@@ -35,9 +34,9 @@ public:
       ColorBuffer = 1 << 1,
       DepthBuffer = 1 << 2,
       ScanBuffer = 1 << 3
-    } use = Use::None;
+    } use;
 
-    bool compressed = false;
+    bool compressed;
   };
 
   struct FormatInfo
@@ -75,7 +74,7 @@ public:
   {
     TileMode mode;
 
-    quint32 rotation = 0;
+    quint32 rotation;
   };
 
   struct TileModeInfo
@@ -97,32 +96,46 @@ public:
     SharedTileModeInfo shared_info = SharedTileModeInfo();
   };
 
-  struct ImageHeader
+  struct ImageHeaderBase
   {
-    virtual ~ImageHeader() {}
+    virtual ~ImageHeaderBase() {}
     quint32 data_length;
     quint32 width;
     quint32 height;
     quint32 pitch;
-    quint32 num_mips;
-    quint32 aa_mode;
+
     quint32 format;
     quint32 tile_mode;
-    quint32 swizzle;
-    // TODO: Do something with this when deswizzling, set m_has_depth?
+
+    quint32 aa_mode;
+    quint32 num_mips;
+    // This currently isn't used, should only be needed for tile mode 3 textures.
     quint32 depth;
+
+    quint32 swizzle;
   };
 
-  ResultCode ReadImageFromData();
-  ResultCode ExportToDDS();
+  void SetupInfoStructs();
 
+  ResultCode ReadImageFromData();
+  ResultCode WriteDeswizzledImageToData();
+
+  ResultCode ImportDDS(QString path);
+  ResultCode ExportToDDS(QString path);
+
+  QList<FormatInfo> GetFormatInfoList() { return m_format_info_list; }
   QList<TileModeInfo> GetTileModeInfoList() { return m_tile_mode_info_list; }
 
+  FormatInfo GetFormatInfo() { return m_format_info; }
+  quint32 GetFormatInfoIndex() { return m_format_info_index; }
+
 protected:
-  ImageHeader* m_header;
+  ImageHeaderBase* m_base_header;
   QByteArray* m_raw_image_data;
 
 private:
+  ResultCode CopyImage(QByteArray* source, QByteArray*& destination, bool swizzle);
+
   // Get the address of a pixel from a coordinate, within a macro tiled texture
   quint64 ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32 slice, quint32 sample,
                                                 quint32 tile_base, quint32 compBits);
@@ -132,22 +145,19 @@ private:
 
   quint32 ComputeSurfaceBankSwappedWidth(quint32 m_pitch);
 
-  quint32 ComputePipeFromCoordWoRotation(quint32 x, quint32 y);
-
-  quint32 ComputeBankFromCoordWoRotation(quint32 x, quint32 y);
-
   QByteArray* m_deswizzled_image_data;
 
   // Constants
-  quint32 m_num_pipes = 2;
-  quint32 m_num_banks = 4;
+  bool m_optimal_bank_swap = 1;
   quint32 m_group_bit_count = 8;
-  quint32 m_pipe_bit_count = 1;
   quint32 m_bank_bit_count = 2;
+  quint32 m_pipe_bit_count = 1;
   quint32 m_split_size = 2048;
   quint32 m_swap_size = 256;
   quint32 m_row_size = 2048;
   quint32 m_pipe_interleave_bytes = 256;
+  const quint32 m_num_pipes = 2;
+  const quint32 m_num_banks = 4;
   const quint32 m_micro_tile_width = 8;
   const quint32 m_micro_tile_height = 8;
   const quint32 m_num_micro_tile_pixels = m_micro_tile_width * m_micro_tile_height;
@@ -157,17 +167,17 @@ private:
 
   enum class MicroTileType
   {
-    GX2_MICRO_TILING_DISPLAYABLE = 0x0,
-    GX2_MICRO_TILING_NON_DISPLAYABLE = 0x1,
-    GX2_MICRO_TILING_DEPTH_SAMPLE_ORDER = 0x2,
-    GX2_MICRO_TILING_THICK_TILING = 0x3,
+    Displayable = 0x0,
+    NonDisplayable = 0x1,
+    DepthSampleOrder = 0x2,
+    ThickTiliing = 0x3,
   };
 
   const QList<SharedFormatInfo> m_shared_format_info_list{
-      {Format::Invalid, 0, SharedFormatInfo::Use::None},
-      {Format::BC1, 64, SharedFormatInfo::Use::Texture},
-      {Format::BC4, 64, SharedFormatInfo::Use::Texture},
-      {Format::BC5, 128, SharedFormatInfo::Use::Texture}};
+      {Format::Invalid, 0, SharedFormatInfo::Use::None, false},
+      {Format::BC1, 64, SharedFormatInfo::Use::Texture, true},
+      {Format::BC4, 64, SharedFormatInfo::Use::Texture, true},
+      {Format::BC5, 128, SharedFormatInfo::Use::Texture, true}};
 
   // Very incomplete list of formats.
   const QList<FormatInfo> m_format_info_list{
@@ -247,6 +257,7 @@ private:
   quint64 m_num_macro_tile_bytes;
 
   FormatInfo m_format_info;
+  quint32 m_format_info_index;
   TileModeInfo m_tile_mode_info;
 };
 

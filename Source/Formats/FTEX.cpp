@@ -5,42 +5,43 @@
 
 int FTEX::ReadHeader()
 {
-  m_ftex_header = new FTEXHeader;
-  file->Seek(start);
-  m_ftex_header->magic = file->ReadStringASCII(4);
-  m_ftex_header->dim = file->Read32();
-  m_ftex_header->width = file->Read32();
-  m_ftex_header->height = file->Read32();
-  m_ftex_header->depth = file->Read32();
-  m_ftex_header->num_mips = file->Read32();
-  m_ftex_header->format = file->Read32();
-  m_ftex_header->aa_mode = file->Read32();
-  m_ftex_header->usage = file->Read32();
-  m_ftex_header->data_length = file->Read32();
-  file->Skip(4);
-  m_ftex_header->mipmap_length = file->Read32();
-  file->Skip(4);
-  m_ftex_header->tile_mode = file->Read32();
-  m_ftex_header->swizzle = file->Read32();
-  m_ftex_header->alignment = file->Read32();
-  m_ftex_header->pitch = file->Read32();
-  file->Skip(0x6C);
-  m_ftex_header->data_offset = file->Pos() + file->Read32();
-  m_ftex_header->mipmap_offset = file->Pos() + file->Read32();
-  file->Skip(8);
+  m_header = new FTEXHeader;
+  m_file->Seek(m_start_offset);
+  m_header->magic = m_file->ReadStringASCII(4);
+  m_header->dim = m_file->Read32();
+  m_header->width = m_file->Read32();
+  m_header->height = m_file->Read32();
+  m_header->depth = m_file->Read32();
+  m_header->num_mips = m_file->Read32();
+  m_header->format = m_file->Read32();
+  m_header->aa_mode = m_file->Read32();
+  m_header->usage = m_file->Read32();
+  m_header->data_length = m_file->Read32();
+  m_file->Skip(4);
+  m_header->mipmap_length = m_file->Read32();
+  m_file->Skip(4);
+  m_header->tile_mode = m_file->Read32();
+  m_header->swizzle = m_file->Read32();
+  m_header->alignment = m_file->Read32();
+  m_header->pitch = m_file->Read32();
+  m_file->Skip(0x6C);
+  m_header->data_offset = m_file->Pos() + m_file->Read32();
+  m_header->mipmap_offset = m_file->Pos() + m_file->Read32();
+  //  m_file->Skip(8);
 
-  m_header = static_cast<ImageHeader*>(m_ftex_header);
+  m_base_header = static_cast<ImageHeaderBase*>(m_header);
+  SetupInfoStructs();
 
-  if (file->Pos() != start + 0xC0)
+  if (m_file->Pos() != m_start_offset + 0xC0)
     return -1;
 
   return 0;
 }
 
-ResultCode FTEX::ReadImageData()
+ResultCode FTEX::ReadImage()
 {
-  file->Seek(m_ftex_header->data_offset);
-  char* buffer = file->ReadBytes(m_header->data_length);
+  m_file->Seek(m_header->data_offset);
+  char* buffer = m_file->ReadBytes(m_header->data_length);
   m_raw_image_data = new QByteArray();
   m_raw_image_data->append(buffer, m_header->data_length);
   delete[] buffer;
@@ -48,21 +49,35 @@ ResultCode FTEX::ReadImageData()
   return ReadImageFromData();
 }
 
-QImage* FTEX::GetImage()
+void FTEX::InjectImage()
 {
-  QImage* image =
-      new QImage(m_header->width, m_header->height, QImage::Format_RGBA8888_Premultiplied);
-  image->fill(Qt::red);
-
-  return image;
-}
-
-FTEX::FTEXHeader FTEX::GetHeader()
-{
-  return *m_ftex_header;
+  m_file->Seek(m_start_offset);
+  m_file->WriteStringASCII(m_header->magic, 4);
+  m_file->Write32(m_header->dim);
+  m_file->Write32(m_header->width);
+  m_file->Write32(m_header->height);
+  m_file->Write32(m_header->depth);
+  m_file->Write32(m_header->num_mips);
+  m_file->Write32(m_header->format);
+  m_file->Write32(m_header->aa_mode);
+  m_file->Write32(m_header->usage);
+  m_file->Write32(m_header->data_length);
+  m_file->Skip(4);
+  m_file->Write32(m_header->mipmap_length);
+  m_file->Skip(4);
+  m_file->Write32(m_header->tile_mode);
+  m_file->Write32(m_header->swizzle);
+  m_file->Write32(m_header->alignment);
+  m_file->Write32(m_header->pitch);
+  m_file->Skip(0x6C);
+  m_file->Write32(m_header->data_offset - m_file->Pos());
+  m_file->Write32(m_header->mipmap_offset);
+  m_file->Seek(m_header->data_offset);
+  m_file->WriteBytes(m_raw_image_data->data(), m_header->data_length);
+  m_file->Save();
 }
 
 quint64 FTEX::GetStart()
 {
-  return start;
+  return m_start_offset;
 }

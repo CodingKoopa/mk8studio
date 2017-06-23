@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ExportDialog</class>
- <widget class="QDialog" name="ExportDialog">
+ <class>IODialog</class>
+ <widget class="QDialog" name="IODialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,16 +17,9 @@
    <item>
     <layout class="QVBoxLayout" name="options_layout">
      <item>
-      <widget class="QLabel" name="options_label">
+      <widget class="QPushButton" name="io_button">
        <property name="text">
-        <string>Options:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="generate_button">
-       <property name="text">
-        <string>Export</string>
+        <string/>
        </property>
       </widget>
      </item>

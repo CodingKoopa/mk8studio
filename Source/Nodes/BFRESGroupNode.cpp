@@ -91,7 +91,7 @@ QStandardItem* BFRESGroupNode::MakeTreeItemFromSubtree(BFRES::Node* node, int bl
 
 ResultCode BFRESGroupNode::LoadAttributeArea()
 {
-  m_delegate_group = CustomDelegate::DelegateGroup();
+  m_delegate_group = CustomItemDelegate::DelegateGroup();
 
   QStandardItemModel* group_attributes_model = new QStandardItemModel();
 
@@ -118,7 +118,7 @@ ResultCode BFRESGroupNode::LoadAttributeArea()
   table_view->verticalHeader()->hide();
   table_view->horizontalHeader()->hide();
 
-  CustomDelegate* customDelegate = new CustomDelegate(m_delegate_group);
+  CustomItemDelegate* customDelegate = new CustomItemDelegate(m_delegate_group);
   table_view->setItemDelegate(customDelegate);
 
   QVBoxLayout* sections_layout = new QVBoxLayout();

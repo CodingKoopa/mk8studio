@@ -8,6 +8,8 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+QMAKE_CXXFLAGS += -Wall -pedantic -std=c++14
+
 TARGET = MK8Studio
 TEMPLATE = app
 
@@ -16,7 +18,6 @@ SOURCES +=\
     Main.cpp \
     ImageView.cpp \
     FileBase.cpp \
-    ExportDialog.cpp \
     CustomDelegate.cpp \
     Nodes/BFRESNode.cpp \
     Nodes/FTEXNode.cpp \
@@ -25,12 +26,12 @@ SOURCES +=\
     Formats/DDS.cpp \
     Formats/BFRES.cpp \
     Formats/GX2ImageBase.cpp \
-    Nodes/Node.cpp
+    Nodes/Node.cpp \
+    IODialog.cpp
 
 HEADERS  += \
     Common.h \
     CustomDelegate.h \
-    ExportDialog.h \
     FileBase.h \
     ImageView.h \
     MainWindow.h \
@@ -42,8 +43,10 @@ HEADERS  += \
     Formats/DDS.h \
     Formats/BFRES.h \
     Formats/FormatBase.h \
-    Formats/GX2ImageBase.h
+    Formats/GX2ImageBase.h \
+    IODialog.h \
+    CustomStandardItem.h
 
 FORMS += \
-    ExportDialog.ui \
-    MainWindow.ui
+    MainWindow.ui \
+    IODialog.ui

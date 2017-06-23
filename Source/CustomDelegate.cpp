@@ -4,12 +4,13 @@
 
 #include "CustomDelegate.h"
 
-CustomDelegate::CustomDelegate(CustomDelegate::DelegateGroup delegates) : m_delegates(delegates)
+CustomItemDelegate::CustomItemDelegate(CustomItemDelegate::DelegateGroup delegates)
+    : m_delegates(delegates)
 {
 }
 
-QWidget* CustomDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&,
-                                      const QModelIndex& index) const
+QWidget* CustomItemDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&,
+                                          const QModelIndex& index) const
 {
   if (index.column() == 0)
     return nullptr;
@@ -46,53 +47,53 @@ QWidget* CustomDelegate::createEditor(QWidget* parent, const QStyleOptionViewIte
   return nullptr;
 }
 
-void CustomDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
+void CustomItemDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
   if (index.column() == 0)
     return;
 
   else if (m_delegates.line_edit_delegates.contains(index.row()))
   {
-    QLineEdit* lineEdit = static_cast<QLineEdit*>(editor);
+    QLineEdit* line_edit = static_cast<QLineEdit*>(editor);
     QString value = index.model()->data(index, Qt::EditRole).toString();
-    lineEdit->setText(value);
+    line_edit->setText(value);
   }
 
   else if (m_delegates.spin_box_delegates.contains(index.row()))
   {
-    QSpinBox* spinBox = static_cast<QSpinBox*>(editor);
+    QSpinBox* spin_box = static_cast<QSpinBox*>(editor);
     int value = index.model()->data(index, Qt::EditRole).toInt();
-    spinBox->setValue(value);
+    spin_box->setValue(value);
   }
 
   else if (m_delegates.combo_box_delegates.contains(index.row()))
   {
-    QComboBox* comboBox = static_cast<QComboBox*>(editor);
-    QString currentText = index.model()->data(index, Qt::EditRole).toString();
-    int index = comboBox->findText(currentText);
-    comboBox->setCurrentIndex(index);
+    QComboBox* combo_box = static_cast<QComboBox*>(editor);
+    QString current_text = index.model()->data(index, Qt::EditRole).toString();
+    int index = combo_box->findText(current_text);
+    combo_box->setCurrentIndex(index);
   }
 }
 
-void CustomDelegate::setModelData(QWidget* editor, QAbstractItemModel* model,
-                                  const QModelIndex& index) const
+void CustomItemDelegate::setModelData(QWidget* editor, QAbstractItemModel* model,
+                                      const QModelIndex& index) const
 {
   if (m_delegates.line_edit_delegates.contains(index.row()))
   {
-    QLineEdit* lineEdit = static_cast<QLineEdit*>(editor);
-    QString string = lineEdit->text();
+    QLineEdit* line_edit = static_cast<QLineEdit*>(editor);
+    QString string = line_edit->text();
     model->setData(index, string, Qt::EditRole);
   }
   else if (m_delegates.spin_box_delegates.contains(index.row()))
   {
-    QSpinBox* spinBox = qobject_cast<QSpinBox*>(editor);
-    spinBox->interpretText();
-    int value = spinBox->value();
+    QSpinBox* spin_box = qobject_cast<QSpinBox*>(editor);
+    spin_box->interpretText();
+    int value = spin_box->value();
     model->setData(index, value, Qt::EditRole);
   }
   else if (m_delegates.combo_box_delegates.contains(index.row()))
   {
-    QComboBox* comboBox = qobject_cast<QComboBox*>(editor);
-    model->setData(index, comboBox->currentText(), Qt::EditRole);
+    QComboBox* combo_box = qobject_cast<QComboBox*>(editor);
+    model->setData(index, combo_box->currentText(), Qt::EditRole);
   }
 }

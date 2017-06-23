@@ -33,6 +33,7 @@ ResultCode BFRES::ReadHeader()
     // it's important we get the position before reading the offset
     qint64 pos = m_file->Pos();
     quint32 offset = m_file->Read32();
+    // TODO: Utility function for reading/writing BFRES relative offsets.
     if (offset != 0)
       m_header.file_offsets.append(pos + offset);
     else

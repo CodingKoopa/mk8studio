@@ -10,8 +10,13 @@ public:
   FormatBase() {}
   QString GetName() { return m_name; }
   void SetName(QString value) { m_name = value; }
+
+  QString GetPath() { return m_path; }
+  void SetPath(QString value) { m_path = value; }
+
 protected:
   QString m_name;
+  QString m_path;
 };
 
 #endif  // FORMATBASE_H

@@ -40,7 +40,7 @@ ResultCode BFRESNode::LoadFileTreeArea()
   m_tree_view = new QTreeView;
   // stretch out table to fit space
   m_tree_view->header()->hide();
-  m_tree_view->setItemDelegate(new CustomDelegate(CustomDelegate::DelegateGroup()));
+  m_tree_view->setItemDelegate(new CustomItemDelegate(CustomItemDelegate::DelegateGroup()));
   m_tree_view->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_tree_view, SIGNAL(customContextMenuRequested(const QPoint&)), this,
           SLOT(HandleTreeCustomContextMenuRequest(const QPoint&)));
@@ -90,7 +90,7 @@ ResultCode BFRESNode::LoadAttributeArea()
   emit NewStatus(RESULT_STATUS_BAR_UPDATE, "Loading file info...");
 
   QStandardItemModel* header_attributes_model = new QStandardItemModel();
-  m_delegate_group = CustomDelegate::DelegateGroup();
+  m_delegate_group = CustomItemDelegate::DelegateGroup();
 
   int row = 0;
 
@@ -189,7 +189,7 @@ ResultCode BFRESNode::LoadAttributeArea()
   table_view->verticalHeader()->hide();
   table_view->horizontalHeader()->hide();
 
-  table_view->setItemDelegate(new CustomDelegate(m_delegate_group));
+  table_view->setItemDelegate(new CustomItemDelegate(m_delegate_group));
 
   // To have all editors open by default, uncomment this out
   // PROS: Looks nicer, possibly more convienient

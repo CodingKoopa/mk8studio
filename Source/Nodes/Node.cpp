@@ -6,6 +6,11 @@
 #include "BFRESNode.h"
 #include "FTEXNode.h"
 
+QMenu* Node::GetContextMenu()
+{
+  return m_context_menu;
+}
+
 void Node::HandleFileTreeClick(QModelIndex index)
 {
   if (BFRESNode* bfres_node = qvariant_cast<BFRESNode*>(index.data(Qt::UserRole + 1)))
@@ -26,12 +31,10 @@ void Node::HandleTreeCustomContextMenuRequest(const QPoint& point)
 {
   QModelIndex index = m_tree_view->indexAt(point);
 
-  if (FTEXNode* ftex_node = qvariant_cast<FTEXNode*>(index.data(Qt::UserRole + 1)))
+  if (Node* node = qvariant_cast<Node*>(index.data(Qt::UserRole + 1)))
   {
-    QMenu context_menu;
-    QAction* action_export = new QAction("Export");
-    connect(action_export, SIGNAL(triggered()), ftex_node, SLOT(HandleExportActionClick()));
-    context_menu.addAction(action_export);
-    context_menu.exec(m_tree_view->mapToGlobal(point));
+    QMenu* context_menu = node->GetContextMenu();
+    if (context_menu)
+      context_menu->exec(m_tree_view->mapToGlobal(point));
   }
 }

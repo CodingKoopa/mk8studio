@@ -5,7 +5,7 @@
 #include <QList>
 #include <QStandardItemModel>
 
-class CustomDelegate : public QItemDelegate
+class CustomItemDelegate : public QItemDelegate
 {
   Q_OBJECT
 public:
@@ -18,7 +18,7 @@ public:
     QList<int> combo_box_selections;
   };
 
-  CustomDelegate(DelegateGroup delegates);
+  CustomItemDelegate(DelegateGroup delegates);
 
   QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem&,
                         const QModelIndex& index) const;

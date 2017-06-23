@@ -7,7 +7,7 @@
 #include "FileBase.h"
 #include "FormatBase.h"
 
-class BFRES : FormatBase
+class BFRES : public FormatBase
 {
 public:
   BFRES(FileBase* m_file);
