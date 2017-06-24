@@ -15,7 +15,7 @@
 
 ResultCode BFRESNode::LoadFileTreeArea()
 {
-  // This doesn't seem like the right place to put this, but the ctor doesn't work
+  // TODO: This doesn't seem like the right place to put this, but the ctor doesn't work
   emit ConnectNode(this);
 
   emit NewStatus(RESULT_STATUS_BAR_UPDATE, "Loading file tree...");

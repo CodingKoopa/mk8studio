@@ -3,7 +3,7 @@
 #include "FTEX.h"
 #include "GX2ImageBase.h"
 
-int FTEX::ReadHeader()
+ResultCode FTEX::ReadHeader()
 {
   m_header = new FTEXHeader;
   m_file->Seek(m_start_offset);
@@ -27,15 +27,11 @@ int FTEX::ReadHeader()
   m_file->Skip(0x6C);
   m_header->data_offset = m_file->Pos() + m_file->Read32();
   m_header->mipmap_offset = m_file->Pos() + m_file->Read32();
-  //  m_file->Skip(8);
 
   m_base_header = static_cast<ImageHeaderBase*>(m_header);
-  SetupInfoStructs();
+  ResultCode res = SetupInfoStructs();
 
-  if (m_file->Pos() != m_start_offset + 0xC0)
-    return -1;
-
-  return 0;
+  return res;
 }
 
 ResultCode FTEX::ReadImage()

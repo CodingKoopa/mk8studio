@@ -114,7 +114,7 @@ public:
     quint32 swizzle;
   };
 
-  void SetupInfoStructs();
+  ResultCode SetupInfoStructs();
 
   ResultCode ReadImageFromData();
   ResultCode WriteDeswizzledImageToData();

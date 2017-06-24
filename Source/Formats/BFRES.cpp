@@ -45,7 +45,7 @@ ResultCode BFRES::ReadHeader()
   m_header.unknown_f = m_file->Read32();
 
   if (m_file->Pos() != 0x6C)
-    return RESULT_BFRES_HEADER_SIZE_ERROR;
+    return RESULT_HEADER_SIZE_ERROR;
 
   m_file->Seek(m_header.file_name_offset);
   // TODO: apparantly the string table stores the lengths of strings too, so a better way of doing

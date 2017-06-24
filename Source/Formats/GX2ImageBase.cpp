@@ -2,7 +2,7 @@
 
 #include "DDS.h"
 
-void GX2ImageBase::SetupInfoStructs()
+ResultCode GX2ImageBase::SetupInfoStructs()
 {
   // Set up the info structs from the format and tile mode.
   // Default to GX2_SURFACE_FORMAT_INVALID.
@@ -16,6 +16,10 @@ void GX2ImageBase::SetupInfoStructs()
       break;
     }
   }
+  // If the format couldn't be assigned to a FormatInfo, and it's not actually an invalid texture.
+  if (m_format_info.id == m_format_info_list[0].id &&
+      m_base_header->format != m_format_info_list[0].id)
+    return ResultCode::RESULT_UNSUPPORTED_FILE_FORMAT;
 
   m_shared_format_info = m_shared_format_info_list[0];
   for (int i = 0; i < m_shared_format_info_list.size(); i++)
@@ -26,6 +30,8 @@ void GX2ImageBase::SetupInfoStructs()
       break;
     }
   }
+  if (m_shared_format_info.format == m_shared_format_info_list[0].format)
+    return ResultCode::RESULT_UNSUPPORTED_FILE_FORMAT;
 
   m_tile_mode_info = m_tile_mode_info_list[m_base_header->tile_mode];
 
@@ -39,6 +45,10 @@ void GX2ImageBase::SetupInfoStructs()
       break;
     }
   }
+  if (m_shared_tile_mode_info.mode == m_shared_tile_mode_info_list[0].mode)
+    return ResultCode::RESULT_UNSUPPORTED_FILE_FORMAT;
+
+  return ResultCode::RESULT_SUCCESS;
 }
 
 ResultCode GX2ImageBase::ReadImageFromData()

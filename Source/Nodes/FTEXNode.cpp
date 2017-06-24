@@ -1,6 +1,8 @@
 #include "FTEXNode.h"
 
 #include <QAction>
+#include <QDir>
+#include <QFileInfo>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
@@ -193,8 +195,8 @@ ResultCode FTEXNode::LoadMainWidget()
 {
   ResultCode res;
   if (!m_header_loaded)
-    m_ftex->ReadHeader();
-  if (!m_image_loaded)
+    res = m_ftex->ReadHeader();
+  if (!m_image_loaded && res != ResultCode::RESULT_SUCCESS)
     res = m_ftex->ReadImage();
   if (res != RESULT_SUCCESS)
   {
@@ -239,8 +241,13 @@ void FTEXNode::HandleExportActionClick()
 
   m_path_line_edit = new QLineEdit;
   settings.beginGroup("file_paths");
-  if (!settings.value("last_ftex_export_path").toString().isEmpty())
-    m_path_line_edit->setText(settings.value("last_ftex_export_path").toString());
+  QString last_path = settings.value("last_ftex_export_path").toString();
+  if (!last_path.isEmpty())
+  {
+    QFileInfo file_info = last_path;
+    m_path_line_edit->setText(file_info.dir().path() + QDir::separator() + m_ftex->GetName() + '.' +
+                              file_info.completeSuffix());
+  }
   settings.endGroup();
   path_layout->addWidget(m_path_line_edit);
 
@@ -297,8 +304,10 @@ void FTEXNode::HandleInjectActionClick()
 
   m_path_line_edit = new QLineEdit;
   settings.beginGroup("file_paths");
-  if (!settings.value("last_dds_import_path").toString().isEmpty())
-    m_path_line_edit->setText(settings.value("last_dds_import_path").toString());
+  // Not a typo, the intended functionality is for it to use the path of the last exported DDS file.
+  QString last_path = settings.value("last_ftex_export_path").toString();
+  if (!last_path.isEmpty())
+    m_path_line_edit->setText(last_path);
   settings.endGroup();
   path_layout->addWidget(m_path_line_edit);
 
@@ -326,10 +335,6 @@ void FTEXNode::HandleInjectActionClick()
 void FTEXNode::HandleInjectButtonClick()
 {
   QSettings settings;
-  settings.beginGroup("file_paths");
-  settings.setValue("last_dds_import_path", m_path_line_edit->text());
-  settings.endGroup();
-
   m_ftex->ImportDDS(m_path_line_edit->text());
   m_ftex->InjectImage();
 }

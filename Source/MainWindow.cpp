@@ -128,12 +128,6 @@ void MainWindow::UpdateStatus(ResultCode status, QString details)
 {
   switch (status)
   {
-  case RESULT_SUCCESS:
-    m_ui->statusbar->showMessage("Success.");
-    break;
-  case RESULT_STATUS_BAR_UPDATE:
-    m_ui->statusbar->showMessage(details);
-    break;
   case RESULT_FILE_NOT_FOUND:
     QMessageBox::critical(this, "Error",
                           QString("Couldn't open file %0 for reading.").arg(details));
@@ -143,8 +137,8 @@ void MainWindow::UpdateStatus(ResultCode status, QString details)
         this, "Error", QString("No bytes were written to the file. This may be due to it not being "
                                "found, or this application not having sufficient permissions."));
     break;
-  case RESULT_BFRES_HEADER_SIZE_ERROR:
-    QMessageBox::critical(this, "Error", "Failed to read BFRES header. This may be due to either a "
+  case RESULT_HEADER_SIZE_ERROR:
+    QMessageBox::critical(this, "Error", "Header size didn't match. This may be due to either a "
                                          "corrupt file or a bug in the code.");
     break;
   case RESULT_BFRES_ENDIANNESS:
@@ -159,9 +153,20 @@ void MainWindow::UpdateStatus(ResultCode status, QString details)
                           "This texture has anti-aliasing, thickness, or is 3D, which is "
                           "unsupported. Please send this file to Koopa ASAP!");
     break;
+  default:
+    break;
   }
 
-  // If there was an error.
-  if (status != RESULT_SUCCESS && status != RESULT_STATUS_BAR_UPDATE)
+  switch (status)
+  {
+  case RESULT_SUCCESS:
+    m_ui->statusbar->showMessage("Success.");
+    break;
+  case RESULT_STATUS_BAR_UPDATE:
+    m_ui->statusbar->showMessage(details);
+    break;
+  default:
     m_ui->statusbar->showMessage("Failed.");
+    break;
+  }
 }

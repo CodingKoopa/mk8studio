@@ -27,7 +27,7 @@ public:
     quint32 mipmap_offset;
   };
 
-  int ReadHeader();
+  ResultCode ReadHeader();
   ResultCode ReadImage();
 
   void InjectImage();
