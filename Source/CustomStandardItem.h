@@ -12,7 +12,7 @@ class CustomStandardItem : public QStandardItem
 public:
   CustomStandardItem(QString string) : QStandardItem(string) {}
 
-  void SetFunction(std::function<void(QString text)> value) { m_function = value; }
+  void SetFunction(const std::function<void(QString text)>& value = {}) { m_function = value; }
 
   void ExecuteFunction()
   {

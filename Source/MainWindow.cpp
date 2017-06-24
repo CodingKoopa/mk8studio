@@ -39,10 +39,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
   m_left_right_splitter = new QSplitter();
   m_left_right_splitter->addWidget(m_file_tree_attributes_splitter);
 
-  //  settings.beginGroup("file_paths");
-  //  if (!settings.value("last_main_file").toString().isEmpty())
-  //    OpenFile(settings.value("last_main_file").toString());
-  //  settings.endGroup();
+  settings.beginGroup("file_paths");
+  if (!settings.value("last_main_file").toString().isEmpty())
+    OpenFile(settings.value("last_main_file").toString());
+  settings.endGroup();
 
   m_ui->welcome_widget->show();
 
@@ -101,7 +101,7 @@ void MainWindow::UpdateFileTreeContainer(QScrollArea* area)
   {
     delete m_file_tree_attributes_splitter->widget(0);
   }
-  m_file_tree_attributes_splitter->addWidget(area);
+  m_file_tree_attributes_splitter->insertWidget(0, area);
 }
 
 void MainWindow::UpdateSectionsContainer(QScrollArea* area)
@@ -111,7 +111,7 @@ void MainWindow::UpdateSectionsContainer(QScrollArea* area)
     area->resize(m_file_tree_attributes_splitter->widget(1)->size());
     delete m_file_tree_attributes_splitter->widget(1);
   }
-  m_file_tree_attributes_splitter->addWidget(area);
+  m_file_tree_attributes_splitter->insertWidget(1, area);
 }
 
 void MainWindow::UpdateMainWidget(QWidget* widget)

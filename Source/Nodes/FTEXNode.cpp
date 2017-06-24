@@ -216,7 +216,7 @@ void FTEXNode::HandleAttributeItemChange(QStandardItem* item)
 #ifdef DEBUG
   qDebug() << "Item changed. Row " << item->row() << " column " << item->column();
 #endif
-  CustomStandardItem* custom_item = static_cast<CustomStandardItem*>(item);
+  CustomStandardItem* custom_item = dynamic_cast<CustomStandardItem*>(item);
   if (custom_item)
     custom_item->ExecuteFunction();
 
