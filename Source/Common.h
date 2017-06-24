@@ -16,7 +16,7 @@ T1 Bit(T1 byte, T2 position = 0)
 }
 
 template <typename T1>
-T1 BitMask(T1 byte)
+T1 InclusiveBitMask(T1 byte)
 {
   return (1 << byte) - 1;
 }

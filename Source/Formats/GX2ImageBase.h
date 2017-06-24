@@ -30,11 +30,11 @@ public:
     enum class Use
     {
       // Not a real use.
-      None = 0,
-      Texture = 1 << 0,
-      ColorBuffer = 1 << 1,
-      DepthBuffer = 1 << 2,
-      ScanBuffer = 1 << 3
+      None,
+      Texture,
+      ColorBuffer,
+      DepthBuffer,
+      ScanBuffer
     } use;
 
     bool compressed;
@@ -65,6 +65,7 @@ public:
   // Tile Mode enumerations just for convienience.
   enum class TileMode
   {
+    Invalid,
     Linear,
     Micro,
     Macro
@@ -146,24 +147,6 @@ private:
 
   QByteArray* m_deswizzled_image_data;
 
-  // Constants
-  bool m_optimal_bank_swap = 1;
-  quint32 m_group_bit_count = 8;
-  quint32 m_bank_bit_count = 2;
-  quint32 m_pipe_bit_count = 1;
-  quint32 m_split_size = 2048;
-  quint32 m_swap_size = 256;
-  quint32 m_row_size = 2048;
-  quint32 m_pipe_interleave_bytes = 256;
-  const quint32 m_num_pipes = 2;
-  const quint32 m_num_banks = 4;
-  const quint32 m_micro_tile_width = 8;
-  const quint32 m_micro_tile_height = 8;
-  const quint32 m_num_micro_tile_pixels = m_micro_tile_width * m_micro_tile_height;
-
-  const quint32 m_tile_mode_2_rotation = m_num_pipes * ((m_num_banks >> 1) - 1);
-  const quint32 m_tile_mode_3_rotation = (m_num_pipes >= 4) ? ((m_num_banks >> 1) - 1) : 1;
-
   enum class MicroTileType
   {
     Displayable = 0x0,
@@ -177,8 +160,6 @@ private:
       {Format::BC1, 64, SharedFormatInfo::Use::Texture, true},
       {Format::BC4, 64, SharedFormatInfo::Use::Texture, true},
       {Format::BC5, 128, SharedFormatInfo::Use::Texture, true}};
-
-  const FormatInfo zerp {0x0, "GX2_SURFACE_FORMAT_INVALID", Format::Invalid, FormatInfo::Type::Invalid};
 
   // Very incomplete list of formats.
   const QList<FormatInfo> m_format_info_list{
@@ -195,10 +176,10 @@ private:
       {0x431, "GX2_SURFACE_FORMAT_SRGB_BC1", Format::BC1, FormatInfo::Type::SRGB}};
 
   const QList<SharedTileModeInfo> m_shared_tile_mode_info_list{
-      // TODO: add INVALID entry?
+      {TileMode::Invalid, 0},
       {TileMode::Linear, 0},
-      {TileMode::Micro, m_tile_mode_2_rotation},
-      {TileMode::Macro, m_tile_mode_3_rotation}};
+      {TileMode::Micro, m_num_pipes*((m_num_banks >> 1) - 1)},
+      {TileMode::Macro, 1}};
 
   const QList<TileModeInfo> m_tile_mode_info_list{
       // Linear Tiled
@@ -220,43 +201,56 @@ private:
       {0x7, "GX2_TILE_MODE_2D_TILED_THICK", TileMode::Macro, TileModeInfo::Thickness::Thick, 1,
        false},
       {0x8, "GX2_TILE_MODE_2B_TILED_THIN1", TileMode::Macro, TileModeInfo::Thickness::Thin, 1,
-       false},
+       true},
       {0x9, "GX2_TILE_MODE_2B_TILED_THIN2", TileMode::Macro, TileModeInfo::Thickness::Thin, 2,
-       false},
+       true},
       {0xA, "GX2_TILE_MODE_2B_TILED_THIN4", TileMode::Macro, TileModeInfo::Thickness::Thin, 4,
-       false},
+       true},
       {0xB, "GX2_TILE_MODE_2B_TILED_THICK", TileMode::Macro, TileModeInfo::Thickness::Thick, 1,
-       false},
+       true},
       {0xC, "GX2_TILE_MODE_3D_TILED_THIN1", TileMode::Macro, TileModeInfo::Thickness::Thin, 1,
        false},
       {0xD, "GX2_TILE_MODE_3D_TILED_THICK", TileMode::Macro, TileModeInfo::Thickness::Thick, 1,
        false},
       {0xE, "GX2_TILE_MODE_3B_TILED_THIN1", TileMode::Macro, TileModeInfo::Thickness::Thin, 1,
-       false},
+       true},
       {0xF, "GX2_TILE_MODE_3B_TILED_THICK", TileMode::Macro, TileModeInfo::Thickness::Thick, 1,
-       false}};
-  // LINEAR_SPECIAL is also a thing, along with XTHICK, POWER_SAVE, and COUNT, which aren't included
-  // because Decaf does not read them.
+       true}};
 
-  // TODO: reorder these more logically
+  quint32 m_element_size;
   quint32 m_num_samples;
-  quint32 m_pipe_swizzle;
-  quint32 m_bank_swizzle;
-  MicroTileType m_micro_tile_type;
-  quint64 m_num_slice_bytes;
-  quint64 m_slice_offset;
-  bool m_has_depth;
 
   // Micro Tiling Info
+  const quint32 m_micro_tile_width = 8;
+  const quint32 m_micro_tile_height = 8;
+  const quint32 m_num_micro_tile_pixels = m_micro_tile_width * m_micro_tile_height;
+
+  MicroTileType m_micro_tile_type;
   quint64 m_num_micro_tile_bits;
   quint64 m_num_micro_tile_bytes;
   quint64 m_bytes_per_sample;
 
   // Macro Tiling info
+  const quint32 m_num_banks = 4;
+  const quint32 m_bank_bit_count = 2;
+  const quint32 m_num_pipes = 2;
+  const quint32 m_pipe_bit_count = 1;
+  const quint32 m_low_offset_bit_count = 8;
+
+  const quint32 m_split_size = 2048;
+  const quint32 m_swap_size = 256;
+  const quint32 m_row_size = 2048;
+  const quint32 m_pipe_interleave_bytes = 256;
+
   quint64 m_macro_tile_pitch;
   quint64 m_macro_tile_height;
   quint64 m_macro_tiles_per_row;
   quint64 m_num_macro_tile_bytes;
+
+  quint64 m_num_slice_bytes;
+
+  quint32 m_pipe_swizzle;
+  quint32 m_bank_swizzle;
 
   FormatInfo m_format_info;
   // The index of the current format, in the list.

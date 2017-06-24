@@ -110,8 +110,7 @@ ResultCode FTEXNode::LoadAttributeArea()
   QStandardItemModel* tiling_combo_box_entries =
       new QStandardItemModel(tile_mode_info_list.size(), 0);
   for (int tile_mode = 0; tile_mode < tile_mode_info_list.size(); tile_mode++)
-    tiling_combo_box_entries->setItem(tile_mode,
-                                      new QStandardItem(m_ftex->GetTileModeInfo().name));
+    tiling_combo_box_entries->setItem(tile_mode, new QStandardItem(m_ftex->GetTileModeInfo().name));
   m_delegate_group.combo_box_entries << tiling_combo_box_entries;
   m_delegate_group.combo_box_delegates << row;
   m_delegate_group.combo_box_selections << m_ftex_header->tile_mode;
