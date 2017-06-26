@@ -53,10 +53,10 @@ public:
     Node* right_node = nullptr;
   };
 
-  enum GroupType
+  enum class GroupType
   {
-    GROUP_FMDL = 0,
-    GROUP_FTEX = 1
+    FMDL = 0,
+    FTEX = 1
   };
 
   ResultCode ReadHeader();

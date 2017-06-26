@@ -18,10 +18,10 @@ ResultCode BFRESNode::LoadFileTreeArea()
   // TODO: This doesn't seem like the right place to put this, but the ctor doesn't work
   emit ConnectNode(this);
 
-  emit NewStatus(RESULT_STATUS_BAR_UPDATE, "Loading file tree...");
+  emit NewStatus(ResultCode::UpdateStatusBar, "Loading file tree...");
 
   ResultCode res = m_bfres->ReadHeader();
-  if (res != RESULT_SUCCESS)
+  if (res != ResultCode::Success)
   {
     NewStatus(res);
     return res;
@@ -87,7 +87,7 @@ QStandardItem* BFRESNode::MakeItem()
 
 ResultCode BFRESNode::LoadAttributeArea()
 {
-  emit NewStatus(RESULT_STATUS_BAR_UPDATE, "Loading file info...");
+  emit NewStatus(ResultCode::UpdateStatusBar, "Loading file info...");
 
   QStandardItemModel* header_attributes_model = new QStandardItemModel();
   m_delegate_group = CustomItemDelegate::DelegateGroup();
@@ -134,8 +134,8 @@ ResultCode BFRESNode::LoadAttributeArea()
   }
   else
   {
-    NewStatus(RESULT_BFRES_ENDIANNESS);
-    return RESULT_BFRES_ENDIANNESS;
+    NewStatus(ResultCode::IncorrectBFRESEndianness);
+    return ResultCode::IncorrectBFRESEndianness;
   }
   header_attributes_model->setItem(row, 1, endianness_item);
   row++;
@@ -208,8 +208,8 @@ ResultCode BFRESNode::LoadAttributeArea()
 
   emit NewAttributesArea(attributes_container);
 
-  emit NewStatus(RESULT_SUCCESS);
-  return RESULT_SUCCESS;
+  emit NewStatus(ResultCode::Success);
+  return ResultCode::Success;
 }
 
 void BFRESNode::HandleAttributeItemChange(QStandardItem* item)

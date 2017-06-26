@@ -19,19 +19,19 @@ ResultCode GX2ImageBase::SetupInfoStructs()
   // If the format couldn't be assigned to a FormatInfo, and it's not actually an invalid texture.
   if (m_format_info.id == m_format_info_list[0].id &&
       m_base_header->format != m_format_info_list[0].id)
-    return ResultCode::RESULT_UNSUPPORTED_FILE_FORMAT;
+    return ResultCode::UnsupportedFileFormat;
 
   m_shared_format_info = m_shared_format_info_list[0];
-  for (int i = 0; i < m_shared_format_info_list.size(); i++)
+  foreach (const SharedFormatInfo& shared_format_info, m_shared_format_info_list)
   {
-    if (m_format_info.format == m_shared_format_info_list[i].format)
+    if (m_format_info.format == shared_format_info.format)
     {
-      m_shared_format_info = m_shared_format_info_list[i];
+      m_shared_format_info = shared_format_info;
       break;
     }
   }
   if (m_shared_format_info.format == m_shared_format_info_list[0].format)
-    return ResultCode::RESULT_UNSUPPORTED_FILE_FORMAT;
+    return ResultCode::UnsupportedFileFormat;
 
   m_tile_mode_info = m_tile_mode_info_list[m_base_header->tile_mode];
 
@@ -46,9 +46,9 @@ ResultCode GX2ImageBase::SetupInfoStructs()
     }
   }
   if (m_shared_tile_mode_info.mode == m_shared_tile_mode_info_list[0].mode)
-    return ResultCode::RESULT_UNSUPPORTED_FILE_FORMAT;
+    return ResultCode::UnsupportedFileFormat;
 
-  return ResultCode::RESULT_SUCCESS;
+  return ResultCode::Success;
 }
 
 ResultCode GX2ImageBase::ReadImageFromData()
@@ -80,9 +80,9 @@ ResultCode GX2ImageBase::ExportToDDS(QString path)
       dds.WriteFile(m_base_header->width, m_base_header->height, m_base_header->depth,
                     m_base_header->num_mips, true, m_format_info);
   if (bytes_written == 0)
-    return ResultCode::RESULT_NO_BYTES_WRITTEN;
+    return ResultCode::NoBytesWritten;
   else
-    return ResultCode::RESULT_SUCCESS;
+    return ResultCode::Success;
 }
 
 ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray*& destination, bool swizzle)
@@ -91,7 +91,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray*& destination,
   if (m_base_header->aa_mode != 0 || static_cast<quint32>(m_tile_mode_info.thickness) > 1 ||
       m_format_info.name == "GX2_SURFACE_FORMAT_INVALID" ||
       m_shared_format_info.format == Format::Invalid)
-    return RESULT_UNSUPPORTED_FILE_FORMAT_IMPORTANT;
+    return ResultCode::ImportantUnsupportedFileFormat;
 
   // Set up dimensions.
   quint32 width = m_base_header->width;
@@ -214,7 +214,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray*& destination,
 
   case TileMode::Linear:
   default:
-    return RESULT_UNSUPPORTED_FILE_FORMAT;
+    return ResultCode::UnsupportedFileFormat;
   }
 
   destination = new QByteArray();
@@ -233,7 +233,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray*& destination,
         original_offset = ComputeSurfaceAddrFromCoordMacroTiled(x, y, 0, 0, 0, 0);
         break;
       default:
-        return RESULT_UNSUPPORTED_FILE_FORMAT;
+        return ResultCode::UnsupportedFileFormat;
       }
 
       qint32 new_offset = (y * width + x) * m_element_size;
@@ -258,7 +258,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray*& destination,
                              m_element_size);
     }
   }
-  return RESULT_SUCCESS;
+  return ResultCode::Success;
 }
 
 quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32 slice,

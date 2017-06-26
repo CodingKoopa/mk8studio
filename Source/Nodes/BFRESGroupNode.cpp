@@ -27,9 +27,9 @@ QStandardItem* BFRESGroupNode::MakeListItemFromRawList()
   for (int row = 1; row < m_node_list.size(); row++)
   {
     QStandardItem* child_item = new QStandardItem;
-    switch (m_group)
+    switch (static_cast<BFRES::GroupType>(m_group))
     {
-    case BFRES::GROUP_FTEX:
+    case BFRES::GroupType::FTEX:
     {
       FTEX* ftex = new FTEX(m_bfres->GetFile(), m_bfres->GetRawNodeLists()[m_group][row]->data_ptr);
       ftex->SetName(m_bfres->GetRawNodeLists()[m_group][row]->name);
@@ -129,7 +129,7 @@ ResultCode BFRESGroupNode::LoadAttributeArea()
   attributes_container->setLayout(sections_layout);
 
   emit NewAttributesArea(attributes_container);
-  return RESULT_SUCCESS;
+  return ResultCode::Success;
 }
 
 void BFRESGroupNode::HandleAttributeItemChange(QStandardItem* item)

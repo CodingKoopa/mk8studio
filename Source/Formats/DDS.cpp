@@ -63,7 +63,7 @@ ResultCode DDS::ReadFile()
   // TODO: this might be a memory leak from readbytes?
   m_image_data->setRawData(dds_file.ReadBytes(image_data_size), image_data_size);
 
-  return ResultCode::RESULT_SUCCESS;
+  return ResultCode::Success;
 }
 
 // TODO: Add uncompressed support
@@ -144,9 +144,9 @@ int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mip
 
   // Pixel flags
   if (compressed)
-    m_header.pixel_format.pixel_flags = DDS_PIX_FLAG_COMPRESSED;
+    m_header.pixel_format.pixel_flags = static_cast<quint32>(PixelFlag::IsCompressed);
   else
-    m_header.pixel_format.pixel_flags = DDS_PIX_FLAG_UNCOMPRESSEDRGB;
+    m_header.pixel_format.pixel_flags = static_cast<quint32>(PixelFlag::IsUncompressedRGB);
   dds_file.Write32(m_header.pixel_format.pixel_flags);
 
   // Four character code
@@ -193,9 +193,10 @@ int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mip
   dds_file.Write32(m_header.pixel_format.alpha_bit_mask);
 
   // Complexity flags
-  m_header.complexity_flags = DDS_COMP_FLAG_TEXTURE;
+  m_header.complexity_flags = static_cast<quint32>(ComplexityFlag::Texture);
   if (num_mips > 1)
-    m_header.complexity_flags |= DDS_COMP_FLAG_COMPLEX | DDS_COMP_FLAG_HASMIPMAPS;
+    m_header.complexity_flags |= static_cast<quint32>(ComplexityFlag::Complex) |
+                                 static_cast<quint32>(ComplexityFlag::HasMipMaps);
   dds_file.Write32(m_header.complexity_flags);
 
   // TODO: could this be important?

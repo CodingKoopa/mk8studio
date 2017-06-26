@@ -35,40 +35,40 @@ T1 MakeByteRecursive(T1 position, T2 bit)
 template <typename T1, typename T2, typename... T3>
 T1 MakeByteRecursive(T1 position, T2 current_bit, T3... queue)
 {
-  return current_bit << position | MakeByteRecursive(position + 1, queue...);
+  return current_bit << position | MakeByteRecursive(position + static_cast<T1>(1), queue...);
 }
 
 template <typename T1, typename... T2>
 T1 MakeByte(T1 current_bit, T2... queue)
 {
-  T1 byte = MakeByteRecursive(0, current_bit, queue...);
+  T1 byte = MakeByteRecursive(static_cast<T1>(0), current_bit, queue...);
   return byte;
 }
 
 template <typename T>
 T BitsToBytes(T num_bits)
 {
-  return num_bits / 8;
+  return num_bits / static_cast<T>(8);
 }
 
 template <typename T>
 T BytesToBits(T num_bytes)
 {
-  return num_bytes * 8;
+  return num_bytes * static_cast<T>(8);
 }
 
-// TODO: Switch to strongly typed enum class.
-enum ResultCode
+// TODO: Catagorize these in a different way?
+enum class ResultCode
 {
-  RESULT_SUCCESS,
+  Success,
   // For noncritical updates on things
-  RESULT_STATUS_BAR_UPDATE,
-  RESULT_FILE_NOT_FOUND,
-  RESULT_NO_BYTES_WRITTEN,
-  RESULT_HEADER_SIZE_ERROR,
-  RESULT_BFRES_ENDIANNESS,
-  RESULT_UNSUPPORTED_FILE_FORMAT,
-  RESULT_UNSUPPORTED_FILE_FORMAT_IMPORTANT
+  UpdateStatusBar,
+  FileNotFound,
+  NoBytesWritten,
+  IncorrectHeaderSize,
+  IncorrectBFRESEndianness,
+  UnsupportedFileFormat,
+  ImportantUnsupportedFileFormat
 };
 
 #endif  // COMMON_H

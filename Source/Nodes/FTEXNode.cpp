@@ -188,7 +188,7 @@ ResultCode FTEXNode::LoadAttributeArea()
   m_sections_container->setLayout(attributes_layout);
 
   emit NewAttributesArea(m_sections_container);
-  return RESULT_SUCCESS;
+  return ResultCode::Success;
 }
 
 ResultCode FTEXNode::LoadMainWidget()
@@ -196,9 +196,9 @@ ResultCode FTEXNode::LoadMainWidget()
   ResultCode res;
   if (!m_header_loaded)
     res = m_ftex->ReadHeader();
-  if (!m_image_loaded && res != ResultCode::RESULT_SUCCESS)
+  if (!m_image_loaded && res != ResultCode::Success)
     res = m_ftex->ReadImage();
-  if (res != RESULT_SUCCESS)
+  if (res != ResultCode::Success)
   {
     emit NewStatus(res);
     return res;
@@ -206,7 +206,7 @@ ResultCode FTEXNode::LoadMainWidget()
   QLabel* label = new QLabel("No in-editor texture viewing yet.");
   emit NewMainWidget(label);
   emit NewStatus(res);
-  return RESULT_SUCCESS;
+  return ResultCode::Success;
 }
 
 void FTEXNode::HandleAttributeItemChange(QStandardItem* item)

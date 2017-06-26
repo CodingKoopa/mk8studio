@@ -65,21 +65,21 @@ private:
     RequiredFlags = Caps | Height | Width | PixelFormat
   };
 
-  enum ComplexityFlag
+  enum class ComplexityFlag
   {
-    DDS_COMP_FLAG_COMPLEX = 0x8,
-    DDS_COMP_FLAG_TEXTURE = 0x1000,
-    DDS_COMP_FLAG_HASMIPMAPS = 0x400000
+    Complex = 0x8,
+    Texture = 0x1000,
+    HasMipMaps = 0x400000
   };
 
-  enum PixelFlag
+  enum class PixelFlag
   {
-    DDS_PIX_FLAG_HASALPHA = 0x1,
-    DDS_PIX_FLAG_UNCOMPESSEDALPHA = 0x2,
-    DDS_PIX_FLAG_COMPRESSED = 0x4,
-    DDS_PIX_FLAG_UNCOMPRESSEDRGB = 0x40,
-    DDS_PIX_FLAG_UNCOMPRESSEDYUV = 0x200,
-    DDS_PIX_FLAG_LUMINANCE = 0x20000,
+    HasAlpha = 0x1,
+    HasUncompressedAlpha = 0x2,
+    IsCompressed = 0x4,
+    IsUncompressedRGB = 0x40,
+    IsUncompressedYUV = 0x200,
+    HasLuminance = 0x20000,
   };
 
   quint32 CalculateLinearSize(quint32 block_size)

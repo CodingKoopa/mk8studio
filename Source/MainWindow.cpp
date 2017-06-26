@@ -65,7 +65,7 @@ void MainWindow::OpenFile(QString path)
   //  file = new FileBase(path);
   if (!file->GetCanRead())
   {
-    emit UpdateStatus(RESULT_FILE_NOT_FOUND, path);
+    emit UpdateStatus(ResultCode::FileNotFound, path);
     return;
   }
 
@@ -76,9 +76,9 @@ void MainWindow::OpenFile(QString path)
   // Make the connections for the BFRES node and any children.
   connect(m_current_file_node, SIGNAL(ConnectNode(Node*)), this, SLOT(MakeNodeConnections(Node*)));
 
-  if (m_current_file_node->LoadFileTreeArea() != RESULT_SUCCESS)
+  if (m_current_file_node->LoadFileTreeArea() != ResultCode::Success)
     return;
-  if (m_current_file_node->LoadAttributeArea() != RESULT_SUCCESS)
+  if (m_current_file_node->LoadAttributeArea() != ResultCode::Success)
     return;
 
   setCentralWidget(m_left_right_splitter);
@@ -128,27 +128,27 @@ void MainWindow::UpdateStatus(ResultCode status, QString details)
 {
   switch (status)
   {
-  case RESULT_FILE_NOT_FOUND:
+  case ResultCode::FileNotFound:
     QMessageBox::critical(this, "Error",
                           QString("Couldn't open file %0 for reading.").arg(details));
     break;
-  case RESULT_NO_BYTES_WRITTEN:
+  case ResultCode::NoBytesWritten:
     QMessageBox::critical(
         this, "Error", QString("No bytes were written to the file. This may be due to it not being "
                                "found, or this application not having sufficient permissions."));
     break;
-  case RESULT_HEADER_SIZE_ERROR:
+  case ResultCode::IncorrectHeaderSize:
     QMessageBox::critical(this, "Error", "Header size didn't match. This may be due to either a "
                                          "corrupt file or a bug in the code.");
     break;
-  case RESULT_BFRES_ENDIANNESS:
+  case ResultCode::IncorrectBFRESEndianness:
     QMessageBox::critical(this, "Error",
                           "Invalid BFRES endianness. Must be either 0xFEFF or 0xFFFE.");
     break;
-  case RESULT_UNSUPPORTED_FILE_FORMAT:
+  case ResultCode::UnsupportedFileFormat:
     QMessageBox::critical(this, "Error", "Unsupported texture format.");
     break;
-  case RESULT_UNSUPPORTED_FILE_FORMAT_IMPORTANT:
+  case ResultCode::ImportantUnsupportedFileFormat:
     QMessageBox::critical(this, "Error",
                           "This texture has anti-aliasing, thickness, or is 3D, which is "
                           "unsupported. Please send this file to Koopa ASAP!");
@@ -159,10 +159,10 @@ void MainWindow::UpdateStatus(ResultCode status, QString details)
 
   switch (status)
   {
-  case RESULT_SUCCESS:
+  case ResultCode::Success:
     m_ui->statusbar->showMessage("Success.");
     break;
-  case RESULT_STATUS_BAR_UPDATE:
+  case ResultCode::UpdateStatusBar:
     m_ui->statusbar->showMessage(details);
     break;
   default:
