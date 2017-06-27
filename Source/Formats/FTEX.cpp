@@ -25,8 +25,8 @@ ResultCode FTEX::ReadHeader()
   m_header->alignment = m_file->Read32();
   m_header->pitch = m_file->Read32();
   m_file->Skip(0x6C);
-  m_header->data_offset = m_file->Pos() + m_file->Read32();
-  m_header->mipmap_offset = m_file->Pos() + m_file->Read32();
+  m_header->data_offset = m_file->Read32RelativeOffset();
+  m_header->mipmap_offset = m_file->Read32RelativeOffset();
 
   m_base_header = static_cast<ImageHeaderBase*>(m_header);
   ResultCode res = SetupInfoStructs();
@@ -66,8 +66,8 @@ void FTEX::InjectImage()
   m_file->Write32(m_header->alignment);
   m_file->Write32(m_header->pitch);
   m_file->Skip(0x6C);
-  m_file->Write32(m_header->data_offset - m_file->Pos());
-  m_file->Write32(m_header->mipmap_offset);
+  m_file->Write32RelativeOffset(m_header->data_offset);
+  m_file->Write32RelativeOffset(m_header->mipmap_offset);
   m_file->Seek(m_header->data_offset);
   m_file->WriteBytes(m_raw_image_data->data(), m_header->data_length);
   m_file->Save();

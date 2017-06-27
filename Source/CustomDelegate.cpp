@@ -1,3 +1,5 @@
+#include <limits>
+
 #include <QComboBox>
 #include <QLineEdit>
 #include <QSpinBox>
@@ -24,8 +26,7 @@ QWidget* CustomItemDelegate::createEditor(QWidget* parent, const QStyleOptionVie
   else if (m_delegates.spin_box_delegates.contains(index.row()))
   {
     QSpinBox* editor = new QSpinBox(parent);
-    // TODO: get an actual value for this?
-    editor->setMaximum(1000000000);
+    editor->setMaximum(std::numeric_limits<quint32>::max());
     return editor;
   }
 

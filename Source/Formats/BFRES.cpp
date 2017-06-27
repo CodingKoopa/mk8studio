@@ -29,18 +29,9 @@ ResultCode BFRES::ReadHeader()
   m_header.string_table_length = m_file->Read32();
   m_header.string_table_offset = m_file->Pos() + m_file->Read32();
   for (int i = 0; i < 12; i++)
-  {
-    // it's important we get the position before reading the offset
-    qint64 pos = m_file->Pos();
-    quint32 offset = m_file->Read32();
-    // TODO: Utility function for reading/writing BFRES relative offsets.
-    if (offset != 0)
-      m_header.file_offsets.append(pos + offset);
-    else
-      m_header.file_offsets.append(0);
-  }
+    m_header.file_offsets << m_file->Read32RelativeOffset();
   for (int i = 0; i < 12; i++)
-    m_header.file_counts.append(m_file->Read16());
+    m_header.file_counts << m_file->Read16();
 
   m_header.unknown_f = m_file->Read32();
 
@@ -63,14 +54,15 @@ int BFRES::ReadIndexGroups()
     if (m_header.file_offsets[group] == 0)
     {
 #ifdef DEBUG
-      qDebug("Skipping group number %i.", i);
+      qDebug("Skipping group number %i.", group);
 #endif
       m_root_nodes.append(nullptr);
       continue;
     }
 #ifdef DEBUG
     else
-      qDebug("Now reading group number %i. This group has %i file(s).", i, header.fileCounts[i]);
+      qDebug("Now reading group number %i. This group has %i file(s).", group,
+             m_header.file_counts[group]);
 #endif
     m_file->Seek(m_header.file_offsets[group]);
 

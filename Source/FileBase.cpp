@@ -75,6 +75,16 @@ quint32 FileBase::Read32()
   return ret;
 }
 
+quint32 FileBase::Read32RelativeOffset()
+{
+  quint32 pos = Pos();
+  quint32 ret = Read32();
+  if (!ret)
+    return 0;
+  else
+    return pos + ret;
+}
+
 char* FileBase::ReadBytes(quint32 len)
 {
   char* buffer = new char[len];
@@ -87,33 +97,33 @@ char* FileBase::ReadBytes(quint32 len)
 QString FileBase::ReadStringASCII(quint32 len)  // len=0 for NULL terminated string
 {
   QString ret;
-  char temp8[64];
-  QChar temp16[64];
+  char temp_8[64];
+  QChar temp_16[64];
 
   if (!len)
     len = 0xFFFFFFFF;  // lazy
 
   bool terminated = false;
-  quint32 lenread = 0;
-  while (lenread < len && !terminated)
+  quint32 len_read = 0;
+  while (len_read < len && !terminated)
   {
-    quint32 thislen = (lenread + 64 > len) ? len : lenread + 64;
-    m_file->read((char*)temp8, thislen);
+    quint32 this_len = (len_read + 64 > len) ? len : len_read + 64;
+    m_file->read((char*)temp_8, this_len);
 
-    quint32 actuallen = 0;
-    for (quint32 i = 0; i < thislen; i++)
+    quint32 actual_len = 0;
+    for (quint32 i = 0; i < this_len; i++)
     {
-      temp16[i] = (QChar)temp8[i];
-      if (!temp8[i])
+      temp_16[i] = (QChar)temp_8[i];
+      if (!temp_8[i])
       {
         terminated = true;
         break;
       }
-      actuallen++;
+      actual_len++;
     }
 
-    ret.append(temp16, actuallen);
-    lenread += actuallen;
+    ret.append(temp_16, actual_len);
+    len_read += actual_len;
   }
 
   return ret;
@@ -132,6 +142,11 @@ void FileBase::Write16(quint16 val)
 void FileBase::Write32(quint32 val)
 {
   m_stream << val;
+}
+
+void FileBase::Write32RelativeOffset(quint32 val)
+{
+  Write32(val - Pos());
 }
 
 int FileBase::WriteBytes(char* data, quint32 len)
