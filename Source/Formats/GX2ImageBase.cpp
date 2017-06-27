@@ -67,7 +67,6 @@ ResultCode GX2ImageBase::ImportDDS(QString path)
   dds.SetPath(path);
   dds.ReadFile();
   m_deswizzled_image_data = dds.GetImageData();
-  // TODO: Padding.
   return WriteDeswizzledImageToData();
 }
 
@@ -203,8 +202,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray*& destination,
     // Number of bits in one micro tile /
     // Number of bits in a byte =
     // Number of bytes in one micro tile with all samples.
-    // TODO: lambda for conversion to bits or something?
-    m_num_micro_tile_bytes = m_num_micro_tile_bits / 8;
+    m_num_micro_tile_bytes = BytesToBits(m_num_micro_tile_bits);
 
     // Number of bytes in one micro tile /
     // Number of samples in each micro tile =
@@ -495,83 +493,68 @@ quint32 GX2ImageBase::ComputePixelIndexWithinMicroTile(quint32 x, quint32 y, qui
   quint32 z_0 = Bit(z, 0);
   quint32 z_1 = Bit(z, 1);
 
-  // TODO: When is this used?
-  if (m_micro_tile_type == MicroTileType::ThickTiliing)
+  if (m_micro_tile_type != MicroTileType::Displayable)
   {
     pixel_bit_0 = x_0;
     pixel_bit_1 = y_0;
-    pixel_bit_2 = z_0;
-    pixel_bit_3 = x_1;
-    pixel_bit_4 = y_1;
-    pixel_bit_5 = z_1;
-    pixel_bit_6 = x_2;
-    pixel_bit_7 = y_2;
+    pixel_bit_2 = x_1;
+    pixel_bit_3 = y_1;
+    pixel_bit_4 = x_2;
+    pixel_bit_5 = y_2;
   }
   else
   {
-    if (m_micro_tile_type != MicroTileType::Displayable)
+    switch (m_shared_format_info.bpp)
     {
+    case 8:
+      pixel_bit_0 = x_0;
+      pixel_bit_1 = x_1;
+      pixel_bit_2 = x_2;
+      pixel_bit_3 = y_1;
+      pixel_bit_4 = y_0;
+      pixel_bit_5 = y_2;
+      break;
+    case 16:
+      pixel_bit_0 = x_0;
+      pixel_bit_1 = x_1;
+      pixel_bit_2 = x_2;
+      pixel_bit_3 = y_0;
+      pixel_bit_4 = y_1;
+      pixel_bit_5 = y_2;
+      break;
+    case 64:
       pixel_bit_0 = x_0;
       pixel_bit_1 = y_0;
       pixel_bit_2 = x_1;
-      pixel_bit_3 = y_1;
-      pixel_bit_4 = x_2;
+      pixel_bit_3 = x_2;
+      pixel_bit_4 = y_1;
       pixel_bit_5 = y_2;
+      break;
+    case 128:
+      pixel_bit_0 = y_0;
+      pixel_bit_1 = x_0;
+      pixel_bit_2 = x_1;
+      pixel_bit_3 = x_2;
+      pixel_bit_4 = y_1;
+      pixel_bit_5 = y_2;
+      break;
+    case 32:
+    case 96:
+    default:
+      pixel_bit_0 = x_0;
+      pixel_bit_1 = x_1;
+      pixel_bit_2 = y_0;
+      pixel_bit_3 = x_2;
+      pixel_bit_4 = y_1;
+      pixel_bit_5 = y_2;
+      break;
     }
-    else
-    {
-      switch (m_shared_format_info.bpp)
-      {
-      case 8:
-        pixel_bit_0 = x_0;
-        pixel_bit_1 = x_1;
-        pixel_bit_2 = x_2;
-        pixel_bit_3 = y_1;
-        pixel_bit_4 = y_0;
-        pixel_bit_5 = y_2;
-        break;
-      case 16:
-        pixel_bit_0 = x_0;
-        pixel_bit_1 = x_1;
-        pixel_bit_2 = x_2;
-        pixel_bit_3 = y_0;
-        pixel_bit_4 = y_1;
-        pixel_bit_5 = y_2;
-        break;
-      case 64:
-        pixel_bit_0 = x_0;
-        pixel_bit_1 = y_0;
-        pixel_bit_2 = x_1;
-        pixel_bit_3 = x_2;
-        pixel_bit_4 = y_1;
-        pixel_bit_5 = y_2;
-        break;
-      case 128:
-        pixel_bit_0 = y_0;
-        pixel_bit_1 = x_0;
-        pixel_bit_2 = x_1;
-        pixel_bit_3 = x_2;
-        pixel_bit_4 = y_1;
-        pixel_bit_5 = y_2;
-        break;
-      case 32:
-      case 96:
-      default:
-        pixel_bit_0 = x_0;
-        pixel_bit_1 = x_1;
-        pixel_bit_2 = y_0;
-        pixel_bit_3 = x_2;
-        pixel_bit_4 = y_1;
-        pixel_bit_5 = y_2;
-        break;
-      }
-    }
+  }
 
-    if (m_tile_mode_info.thickness == TileModeInfo::Thickness::Thick)
-    {
-      pixel_bit_6 = z_0;
-      pixel_bit_7 = z_1;
-    }
+  if (m_tile_mode_info.thickness == TileModeInfo::Thickness::Thick)
+  {
+    pixel_bit_6 = z_0;
+    pixel_bit_7 = z_1;
   }
 
   return MakeByte(pixel_bit_0, pixel_bit_1, pixel_bit_2, pixel_bit_3, pixel_bit_4, pixel_bit_5,

@@ -193,7 +193,6 @@ int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mip
                                  static_cast<quint32>(ComplexityFlag::HasMipMaps);
   dds_file.Write32(m_header.complexity_flags);
 
-  // TODO: could this be important?
   m_header.caps2 = 0;
   dds_file.Write32(m_header.caps2);
 

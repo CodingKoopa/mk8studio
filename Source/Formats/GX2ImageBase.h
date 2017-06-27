@@ -51,7 +51,6 @@ public:
 
     enum class Type
     {
-      // TODO: Values for these
       Invalid,
       UNorm,
       UInt,

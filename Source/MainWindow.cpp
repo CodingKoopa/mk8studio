@@ -76,6 +76,9 @@ void MainWindow::OpenFile(QString path)
   // Make the connections for the BFRES node and any children.
   connect(m_current_file_node, SIGNAL(ConnectNode(Node*)), this, SLOT(MakeNodeConnections(Node*)));
 
+  // Manually make the connections for the BFRES parent node.
+  MakeNodeConnections(m_current_file_node);
+
   if (m_current_file_node->LoadFileTreeArea() != ResultCode::Success)
     return;
   if (m_current_file_node->LoadAttributeArea() != ResultCode::Success)

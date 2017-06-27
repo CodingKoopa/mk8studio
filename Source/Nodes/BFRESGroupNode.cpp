@@ -61,7 +61,6 @@ QStandardItem* BFRESGroupNode::MakeTreeItemFromSubtree(BFRES::Node* node, int bl
 {
   if (node)
   {
-    // TODO: Might have to free this up
     QStandardItem* item = new QStandardItem();
     item->setData(node->name, Qt::DisplayRole);
     if (!m_node_blacklist.contains(node->left_index))
