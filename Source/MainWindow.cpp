@@ -131,6 +131,10 @@ void MainWindow::UpdateStatus(ResultCode status, QString details)
 {
   switch (status)
   {
+  case ResultCode::NotAvailable:
+    QMessageBox::critical(this, "Error",
+                          QString("The requested widget isn't available for this file type."));
+    break;
   case ResultCode::FileNotFound:
     QMessageBox::critical(this, "Error",
                           QString("Couldn't open file %0 for reading.").arg(details));

@@ -64,6 +64,7 @@ enum class ResultCode
   Success,
   // For noncritical updates on things
   UpdateStatusBar,
+  NotAvailable,
   FileNotFound,
   NoBytesWritten,
   IncorrectHeaderSize,

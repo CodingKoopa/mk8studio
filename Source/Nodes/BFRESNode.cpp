@@ -24,7 +24,6 @@ ResultCode BFRESNode::LoadFileTreeArea()
     return res;
   }
   m_bfres_header = m_bfres->GetHeader();
-  // TODO: have this return a result code
   m_bfres->ReadIndexGroups();
   // QVector<BFRES::Node*> root_nodes = bfres.GetRootNodes();
   QVector<QVector<BFRES::Node*>> raw_node_list = m_bfres->GetRawNodeLists();
@@ -99,12 +98,40 @@ ResultCode BFRESNode::LoadAttributeArea()
   row++;
 
   // Unknown A
-  header_attributes_model->setItem(row, 0, new QStandardItem("Unknown 1"));
+  header_attributes_model->setItem(row, 0, new QStandardItem("Unknown A"));
   header_attributes_model->setItem(
       row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_a, 16))));
-  m_delegate_group.spin_box_delegates << row;
   row++;
-  // TODO: the other unknowns
+
+  // Unknown A
+  header_attributes_model->setItem(row, 0, new QStandardItem("Unknown B"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_b, 16))));
+  row++;
+
+  // Unknown A
+  header_attributes_model->setItem(row, 0, new QStandardItem("Unknown C"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_c, 16))));
+  row++;
+
+  // Unknown A
+  header_attributes_model->setItem(row, 0, new QStandardItem("Unknown D"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_d, 16))));
+  row++;
+
+  // Unknown A
+  header_attributes_model->setItem(row, 0, new QStandardItem("Unknown E"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_e, 16))));
+  row++;
+
+  // Unknown A
+  header_attributes_model->setItem(row, 0, new QStandardItem("Unknown F"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_f, 16))));
+  row++;
 
   // Endianess
   header_attributes_model->setItem(row, 0, new QStandardItem("Endianness"));

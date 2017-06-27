@@ -26,7 +26,9 @@ QWidget* CustomItemDelegate::createEditor(QWidget* parent, const QStyleOptionVie
   else if (m_delegates.spin_box_delegates.contains(index.row()))
   {
     QSpinBox* editor = new QSpinBox(parent);
-    editor->setMaximum(std::numeric_limits<quint32>::max());
+    // TODO: Use the limits for an unsigned int. This would require reimplementing the SpinBox to
+    // use this, see: https://stackoverflow.com/questions/8383620/64bit-int-spin-box-in-qt
+    editor->setRange(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
     return editor;
   }
 

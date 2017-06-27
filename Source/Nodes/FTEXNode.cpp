@@ -41,9 +41,15 @@ QStandardItem* FTEXNode::MakeItem()
 ResultCode FTEXNode::LoadAttributeArea()
 {
   QStandardItemModel* header_attributes_model = new QStandardItemModel();
-  // TODO: get result code from this
   if (!m_header_loaded)
-    m_ftex->ReadHeader();
+  {
+    ResultCode res = m_ftex->ReadHeader();
+    if (res != ResultCode::Success)
+    {
+      emit NewStatus(res);
+      return res;
+    }
+  }
   m_ftex_header = m_ftex->GetHeader();
   int row = 0;
 

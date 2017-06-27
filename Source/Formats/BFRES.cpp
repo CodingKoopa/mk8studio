@@ -45,7 +45,7 @@ ResultCode BFRES::ReadHeader()
   return ResultCode::Success;
 }
 
-int BFRES::ReadIndexGroups()
+ResultCode BFRES::ReadIndexGroups()
 {
   m_index_group_headers.resize(m_header.file_offsets.size());
   m_raw_node_lists.resize(m_header.file_offsets.size());
@@ -98,17 +98,7 @@ int BFRES::ReadIndexGroups()
            node.rightIndex, node.namePtr, node.dataPtr);
 #endif
   }
-  return 0;
-}
-
-BFRES::BFRESHeader BFRES::GetHeader()
-{
-  return m_header;
-}
-
-void BFRES::setHeader(BFRESHeader value)
-{
-  m_header = value;
+  return ResultCode::Success;
 }
 
 QVector<BFRES::Node*> BFRES::GetRootNodes()
