@@ -2,6 +2,16 @@
 #include "FileBase.h"
 #include "GX2ImageBase.h"
 
+DDS::DDS() : m_image_data(new QByteArray())
+{
+}
+
+DDS::~DDS()
+{
+  if (m_image_data_buffer)
+    delete m_image_data_buffer;
+}
+
 ResultCode DDS::ReadFile()
 {
   FileBase dds_file(m_path);
@@ -60,37 +70,21 @@ ResultCode DDS::ReadFile()
       /* Calculate From Pitch */
     }
   }
-  // TODO: this might be a memory leak from readbytes?
-  m_image_data->setRawData(dds_file.ReadBytes(image_data_size), image_data_size);
+
+  m_image_data_buffer = new char[image_data_size];
+  dds_file.ReadBytes(image_data_size, m_image_data_buffer);
+  m_image_data->setRawData(m_image_data_buffer, image_data_size);
 
   return ResultCode::Success;
 }
 
 // TODO: Add uncompressed support
-// TODO: the format says if theres compression or not
-int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mips, bool compressed,
-                   GX2ImageBase::FormatInfo format_info)
+int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mips,
+                   quint32 element_size, GX2ImageBase::FormatInfo format_info,
+                   GX2ImageBase::SharedFormatInfo shared_format_info)
 {
   FileBase dds_file(m_path);
   dds_file.SetByteOrder(QDataStream::LittleEndian);
-
-  quint32 block_size = 0;
-  if (compressed)
-  {
-    switch (format_info.format)
-    {
-    case GX2ImageBase::Format::BC1:
-    {
-      block_size = 8;
-      break;
-    }
-    default:
-    {
-      block_size = 16;
-      break;
-    }
-    }
-  }
 
   // Magic
   m_header.magic = "DDS ";
@@ -104,7 +98,7 @@ int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mip
   m_header.flags = static_cast<quint32>(ImageFlag::RequiredFlags);
   if (num_mips > 1)
     m_header.flags |= static_cast<quint32>(ImageFlag::MipMaps);
-  if (compressed)
+  if (shared_format_info.compressed)
     m_header.flags |= static_cast<quint32>(ImageFlag::LinearSize);
   else
     m_header.flags |= static_cast<quint32>(ImageFlag::Pitch);
@@ -119,8 +113,8 @@ int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mip
   dds_file.Write32(m_header.width);
 
   // Pitch for uncompressed textures, or linear size for compressed textures.
-  if (compressed)
-    m_header.pitch_or_linear_size = CalculateLinearSize(block_size);
+  if (shared_format_info.compressed)
+    m_header.pitch_or_linear_size = CalculateLinearSize(element_size);
   else
     // TODO
     m_header.pitch_or_linear_size = 0;
@@ -143,14 +137,14 @@ int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mip
   dds_file.Write32(m_header.pixel_format.format_size);
 
   // Pixel flags
-  if (compressed)
+  if (shared_format_info.compressed)
     m_header.pixel_format.pixel_flags = static_cast<quint32>(PixelFlag::IsCompressed);
   else
     m_header.pixel_format.pixel_flags = static_cast<quint32>(PixelFlag::IsUncompressedRGB);
   dds_file.Write32(m_header.pixel_format.pixel_flags);
 
   // Four character code
-  if (compressed)
+  if (shared_format_info.compressed)
   {
     switch (format_info.format)
     {
@@ -178,7 +172,7 @@ int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mip
   dds_file.WriteStringASCII(m_header.pixel_format.four_cc, 4);
 
   // RGBA bitmasks, not used for compressed images
-  if (compressed)
+  if (shared_format_info.compressed)
   {
     m_header.pixel_format.rgb_bit_count = 0;
     m_header.pixel_format.red_bit_mask = 0;

@@ -246,7 +246,7 @@ void FTEXNode::HandleExportActionClick()
   {
     QFileInfo file_info = last_path;
     m_path_line_edit->setText(file_info.dir().path() + QDir::separator() + m_ftex->GetName() + '.' +
-                              file_info.completeSuffix());
+                              file_info.suffix());
   }
   settings.endGroup();
   path_layout->addWidget(m_path_line_edit);

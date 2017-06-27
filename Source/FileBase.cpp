@@ -85,13 +85,9 @@ quint32 FileBase::Read32RelativeOffset()
     return pos + ret;
 }
 
-char* FileBase::ReadBytes(quint32 len)
+void FileBase::ReadBytes(quint32 len, char* buffer)
 {
-  char* buffer = new char[len];
-
   m_stream.readRawData(buffer, len);
-
-  return buffer;
 }
 
 QString FileBase::ReadStringASCII(quint32 len)  // len=0 for NULL terminated string

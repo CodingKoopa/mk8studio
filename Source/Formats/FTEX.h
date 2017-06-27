@@ -9,12 +9,8 @@
 class FTEX : public GX2ImageBase
 {
 public:
-  FTEX(FileBase* file, quint64 pos) : m_file(file), m_start_offset(pos), m_header(nullptr) {}
-  ~FTEX()
-  {
-    if (m_header)
-      delete m_header;
-  }
+  FTEX(FileBase* file, quint64 pos);
+  ~FTEX();
 
   struct FTEXHeader : ImageHeaderBase
   {
@@ -43,7 +39,8 @@ public:
 private:
   FileBase* m_file;
   quint64 m_start_offset;
-  FTEXHeader* m_header;
+  FTEXHeader* m_header = nullptr;
+  char* m_raw_image_data_buffer = nullptr;
 };
 
 #endif  // FTEX_H

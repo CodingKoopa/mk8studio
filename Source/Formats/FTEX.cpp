@@ -3,6 +3,18 @@
 #include "FTEX.h"
 #include "GX2ImageBase.h"
 
+FTEX::FTEX(FileBase* file, quint64 pos) : m_file(file), m_start_offset(pos), m_header(nullptr)
+{
+}
+
+FTEX::~FTEX()
+{
+  if (m_header)
+    delete m_header;
+  if (m_raw_image_data_buffer)
+    delete m_raw_image_data_buffer;
+}
+
 ResultCode FTEX::ReadHeader()
 {
   m_header = new FTEXHeader;
@@ -37,10 +49,10 @@ ResultCode FTEX::ReadHeader()
 ResultCode FTEX::ReadImage()
 {
   m_file->Seek(m_header->data_offset);
-  char* buffer = m_file->ReadBytes(m_header->data_length);
+  m_raw_image_data_buffer = new char[m_header->data_length];
+  m_file->ReadBytes(m_header->data_length, m_raw_image_data_buffer);
   m_raw_image_data = new QByteArray();
-  m_raw_image_data->append(buffer, m_header->data_length);
-  delete[] buffer;
+  m_raw_image_data->append(m_raw_image_data_buffer, m_header->data_length);
 
   return ReadImageFromData();
 }

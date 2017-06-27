@@ -3,6 +3,7 @@
 
 #include <QDebug>
 
+// TODO: constexpr?
 template <typename T1>
 T1 Bit(T1 byte)
 {
@@ -12,13 +13,13 @@ T1 Bit(T1 byte)
 template <typename T1, typename T2>
 T1 Bit(T1 byte, T2 position = 0)
 {
-  return (byte >> position) & 1;
+  return (byte >> position) & static_cast<T1>(1);
 }
 
 template <typename T1>
 T1 InclusiveBitMask(T1 byte)
 {
-  return (1 << byte) - 1;
+  return (static_cast<T1>(1) << byte) - static_cast<T1>(1);
 }
 
 template <typename T1, typename T2, typename T3>

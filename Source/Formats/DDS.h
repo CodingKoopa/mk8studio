@@ -10,7 +10,8 @@
 class DDS : public FormatBase
 {
 public:
-  DDS() : m_image_data(new QByteArray()) {}
+  DDS();
+  ~DDS();
 
   struct PixelFormat
   {
@@ -44,8 +45,9 @@ public:
   };
 
   ResultCode ReadFile();
-  int WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mips, bool compressed,
-                GX2ImageBase::FormatInfo format_info);
+  int WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mips,
+                quint32 element_size, GX2ImageBase::FormatInfo format_info,
+                GX2ImageBase::SharedFormatInfo shared_format_info);
 
   QByteArray* GetImageData() { return m_image_data; }
   void SetImageData(QByteArray* image_data) { m_image_data = image_data; }
@@ -87,7 +89,8 @@ private:
     return ((m_header.width + 3) >> 2) * ((m_header.height + 3) >> 2) * block_size;
   }
 
-  QByteArray* m_image_data;
+  char* m_image_data_buffer = nullptr;
+  QByteArray* m_image_data = nullptr;
   DDSHeader m_header;
 };
 

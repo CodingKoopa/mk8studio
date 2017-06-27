@@ -78,7 +78,7 @@ ResultCode GX2ImageBase::ExportToDDS(QString path)
   dds.SetImageData(m_deswizzled_image_data);
   int bytes_written =
       dds.WriteFile(m_base_header->width, m_base_header->height, m_base_header->depth,
-                    m_base_header->num_mips, true, m_format_info);
+                    m_base_header->num_mips, m_element_size, m_format_info, m_shared_format_info);
   if (bytes_written == 0)
     return ResultCode::NoBytesWritten;
   else
