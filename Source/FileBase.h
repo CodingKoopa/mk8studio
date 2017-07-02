@@ -23,11 +23,11 @@
 
 #include "NonCopyable.h"
 
-class FileBase : NonCopyable
+class File : NonCopyable
 {
 public:
-  FileBase(const QString& path);
-  ~FileBase();
+  File(const QString& path);
+  ~File();
 
   bool GetReadOnly();
   bool GetCanRead();

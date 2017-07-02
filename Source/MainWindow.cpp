@@ -64,10 +64,10 @@ void MainWindow::OpenFile(const QString& path)
     delete m_file;
 
   if (path.isEmpty())
-    m_file = new FileBase(
+    m_file = new File(
         QFileDialog::getOpenFileName(this, "Open File", QDir::homePath(), "BFRES Model (*.bfres)"));
   else
-    m_file = new FileBase(path);
+    m_file = new File(path);
 
   if (!m_file->GetCanRead())
   {

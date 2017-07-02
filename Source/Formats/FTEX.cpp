@@ -4,7 +4,7 @@
 
 #include "GX2ImageBase.h"
 
-FTEX::FTEX(FileBase* file, quint64 pos) : m_file(file), m_start_offset(pos)
+FTEX::FTEX(File* file, quint64 pos) : m_file(file), m_start_offset(pos)
 {
 }
 

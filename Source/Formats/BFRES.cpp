@@ -1,6 +1,6 @@
 #include "BFRES.h"
 
-BFRES::BFRES(FileBase* file) : m_file(file)
+BFRES::BFRES(File* file) : m_file(file)
 {
 }
 
@@ -130,7 +130,7 @@ void BFRES::SetHeader(const Header& header)
   m_header = header;
 }
 
-FileBase* BFRES::GetFile() const
+File* BFRES::GetFile() const
 {
   return m_file;
 }

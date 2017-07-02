@@ -1,6 +1,6 @@
 #include "FileBase.h"
 
-FileBase::FileBase(const QString& path)
+File::File(const QString& path)
 {
   m_file = new QFile(path);
   m_stream = new QDataStream(m_file);
@@ -13,7 +13,7 @@ FileBase::FileBase(const QString& path)
   }
 }
 
-FileBase::~FileBase()
+File::~File()
 {
   if (m_file)
   {
@@ -25,63 +25,63 @@ FileBase::~FileBase()
     delete m_stream;
 }
 
-quint64 FileBase::Pos()
+quint64 File::Pos()
 {
   return m_file->pos();
 }
 
-bool FileBase::Seek(quint64 pos)
+bool File::Seek(quint64 pos)
 {
   return m_file->seek(pos);
 }
 
-void FileBase::Skip(qint64 num)
+void File::Skip(qint64 num)
 {
   Seek(Pos() + num);
 }
 
-quint64 FileBase::Size()
+quint64 File::Size()
 {
   return m_file->size();
 }
 
-void FileBase::Save()
+void File::Save()
 {
   m_file->flush();
 }
 
-bool FileBase::GetReadOnly()
+bool File::GetReadOnly()
 {
   return m_read_only;
 }
 
-bool FileBase::GetCanRead()
+bool File::GetCanRead()
 {
   return m_can_read;
 }
 
-quint8 FileBase::Read8()
+quint8 File::Read8()
 {
   quint8 ret;
   *m_stream >> ret;
   return ret;
 }
 
-quint16 FileBase::Read16()
+quint16 File::Read16()
 {
   quint16 ret;
   *m_stream >> ret;
   return ret;
 }
 
-quint32 FileBase::Read32()
+quint32 File::Read32()
 {
   quint32 ret;
   *m_stream >> ret;
   return ret;
 }
 
-quint32 FileBase::Read32RelativeOffset()
+quint32 File::Read32RelativeOffset()
 {
   quint32 pos = Pos();
   quint32 ret = Read32();
@@ -91,12 +91,12 @@ quint32 FileBase::Read32RelativeOffset()
     return pos + ret;
 }
 
-void FileBase::ReadBytes(quint32 len, char* buffer)
+void File::ReadBytes(quint32 len, char* buffer)
 {
   m_stream->readRawData(buffer, len);
 }
 
-QString FileBase::ReadStringASCII(quint32 len)  // len=0 for NULL terminated string
+QString File::ReadStringASCII(quint32 len)  // len=0 for NULL terminated string
 {
   QString ret;
   char temp_8[64];
@@ -131,32 +131,32 @@ QString FileBase::ReadStringASCII(quint32 len)  // len=0 for NULL terminated str
   return ret;
 }
 
-void FileBase::Write8(quint8 val)
+void File::Write8(quint8 val)
 {
   *m_stream << val;
 }
 
-void FileBase::Write16(quint16 val)
+void File::Write16(quint16 val)
 {
   *m_stream << val;
 }
 
-void FileBase::Write32(quint32 val)
+void File::Write32(quint32 val)
 {
   *m_stream << val;
 }
 
-void FileBase::Write32RelativeOffset(quint32 val)
+void File::Write32RelativeOffset(quint32 val)
 {
   Write32(val - Pos());
 }
 
-int FileBase::WriteBytes(char* data, quint32 len)
+int File::WriteBytes(char* data, quint32 len)
 {
   return m_stream->writeRawData(data, len);
 }
 
-void FileBase::WriteStringASCII(QString str, int len)
+void File::WriteStringASCII(QString str, int len)
 {
   if (len < str.length())
     str = str.left(len);
@@ -168,7 +168,7 @@ void FileBase::WriteStringASCII(QString str, int len)
     Write8(0);
 }
 
-void FileBase::SetByteOrder(QDataStream::ByteOrder order)
+void File::SetByteOrder(QDataStream::ByteOrder order)
 {
   m_stream->setByteOrder(order);
 }

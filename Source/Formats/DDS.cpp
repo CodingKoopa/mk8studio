@@ -11,7 +11,7 @@ DDS::~DDS()
 
 ResultCode DDS::ReadFile()
 {
-  FileBase dds_file(m_path);
+  File dds_file(m_path);
   dds_file.SetByteOrder(QDataStream::LittleEndian);
   m_header.magic = dds_file.ReadStringASCII(4);
   m_header.header_size = dds_file.Read32();
@@ -80,7 +80,7 @@ int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mip
                    quint32 element_size, GX2ImageBase::FormatInfo format_info,
                    GX2ImageBase::SharedFormatInfo shared_format_info)
 {
-  FileBase dds_file(m_path);
+  File dds_file(m_path);
   dds_file.SetByteOrder(QDataStream::LittleEndian);
 
   // Magic

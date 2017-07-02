@@ -9,7 +9,7 @@
 class BFRES : public FormatBase
 {
 public:
-  BFRES(FileBase* file);
+  BFRES(File* file);
   // Copy Constructor
   BFRES(const BFRES& other);
   BFRES& operator=(const BFRES& other);
@@ -67,7 +67,7 @@ public:
   const Header& GetHeader() const;
   void SetHeader(const Header& header);
 
-  FileBase* GetFile() const;
+  File* GetFile() const;
 
   const QVector<QVector<Node*>>& GetRawNodeLists();
 
@@ -87,5 +87,5 @@ private:
   QVector<QVector<Node*>> m_raw_node_lists;
   QVector<int> m_node_blacklist;
 
-  FileBase* m_file;
+  File* m_file;
 };

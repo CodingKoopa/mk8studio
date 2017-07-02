@@ -8,7 +8,7 @@
 class FTEX : public GX2ImageBase
 {
 public:
-  FTEX(FileBase* file, quint64 pos);
+  FTEX(File* file, quint64 pos);
   FTEX(const FTEX& other);
   FTEX& operator=(const FTEX& other);
   ~FTEX();
@@ -37,7 +37,7 @@ public:
 private:
   void DeepCopyRawImageDataBuffer(const FTEX& other);
 
-  FileBase* m_file;
+  File* m_file;
   quint64 m_start_offset;
   FTEXHeader m_header;
   char* m_raw_image_data_buffer = nullptr;
