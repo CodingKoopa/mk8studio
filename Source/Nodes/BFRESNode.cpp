@@ -69,7 +69,7 @@ QStandardItem* BFRESNode::MakeItem()
   // Store the current instance in a QVariant as an upcasted Node pointer.
   // Will be downcasted back to a BFRES Group Node later.
   bfres_item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
-  for (int group = 0; group < m_bfres_header.file_counts.size(); group++)
+  for (int group = 0; group < m_bfres_header.file_counts.size(); ++group)
   {
     if (m_bfres_header.file_counts[group])
     {
@@ -98,43 +98,43 @@ ResultCode BFRESNode::LoadAttributeArea()
   QStandardItem* magicValueItem = new QStandardItem(m_bfres_header.magic);
   header_attributes_model->setItem(row, 1, magicValueItem);
   m_delegate_group.line_edit_delegates << row;
-  row++;
+  ++row;
 
   // Unknown A
   header_attributes_model->setItem(row, 0, new QStandardItem("Unknown A"));
   header_attributes_model->setItem(
       row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_a, 16))));
-  row++;
+  ++row;
 
   // Unknown A
   header_attributes_model->setItem(row, 0, new QStandardItem("Unknown B"));
   header_attributes_model->setItem(
       row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_b, 16))));
-  row++;
+  ++row;
 
   // Unknown A
   header_attributes_model->setItem(row, 0, new QStandardItem("Unknown C"));
   header_attributes_model->setItem(
       row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_c, 16))));
-  row++;
+  ++row;
 
   // Unknown A
   header_attributes_model->setItem(row, 0, new QStandardItem("Unknown D"));
   header_attributes_model->setItem(
       row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_d, 16))));
-  row++;
+  ++row;
 
   // Unknown A
   header_attributes_model->setItem(row, 0, new QStandardItem("Unknown E"));
   header_attributes_model->setItem(
       row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_e, 16))));
-  row++;
+  ++row;
 
   // Unknown A
   header_attributes_model->setItem(row, 0, new QStandardItem("Unknown F"));
   header_attributes_model->setItem(
       row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_f, 16))));
-  row++;
+  ++row;
 
   // Endianess
   header_attributes_model->setItem(row, 0, new QStandardItem("Endianness"));
@@ -165,39 +165,39 @@ ResultCode BFRESNode::LoadAttributeArea()
     return ResultCode::IncorrectBFRESEndianness;
   }
   header_attributes_model->setItem(row, 1, endianness_item);
-  row++;
+  ++row;
 
   // Length
   header_attributes_model->setItem(row, 0, new QStandardItem("Length"));
   header_attributes_model->setItem(row, 1,
                                    new QStandardItem(QString::number(m_bfres_header.length)));
   m_delegate_group.spin_box_delegates << row;
-  row++;
+  ++row;
 
   // Alignment
   header_attributes_model->setItem(row, 0, new QStandardItem("Alignment"));
   header_attributes_model->setItem(
       row, 1, new QStandardItem("0x" + QString::number(m_bfres_header.alignment, 16)));
-  row++;
+  ++row;
 
   // File name offset
   header_attributes_model->setItem(row, 0, new QStandardItem("File Name Offset"));
   header_attributes_model->setItem(
       row, 1, new QStandardItem("0x" + QString::number(m_bfres_header.file_name_offset, 16)));
   // TODO: hex spinbox delegate maybe?
-  row++;
+  ++row;
 
   // String table length
   header_attributes_model->setItem(row, 0, new QStandardItem("String Table Length"));
   header_attributes_model->setItem(
       row, 1, new QStandardItem("0x" + QString::number(m_bfres_header.string_table_length, 16)));
-  row++;
+  ++row;
 
   // String table offset
   header_attributes_model->setItem(row, 0, new QStandardItem("String Table Offset"));
   header_attributes_model->setItem(
       row, 1, new QStandardItem("0x" + QString::number(m_bfres_header.string_table_offset, 16)));
-  row++;
+  ++row;
 
   header_attributes_model->setRowCount(row);
   header_attributes_model->setColumnCount(2);
@@ -223,7 +223,7 @@ ResultCode BFRESNode::LoadAttributeArea()
   // CONS: Scrolling can accidentally change values, and opening a new sections
   // seems to select the text
   // in every open editor for some reason
-  // for (int i = 0; i < sectionHeaderModel->rowCount(); i++)
+  // for (int i = 0; i < sectionHeaderModel->rowCount(); ++i)
   // tableView->openPersistentEditor(sectionHeaderModel->index(i, 1));
 
   QVBoxLayout* sections_layout = new QVBoxLayout();

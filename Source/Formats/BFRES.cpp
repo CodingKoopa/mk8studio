@@ -48,9 +48,9 @@ ResultCode BFRES::ReadHeader()
   m_header.file_name_offset = m_file->Read32RelativeOffset();
   m_header.string_table_length = m_file->Read32();
   m_header.string_table_offset = m_file->Read32RelativeOffset();
-  for (int i = 0; i < 12; i++)
+  for (int i = 0; i < 12; ++i)
     m_header.file_offsets << m_file->Read32RelativeOffset();
-  for (int i = 0; i < 12; i++)
+  for (int i = 0; i < 12; ++i)
     m_header.file_counts << m_file->Read16();
 
   m_header.unknown_f = m_file->Read32();
@@ -69,7 +69,7 @@ ResultCode BFRES::ReadIndexGroups()
 {
   m_index_group_headers.resize(m_header.file_offsets.size());
   m_raw_node_lists.resize(m_header.file_offsets.size());
-  for (int group = 0; group < m_header.file_offsets.size(); group++)
+  for (int group = 0; group < m_header.file_offsets.size(); ++group)
   {
     if (m_header.file_offsets[group] == 0)
     {
@@ -94,7 +94,7 @@ ResultCode BFRES::ReadIndexGroups()
 
     Node* root_node = ReadNodeAtOffset(m_header.file_offsets[group] + 0x8);
     m_raw_node_lists[group][0] = root_node;
-    for (quint32 node = 1; node < m_index_group_headers[group].num_entries + 1; node++)
+    for (quint32 node = 1; node < m_index_group_headers[group].num_entries + 1; ++node)
       m_raw_node_lists[group][node] =
           ReadNodeAtOffset(m_header.file_offsets[group] + 0x8 + node * 0x10);
 
@@ -223,7 +223,7 @@ void BFRES::DeepCopyNodes(const BFRES& other)
   // Use the other object's lists because this object's are empty.
   for (int group = 0; group < other.m_raw_node_lists.size(); ++group)
   {
-    for (quint32 node = 0; node < other.m_index_group_headers[group].num_entries + 1; node++)
+    for (quint32 node = 0; node < other.m_index_group_headers[group].num_entries + 1; ++node)
     {
       if (other.m_header.file_offsets[group])
       {

@@ -38,7 +38,7 @@ IODialog::~IODialog()
 void IODialog::AddGroup(QGroupBox* group)
 {
   m_ui->options_layout->insertWidget(m_current_group, group);
-  m_current_group++;
+  ++m_current_group;
 }
 
 void IODialog::MakeOpenFilePathConnection(QLineEdit* line_edit, QPushButton* button,

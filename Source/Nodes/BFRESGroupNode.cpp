@@ -31,7 +31,7 @@ QStandardItem* BFRESGroupNode::MakeListItemFromRawList()
   QStandardItem* item = new QStandardItem();
   item->setData(QString("Group " + QString::number(m_group)), Qt::DisplayRole);
   // Skip the first node (Dummy root node.).
-  for (int row = 1; row < m_node_list.size(); row++)
+  for (int row = 1; row < m_node_list.size(); ++row)
   {
     QStandardItem* child_item = new QStandardItem;
     switch (static_cast<BFRES::GroupType>(m_group))
@@ -98,7 +98,7 @@ ResultCode BFRESGroupNode::LoadAttributeArea()
   group_attributes_model->setItem(row, 0, new QStandardItem("Offset"));
   group_attributes_model->setItem(
       row, 1, new QStandardItem("0x" + QString::number(m_bfres_header.file_offsets[m_group], 16)));
-  row++;
+  ++row;
 
   group_attributes_model->setItem(row, 0, new QStandardItem("Number of files"));
   group_attributes_model->setItem(

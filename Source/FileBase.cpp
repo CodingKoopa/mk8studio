@@ -121,7 +121,7 @@ QString FileBase::ReadStringASCII(quint32 len)  // len=0 for NULL terminated str
         terminated = true;
         break;
       }
-      actual_len++;
+      ++actual_len;
     }
 
     ret.append(temp_16, actual_len);
@@ -161,10 +161,10 @@ void FileBase::WriteStringASCII(QString str, int len)
   if (len < str.length())
     str = str.left(len);
 
-  for (int i = 0; i < str.length(); i++)
+  for (int i = 0; i < str.length(); ++i)
     Write8(str.at(i).toLatin1());
 
-  for (int i = 0; i < len - str.length(); i++)
+  for (int i = 0; i < len - str.length(); ++i)
     Write8(0);
 }
 
