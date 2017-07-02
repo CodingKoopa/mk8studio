@@ -1,5 +1,4 @@
-#ifndef EXPORTDIALOG_H
-#define EXPORTDIALOG_H
+#pragma once
 
 #include <QComboBox>
 #include <QDialog>
@@ -35,5 +34,3 @@ private:
 signals:
   void StartIOAction();
 };
-
-#endif  // EXPORTDIALOG_H

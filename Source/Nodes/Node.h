@@ -1,5 +1,4 @@
-#ifndef NODE_H
-#define NODE_H
+#pragma once
 
 #include <QScrollArea>
 #include <QStandardItem>
@@ -49,5 +48,3 @@ protected slots:
   void HandleTreeCustomContextMenuRequest(const QPoint& point);
   virtual void HandleAttributeItemChange(QStandardItem* item) = 0;
 };
-
-#endif  // NODE_H

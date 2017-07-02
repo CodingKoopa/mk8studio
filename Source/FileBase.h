@@ -15,8 +15,7 @@
     with CoinKiller. If not, see http://www.gnu.org/licenses/.
 */
 
-#ifndef FILEBASE
-#define FILEBASE
+#pragma once
 
 #include <QDataStream>
 #include <QFile>
@@ -62,5 +61,3 @@ protected:
   bool m_read_only = false;
   bool m_can_read = true;
 };
-
-#endif  // FILEBASE

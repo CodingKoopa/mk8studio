@@ -1,5 +1,4 @@
-#ifndef BFRESGROUPNODE_H
-#define BFRESGROUPNODE_H
+#pragma once
 
 #include "Formats/BFRES.h"
 #include "Node.h"
@@ -29,5 +28,3 @@ private slots:
 };
 
 Q_DECLARE_METATYPE(BFRESGroupNode*)
-
-#endif  // BFRESGROUPNODE_H

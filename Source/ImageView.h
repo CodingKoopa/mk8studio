@@ -1,23 +1,20 @@
-#ifndef IMAGEVIEW_H
-#define IMAGEVIEW_H
+#pragma once
 
 #include <QWidget>
 
 class ImageView : public QWidget
 {
-    Q_OBJECT
-    public:
-    explicit ImageView(QImage* image, QWidget *parent = 0);
+  Q_OBJECT
+public:
+  explicit ImageView(QImage* image, QWidget* parent = 0);
 
-    protected:
-    void paintEvent(QPaintEvent *event);
+protected:
+  void paintEvent(QPaintEvent* event);
 
-    private:
-    QImage* image;
+private:
+  QImage* image;
 
-    signals:
+signals:
 
-    public slots:
+public slots:
 };
-
-#endif // IMAGEVIEW_H

@@ -1,5 +1,4 @@
-﻿#ifndef BFRESGUI_H
-#define BFRESGUI_H
+﻿#pragma once
 
 #include <QScrollArea>
 #include <QStandardItem>
@@ -30,5 +29,3 @@ private slots:
 
 // Make this class known to the template-based functions to allow casting to and from a QVariant.
 Q_DECLARE_METATYPE(BFRESNode*)
-
-#endif  // BFRESGUI_H

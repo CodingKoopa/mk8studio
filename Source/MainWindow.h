@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include <QScrollArea>
@@ -32,7 +31,7 @@ private:
   QSplitter* m_left_right_splitter = nullptr;
   FileBase* m_file = nullptr;
 
-  Node* m_current_file_node;
+  Node* m_current_file_node = nullptr;
 
 private slots:
   void MakeNodeConnections(Node* node);
@@ -43,5 +42,3 @@ private slots:
 
   void OpenFile(const QString& path = QString());
 };
-
-#endif  // MAINWINDOW_H

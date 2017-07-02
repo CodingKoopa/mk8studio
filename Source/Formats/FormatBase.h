@@ -1,5 +1,4 @@
-#ifndef FORMATBASE_H
-#define FORMATBASE_H
+#pragma once
 
 #include <QString>
 
@@ -17,5 +16,3 @@ protected:
   QString m_name;
   QString m_path;
 };
-
-#endif  // FORMATBASE_H

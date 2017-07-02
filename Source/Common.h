@@ -1,5 +1,4 @@
-#ifndef COMMON_H
-#define COMMON_H
+#pragma once
 
 #include <QDebug>
 
@@ -72,5 +71,3 @@ enum class ResultCode
   UnsupportedFileFormat,
   ImportantUnsupportedFileFormat
 };
-
-#endif  // COMMON_H

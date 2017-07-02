@@ -1,7 +1,5 @@
 #include "BFRES.h"
 
-#include <QDebug>
-
 BFRES::BFRES(FileBase* file) : m_file(file)
 {
 }

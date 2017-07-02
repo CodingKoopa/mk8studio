@@ -1,5 +1,4 @@
-#ifndef GTX_H
-#define GTX_H
+#pragma once
 
 #include <QByteArray>
 #include <QList>
@@ -256,5 +255,3 @@ private:
   TileModeInfo m_tile_mode_info;
   SharedTileModeInfo m_shared_tile_mode_info;
 };
-
-#endif  // GTX_H

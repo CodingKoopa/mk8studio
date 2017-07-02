@@ -1,5 +1,4 @@
-#ifndef DDS_H
-#define DDS_H
+#pragma once
 
 #include <QByteArray>
 
@@ -93,5 +92,3 @@ private:
   QByteArray m_image_data;
   DDSHeader m_header;
 };
-
-#endif  // DDS_H

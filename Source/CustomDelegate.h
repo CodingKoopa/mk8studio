@@ -1,5 +1,4 @@
-#ifndef CUSTOMDELEGATE_H
-#define CUSTOMDELEGATE_H
+#pragma once
 
 #include <QItemDelegate>
 #include <QList>
@@ -28,5 +27,3 @@ public:
 private:
   DelegateGroup m_delegates;
 };
-
-#endif  // CUSTOMDELEGATE_H

@@ -1,5 +1,4 @@
-#ifndef CUSTOMSTANDARDITEM_H
-#define CUSTOMSTANDARDITEM_H
+#pragma once
 
 #include <functional>
 
@@ -25,5 +24,3 @@ private:
 };
 
 Q_DECLARE_METATYPE(std::function<void(QString text)>)
-
-#endif  // CUSTOMSTANDARDITEM_H

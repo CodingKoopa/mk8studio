@@ -1,5 +1,4 @@
-#ifndef FTEX_H
-#define FTEX_H
+#pragma once
 
 #include <QString>
 
@@ -43,5 +42,3 @@ private:
   FTEXHeader m_header;
   char* m_raw_image_data_buffer = nullptr;
 };
-
-#endif  // FTEX_H

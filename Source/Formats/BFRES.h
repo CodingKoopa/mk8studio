@@ -1,5 +1,4 @@
-#ifndef BFRES_H
-#define BFRES_H
+#pragma once
 
 #include <QVector>
 
@@ -90,5 +89,3 @@ private:
 
   FileBase* m_file;
 };
-
-#endif  // BFRES_H

@@ -1,5 +1,4 @@
-#ifndef FTEXGUI_H
-#define FTEXGUI_H
+#pragma once
 
 #include <QComboBox>
 #include <QGroupBox>
@@ -44,5 +43,3 @@ private slots:
   void HandleInjectActionClick();
   void HandleInjectButtonClick();
 };
-
-#endif  // FTEXGUI_H
