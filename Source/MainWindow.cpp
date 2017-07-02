@@ -17,8 +17,8 @@
 #include "MainWindow.h"
 
 #include "CustomDelegate.h"
-#include "FileBase.h"
 #include "Nodes/BFRESNode.h"
+#include "NonCopyable.h"
 #include "ui_MainWindow.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::MainWindow)
@@ -51,26 +51,31 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
 
 MainWindow::~MainWindow()
 {
+  if (m_current_file_node)
+    delete m_current_file_node;
+  if (m_file)
+    delete m_file;
   delete m_ui;
 }
 
-void MainWindow::OpenFile(QString path)
+void MainWindow::OpenFile(const QString& path)
 {
+  if (m_file)
+    delete m_file;
+
   if (path.isEmpty())
-    path =
-        QFileDialog::getOpenFileName(this, "Open File", QDir::homePath(), "BFRES Model (*.bfres)");
+    m_file = new FileBase(
+        QFileDialog::getOpenFileName(this, "Open File", QDir::homePath(), "BFRES Model (*.bfres)"));
+  else
+    m_file = new FileBase(path);
 
-  FileBase* file = new FileBase(path);
-
-  //  file = new FileBase(path);
-  if (!file->GetCanRead())
+  if (!m_file->GetCanRead())
   {
     emit UpdateStatus(ResultCode::FileNotFound, path);
     return;
   }
 
-  // Deallocated by BFRESNode's dtor.
-  BFRES* bfres = new BFRES(file);
+  BFRES bfres(m_file);
   m_current_file_node = new BFRESNode(bfres, this);
 
   // Make the connections for the BFRES node and any children.
@@ -127,7 +132,7 @@ void MainWindow::UpdateMainWidget(QWidget* widget)
   m_left_right_splitter->addWidget(widget);
 }
 
-void MainWindow::UpdateStatus(ResultCode status, QString details)
+void MainWindow::UpdateStatus(ResultCode status, const QString& details)
 {
   switch (status)
   {

@@ -41,7 +41,8 @@ void IODialog::AddGroup(QGroupBox* group)
   m_current_group++;
 }
 
-void IODialog::MakeOpenFilePathConnection(QLineEdit* line_edit, QPushButton* button, QString filter)
+void IODialog::MakeOpenFilePathConnection(QLineEdit* line_edit, QPushButton* button,
+                                          const QString& filter)
 {
   // TODO: Switch to new signal/slot syntax for everything else, for consistency.
   connect(button, &QPushButton::clicked, this, [this, line_edit, filter] {
@@ -49,7 +50,8 @@ void IODialog::MakeOpenFilePathConnection(QLineEdit* line_edit, QPushButton* but
   });
 }
 
-void IODialog::MakeSaveFilePathConnection(QLineEdit* line_edit, QPushButton* button, QString filter)
+void IODialog::MakeSaveFilePathConnection(QLineEdit* line_edit, QPushButton* button,
+                                          const QString& filter)
 {
   // TODO: Switch to new signal/slot syntax for everything else, for consistency.
   connect(button, &QPushButton::clicked, this, [this, line_edit, filter] {

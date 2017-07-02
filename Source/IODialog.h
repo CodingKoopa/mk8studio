@@ -25,8 +25,8 @@ public:
   explicit IODialog(Type type, QWidget* parent = 0);
   ~IODialog();
   void AddGroup(QGroupBox* group);
-  void MakeOpenFilePathConnection(QLineEdit* line_edit, QPushButton* button, QString filter);
-  void MakeSaveFilePathConnection(QLineEdit* line_edit, QPushButton* button, QString filter);
+  void MakeOpenFilePathConnection(QLineEdit* line_edit, QPushButton* button, const QString& filter);
+  void MakeSaveFilePathConnection(QLineEdit* line_edit, QPushButton* button, const QString& filter);
 
 private:
   Ui::IODialog* m_ui;

@@ -25,7 +25,8 @@ SOURCES +=\
     Formats/BFRES.cpp \
     Formats/GX2ImageBase.cpp \
     Nodes/Node.cpp \
-    IODialog.cpp
+    IODialog.cpp \
+    Formats/FormatBase.cpp
 
 HEADERS  += \
     Common.h \
@@ -43,7 +44,8 @@ HEADERS  += \
     Formats/FormatBase.h \
     Formats/GX2ImageBase.h \
     IODialog.h \
-    CustomStandardItem.h
+    CustomStandardItem.h \
+    NonCopyable.h
 
 FORMS += \
     MainWindow.ui \

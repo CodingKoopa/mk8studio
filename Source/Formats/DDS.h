@@ -6,11 +6,11 @@
 #include "Common.h"
 #include "FormatBase.h"
 #include "GX2ImageBase.h"
+#include "NonCopyable.h"
 
-class DDS : public FormatBase
+class DDS : public FormatBase, NonCopyable
 {
 public:
-  DDS();
   ~DDS();
 
   struct PixelFormat
@@ -49,8 +49,8 @@ public:
                 quint32 element_size, GX2ImageBase::FormatInfo format_info,
                 GX2ImageBase::SharedFormatInfo shared_format_info);
 
-  QByteArray* GetImageData() { return m_image_data; }
-  void SetImageData(QByteArray* image_data) { m_image_data = image_data; }
+  const QByteArray& GetImageData();
+  void SetImageData(const QByteArray& image_data);
 
 private:
   enum class ImageFlag
@@ -90,7 +90,7 @@ private:
   }
 
   char* m_image_data_buffer = nullptr;
-  QByteArray* m_image_data = nullptr;
+  QByteArray m_image_data;
   DDSHeader m_header;
 };
 

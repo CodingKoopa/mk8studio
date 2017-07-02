@@ -1,3 +1,4 @@
+
 #include "BFRESNode.h"
 
 #include <QAction>
@@ -13,20 +14,24 @@
 #include "CustomDelegate.h"
 #include "ImageView.h"
 
+BFRESNode::BFRESNode(const BFRES& bfres, QObject* parent) : Node(parent), m_bfres(bfres)
+{
+}
+
 ResultCode BFRESNode::LoadFileTreeArea()
 {
   emit NewStatus(ResultCode::UpdateStatusBar, "Loading file tree...");
 
-  ResultCode res = m_bfres->ReadHeader();
+  ResultCode res = m_bfres.ReadHeader();
   if (res != ResultCode::Success)
   {
     NewStatus(res);
     return res;
   }
-  m_bfres_header = m_bfres->GetHeader();
-  m_bfres->ReadIndexGroups();
+  m_bfres_header = m_bfres.GetHeader();
+  m_bfres.ReadIndexGroups();
   // QVector<BFRES::Node*> root_nodes = bfres.GetRootNodes();
-  QVector<QVector<BFRES::Node*>> raw_node_list = m_bfres->GetRawNodeLists();
+  QVector<QVector<BFRES::Node*>> raw_node_list = m_bfres.GetRawNodeLists();
 
   QStandardItemModel* file_tree_model = new QStandardItemModel(0, 1);
 
@@ -42,18 +47,17 @@ ResultCode BFRESNode::LoadFileTreeArea()
           SLOT(HandleTreeCustomContextMenuRequest(const QPoint&)));
 
   m_tree_view->setModel(file_tree_model);
-  // todo: this only works with mouse clicking, i still have to figure out
+  // TODO: this only works with mouse clicking, i still have to figure out
   // keyboard arrow navigation
   connect(m_tree_view, SIGNAL(clicked(QModelIndex)), this, SLOT(HandleFileTreeClick(QModelIndex)));
-  m_file_tree_container = new QScrollArea();
 
-  m_file_tree_layout = new QVBoxLayout();
-  m_file_tree_layout->addWidget(m_tree_view);
+  QVBoxLayout* file_tree_layout = new QVBoxLayout();
+  file_tree_layout->addWidget(m_tree_view);
 
-  m_file_tree_container = new QScrollArea();
-  m_file_tree_container->setLayout(m_file_tree_layout);
+  QScrollArea* file_tree_container = new QScrollArea();
+  file_tree_container->setLayout(file_tree_layout);
 
-  emit NewFileTreeArea(m_file_tree_container);
+  emit NewFileTreeArea(file_tree_container);
 
   emit NewStatus(res);
   return res;
@@ -72,7 +76,7 @@ QStandardItem* BFRESNode::MakeItem()
     {
       // Allocate a new Node derived object.
       BFRESGroupNode* group_node =
-          new BFRESGroupNode(group, m_bfres, m_bfres->GetRawNodeLists()[group], this);
+          new BFRESGroupNode(group, m_bfres, m_bfres.GetRawNodeLists()[group], this);
       connect(group_node, SIGNAL(ConnectNode(Node*)), this, SIGNAL(ConnectNode(Node*)));
       emit ConnectNode(group_node);
       bfres_item->appendRow(group_node->MakeItem());
@@ -261,6 +265,6 @@ void BFRESNode::HandleAttributeItemChange(QStandardItem* item)
         m_bfres_header.bom = 0xFFFE;
     }
   }
-  m_bfres->setHeader(m_bfres_header);
+  m_bfres.SetHeader(m_bfres_header);
   // TODO: spin box reaction
 }

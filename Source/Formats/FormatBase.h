@@ -7,12 +7,11 @@ class FormatBase
 {
   // When saving is implemented, this class will be more useful.
 public:
-  FormatBase() {}
-  QString GetName() { return m_name; }
-  void SetName(QString value) { m_name = value; }
+  const QString& GetName();
+  void SetName(const QString& value);
 
-  QString GetPath() { return m_path; }
-  void SetPath(QString value) { m_path = value; }
+  const QString& GetPath();
+  void SetPath(const QString& value);
 
 protected:
   QString m_name;

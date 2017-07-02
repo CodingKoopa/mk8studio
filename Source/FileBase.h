@@ -22,10 +22,12 @@
 #include <QFile>
 #include <QString>
 
-class FileBase
+#include "NonCopyable.h"
+
+class FileBase : NonCopyable
 {
 public:
-  FileBase(QString path);
+  FileBase(const QString& path);
   ~FileBase();
 
   bool GetReadOnly();
@@ -48,7 +50,7 @@ public:
   void SetByteOrder(QDataStream::ByteOrder order);
 
   quint64 Pos();
-  bool Seek(quint64 Pos);
+  bool Seek(quint64 pos);
   void Skip(qint64 num);
   quint64 Size();
 
@@ -56,9 +58,9 @@ public:
 
 protected:
   QFile* m_file;
-  QDataStream m_stream;
-  bool readOnly = false;
-  bool canRead = true;
+  QDataStream* m_stream;
+  bool m_read_only = false;
+  bool m_can_read = true;
 };
 
 #endif  // FILEBASE

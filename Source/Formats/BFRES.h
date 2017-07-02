@@ -10,10 +10,13 @@
 class BFRES : public FormatBase
 {
 public:
-  BFRES(FileBase* m_file);
+  BFRES(FileBase* file);
+  // Copy Constructor
+  BFRES(const BFRES& other);
+  BFRES& operator=(const BFRES& other);
   ~BFRES();
 
-  struct BFRESHeader
+  struct Header
   {
     QString magic;
     quint8 unknown_a;
@@ -60,31 +63,27 @@ public:
   };
 
   ResultCode ReadHeader();
-  int ReadIndexGroups();
+  ResultCode ReadIndexGroups();
 
-  BFRESHeader GetHeader();
-  void setHeader(BFRESHeader value);
+  const Header& GetHeader() const;
+  void SetHeader(const Header& header);
 
-  // TODO: Reorder to put all get/set functions in the same place.
-  FileBase* GetFile();
+  FileBase* GetFile() const;
 
-  QVector<Node*> GetRootNodes();
-  void SetRootNodes(QVector<Node*> root_nodes);
-
-  QVector<QVector<Node*>> GetRawNodeLists();
-  void SetRawNodeLists(QVector<QVector<Node*>> raw_node_lists);
+  const QVector<QVector<Node*>>& GetRawNodeLists();
 
 private:
   void ReadSubtreeFromNode(Node* node, quint32 group);
+  void CopySubtreeFromNode(Node* source_node, Node* destination_node);
   void DeleteSubtreeFromNode(Node* node);
 
   Node* ReadNodeAtOffset(quint64 offset);
+  void DeepCopyNodes(const BFRES& other);
+  void CopyNode(Node* source_node, Node* destination_node);
 
   // http://mk8.tockdom.com/wiki/BFRES_(File_Format)
-  BFRESHeader m_header;
+  Header m_header;
   QVector<IndexGroupHeader> m_index_group_headers;
-
-  QVector<Node*> m_root_nodes;
 
   QVector<QVector<Node*>> m_raw_node_lists;
   QVector<int> m_node_blacklist;

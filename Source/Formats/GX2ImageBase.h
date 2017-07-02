@@ -10,8 +10,6 @@
 class GX2ImageBase : public FormatBase
 {
 public:
-  GX2ImageBase() : m_base_header(nullptr) {}
-
   // Format enumerations just for convienience.
   enum class Format
   {
@@ -121,19 +119,19 @@ public:
   ResultCode ImportDDS(QString path);
   ResultCode ExportToDDS(QString path);
 
-  QList<FormatInfo> GetFormatInfoList() { return m_format_info_list; }
-  QList<TileModeInfo> GetTileModeInfoList() { return m_tile_mode_info_list; }
+  const QList<FormatInfo>& GetFormatInfoList();
+  const QList<TileModeInfo>& GetTileModeInfoList();
 
-  FormatInfo GetFormatInfo() { return m_format_info; }
-  quint32 GetFormatInfoIndex() { return m_format_info_index; }
-  TileModeInfo GetTileModeInfo() { return m_tile_mode_info; }
+  const FormatInfo& GetFormatInfo();
+  quint32 GetFormatInfoIndex();
+  const TileModeInfo& GetTileModeInfo();
 
 protected:
-  ImageHeaderBase* m_base_header;
-  QByteArray* m_raw_image_data;
+  ImageHeaderBase m_base_header;
+  QByteArray m_raw_image_data;
 
 private:
-  ResultCode CopyImage(QByteArray* source, QByteArray*& destination, bool swizzle);
+  ResultCode CopyImage(QByteArray* source, QByteArray* destination, bool swizzle);
 
   // Get the address of a pixel from a coordinate, within a macro tiled texture
   quint64 ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32 slice, quint32 sample,
@@ -144,7 +142,7 @@ private:
 
   quint32 ComputeSurfaceBankSwappedWidth(quint32 m_pitch);
 
-  QByteArray* m_deswizzled_image_data;
+  QByteArray m_deswizzled_image_data;
 
   enum class MicroTileType
   {
@@ -216,7 +214,7 @@ private:
       {0xF, "GX2_TILE_MODE_3B_TILED_THICK", TileMode::Macro, TileModeInfo::Thickness::Thick, 1,
        true}};
 
-  quint32 m_element_size;
+  quint32 m_element_size = 0;
   quint32 m_num_samples;
 
   // Micro Tiling Info

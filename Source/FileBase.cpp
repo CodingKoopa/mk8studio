@@ -2,21 +2,29 @@
 
 #include <QDebug>
 
-FileBase::FileBase(QString path) : m_file(new QFile(path)), m_stream(m_file)
+FileBase::FileBase(const QString& path)
 {
+  m_file = new QFile(path);
+  m_stream = new QDataStream(m_file);
   if (!m_file->open(QIODevice::ReadWrite))
   {
     if (!m_file->open(QIODevice::ReadOnly))
-      canRead = false;
+      m_can_read = false;
     else
-      readOnly = true;
+      m_read_only = true;
   }
 }
 
 FileBase::~FileBase()
 {
-  m_file->close();
-  delete m_file;
+  if (m_file)
+  {
+    if (m_file->isOpen())
+      m_file->close();
+    delete m_file;
+  }
+  if (m_stream)
+    delete m_stream;
 }
 
 quint64 FileBase::Pos()
@@ -46,32 +54,32 @@ void FileBase::Save()
 
 bool FileBase::GetReadOnly()
 {
-  return readOnly;
+  return m_read_only;
 }
 
 bool FileBase::GetCanRead()
 {
-  return canRead;
+  return m_can_read;
 }
 
 quint8 FileBase::Read8()
 {
   quint8 ret;
-  m_stream >> ret;
+  *m_stream >> ret;
   return ret;
 }
 
 quint16 FileBase::Read16()
 {
   quint16 ret;
-  m_stream >> ret;
+  *m_stream >> ret;
   return ret;
 }
 
 quint32 FileBase::Read32()
 {
   quint32 ret;
-  m_stream >> ret;
+  *m_stream >> ret;
   return ret;
 }
 
@@ -87,7 +95,7 @@ quint32 FileBase::Read32RelativeOffset()
 
 void FileBase::ReadBytes(quint32 len, char* buffer)
 {
-  m_stream.readRawData(buffer, len);
+  m_stream->readRawData(buffer, len);
 }
 
 QString FileBase::ReadStringASCII(quint32 len)  // len=0 for NULL terminated string
@@ -127,17 +135,17 @@ QString FileBase::ReadStringASCII(quint32 len)  // len=0 for NULL terminated str
 
 void FileBase::Write8(quint8 val)
 {
-  m_stream << val;
+  *m_stream << val;
 }
 
 void FileBase::Write16(quint16 val)
 {
-  m_stream << val;
+  *m_stream << val;
 }
 
 void FileBase::Write32(quint32 val)
 {
-  m_stream << val;
+  *m_stream << val;
 }
 
 void FileBase::Write32RelativeOffset(quint32 val)
@@ -147,7 +155,7 @@ void FileBase::Write32RelativeOffset(quint32 val)
 
 int FileBase::WriteBytes(char* data, quint32 len)
 {
-  return m_stream.writeRawData(data, len);
+  return m_stream->writeRawData(data, len);
 }
 
 void FileBase::WriteStringASCII(QString str, int len)
@@ -164,5 +172,5 @@ void FileBase::WriteStringASCII(QString str, int len)
 
 void FileBase::SetByteOrder(QDataStream::ByteOrder order)
 {
-  m_stream.setByteOrder(order);
+  m_stream->setByteOrder(order);
 }

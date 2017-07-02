@@ -1,17 +1,39 @@
 #include "BFRES.h"
 
+#include <QDebug>
+
 BFRES::BFRES(FileBase* file) : m_file(file)
 {
 }
 
+BFRES::BFRES(const BFRES& other)
+    : FormatBase(other), m_header(other.m_header),
+      m_index_group_headers(other.m_index_group_headers), m_node_blacklist(other.m_node_blacklist),
+      m_file(other.m_file)
+{
+  DeepCopyNodes(other);
+}
+
+BFRES& BFRES::operator=(const BFRES& other)
+{
+  m_header = other.m_header;
+  m_index_group_headers = other.m_index_group_headers;
+  m_node_blacklist = other.m_node_blacklist;
+  m_file = other.m_file;
+  DeepCopyNodes(other);
+  return *this;
+}
+
 BFRES::~BFRES()
 {
-  for (int i = 0; i < m_root_nodes.size(); i++)
-    DeleteSubtreeFromNode(m_root_nodes[i]);
+  foreach (const QVector<Node*>& group, m_raw_node_lists)
+    DeleteSubtreeFromNode(group[0]);
 }
 
 ResultCode BFRES::ReadHeader()
 {
+  // TODO: read all the read 32s, read 8s in different for loops like so:
+  // https://github.com/citra-emu/citra/blob/master/src/citra_qt/main.cpp#L115
   m_header.magic = m_file->ReadStringASCII(4);
   m_header.unknown_a = m_file->Read8();
   m_header.unknown_b = m_file->Read8();
@@ -25,9 +47,9 @@ ResultCode BFRES::ReadHeader()
   m_header.unknown_e = m_file->Read16();
   m_header.length = m_file->Read32();
   m_header.alignment = m_file->Read32();
-  m_header.file_name_offset = m_file->Pos() + m_file->Read32();
+  m_header.file_name_offset = m_file->Read32RelativeOffset();
   m_header.string_table_length = m_file->Read32();
-  m_header.string_table_offset = m_file->Pos() + m_file->Read32();
+  m_header.string_table_offset = m_file->Read32RelativeOffset();
   for (int i = 0; i < 12; i++)
     m_header.file_offsets << m_file->Read32RelativeOffset();
   for (int i = 0; i < 12; i++)
@@ -56,7 +78,7 @@ ResultCode BFRES::ReadIndexGroups()
 #ifdef DEBUG
       qDebug("Skipping group number %i.", group);
 #endif
-      m_root_nodes.append(nullptr);
+      m_raw_node_lists[group].append(nullptr);
       continue;
     }
 #ifdef DEBUG
@@ -78,7 +100,6 @@ ResultCode BFRES::ReadIndexGroups()
       m_raw_node_lists[group][node] =
           ReadNodeAtOffset(m_header.file_offsets[group] + 0x8 + node * 0x10);
 
-    m_root_nodes.append(root_node);
     ReadSubtreeFromNode(root_node, group);
     m_node_blacklist.clear();
 
@@ -101,19 +122,24 @@ ResultCode BFRES::ReadIndexGroups()
   return ResultCode::Success;
 }
 
-QVector<BFRES::Node*> BFRES::GetRootNodes()
+const BFRES::Header& BFRES::GetHeader() const
 {
-  return m_root_nodes;
+  return m_header;
 }
 
-void BFRES::SetRootNodes(QVector<Node*> root_nodes)
+void BFRES::SetHeader(const Header& header)
 {
-  m_root_nodes = root_nodes;
+  m_header = header;
 }
 
-FileBase* BFRES::GetFile()
+FileBase* BFRES::GetFile() const
 {
   return m_file;
+}
+
+const QVector<QVector<BFRES::Node*>>& BFRES::GetRawNodeLists()
+{
+  return m_raw_node_lists;
 }
 
 void BFRES::ReadSubtreeFromNode(Node* node, quint32 group)
@@ -121,7 +147,7 @@ void BFRES::ReadSubtreeFromNode(Node* node, quint32 group)
   if (node)
   {
     // If there is a left index, and it's not referring to the current one, and it's unitialized,
-    // and it's not on the blacklist
+    // and it's not on the blacklist.
     if (node->left_index != 0 && m_raw_node_lists[group].indexOf(node) != node->left_index &&
         !node->left_node && !m_node_blacklist.contains(node->left_index))
     {
@@ -132,11 +158,9 @@ void BFRES::ReadSubtreeFromNode(Node* node, quint32 group)
       ReadSubtreeFromNode(node->left_node, group);
     }
     else
-    {
       node->left_node = nullptr;
-    }
 
-    if (node->right_index && m_raw_node_lists[group].indexOf(node) != node->right_index &&
+    if (node->right_index != 0 && m_raw_node_lists[group].indexOf(node) != node->right_index &&
         !node->right_node && !m_node_blacklist.contains(node->right_index))
     {
       m_node_blacklist.append(node->right_index);
@@ -145,9 +169,23 @@ void BFRES::ReadSubtreeFromNode(Node* node, quint32 group)
       ReadSubtreeFromNode(node->right_node, group);
     }
     else
-    {
       node->right_node = nullptr;
-    }
+  }
+}
+
+void BFRES::CopySubtreeFromNode(BFRES::Node* source_node, BFRES::Node* destination_node)
+{
+  // The source node should have already went through ReadSubtreeFromNode(), so we shouldn't have to
+  // do all the checking again.
+  if (source_node->left_node)
+  {
+    destination_node->left_node = new Node;
+    CopyNode(source_node->left_node, destination_node->left_node);
+  }
+  if (source_node->right_node)
+  {
+    destination_node->right_node = new Node;
+    CopyNode(source_node->right_node, destination_node->right_node);
   }
 }
 
@@ -170,21 +208,47 @@ BFRES::Node* BFRES::ReadNodeAtOffset(quint64 offset)
   node->search_value = m_file->Read32();
   node->left_index = m_file->Read16();
   node->right_index = m_file->Read16();
-  node->name_ptr = m_file->Pos() + m_file->Read32();
-  node->data_ptr = m_file->Pos() + m_file->Read32();
+  node->name_ptr = m_file->Read32RelativeOffset();
+  node->data_ptr = m_file->Read32RelativeOffset();
   quint64 pos = m_file->Pos();
   m_file->Seek(node->name_ptr);
-  node->name = m_file->ReadStringASCII(0);
+  if (node->name_ptr)
+    node->name = m_file->ReadStringASCII(0);
   m_file->Seek(pos);
   return node;
 }
 
-QVector<QVector<BFRES::Node*>> BFRES::GetRawNodeLists()
+void BFRES::DeepCopyNodes(const BFRES& other)
 {
-  return m_raw_node_lists;
+  m_raw_node_lists.resize(other.m_header.file_offsets.size());
+
+  // Use the other object's lists because this object's are empty.
+  for (int group = 0; group < other.m_raw_node_lists.size(); ++group)
+  {
+    for (quint32 node = 0; node < other.m_index_group_headers[group].num_entries + 1; node++)
+    {
+      if (other.m_header.file_offsets[group])
+      {
+        m_raw_node_lists[group] << new Node;
+        CopyNode(other.m_raw_node_lists[group][node], m_raw_node_lists[group][node]);
+      }
+      else
+        m_raw_node_lists[group] << nullptr;
+
+      if (other.m_raw_node_lists[group][0])
+        CopySubtreeFromNode(other.m_raw_node_lists[group][0], m_raw_node_lists[group][0]);
+    }
+  }
 }
 
-void BFRES::SetRawNodeLists(QVector<QVector<Node*>> raw_node_lists)
+void BFRES::CopyNode(BFRES::Node* source_node, BFRES::Node* destination_node)
 {
-  m_raw_node_lists = raw_node_lists;
+  // Manually make a deep copy of the node so the left/right node pointers don't point to the
+  // same node.
+  destination_node->search_value = source_node->search_value;
+  destination_node->left_index = source_node->left_index;
+  destination_node->right_index = source_node->right_index;
+  destination_node->name_ptr = source_node->name_ptr;
+  destination_node->data_ptr = source_node->data_ptr;
+  destination_node->name = source_node->name;
 }

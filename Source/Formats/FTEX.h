@@ -10,6 +10,8 @@ class FTEX : public GX2ImageBase
 {
 public:
   FTEX(FileBase* file, quint64 pos);
+  FTEX(const FTEX& other);
+  FTEX& operator=(const FTEX& other);
   ~FTEX();
 
   struct FTEXHeader : ImageHeaderBase
@@ -28,18 +30,17 @@ public:
 
   void InjectImage();
 
-  QImage* GetImage();
-
   quint64 GetStart();
 
-  FTEXHeader* GetHeader() { return m_header; }
-
-  void SetHeader(FTEXHeader* ftex_header) { m_header = ftex_header; }
+  const FTEXHeader& GetHeader();
+  void SetHeader(const FTEXHeader& ftex_header);
 
 private:
+  void DeepCopyRawImageDataBuffer(const FTEX& other);
+
   FileBase* m_file;
   quint64 m_start_offset;
-  FTEXHeader* m_header = nullptr;
+  FTEXHeader m_header;
   char* m_raw_image_data_buffer = nullptr;
 };
 

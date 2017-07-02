@@ -8,6 +8,13 @@
 #include "CustomDelegate.h"
 #include "FTEXNode.h"
 
+BFRESGroupNode::BFRESGroupNode(quint32 group, const BFRES& bfres,
+                               const QVector<BFRES::Node*>& node_list, QObject* parent)
+    : Node(parent), m_group(group), m_bfres(bfres), m_bfres_header(m_bfres.GetHeader()),
+      m_node_list(node_list)
+{
+}
+
 QStandardItem* BFRESGroupNode::MakeItem()
 {
   QStandardItem* item;
@@ -31,16 +38,8 @@ QStandardItem* BFRESGroupNode::MakeListItemFromRawList()
     {
     case BFRES::GroupType::FTEX:
     {
-      FTEX* ftex = new FTEX(m_bfres->GetFile(), m_bfres->GetRawNodeLists()[m_group][row]->data_ptr);
-      ftex->SetName(m_bfres->GetRawNodeLists()[m_group][row]->name);
-      //      ftex->ReadHeader();
-      //      qDebug() << "FTEX Name: " << ftex->GetName();
-      //      qDebug() << "FTEX Image Data Offset:  0x" << ftex->GetHeader().data_offset;
-      //      qDebug() << "FTEX Image Data Length:  0x" << ftex->GetHeader().data_length << "Bytes";
-      //      qDebug() << "FTEX Mipmap Offset:      0x" << ftex->GetHeader().mipmap_offset;
-      //      qDebug() << "FTEX Mipmap Length:      0x" << ftex->GetHeader().mipmap_length <<
-      //      "Bytes";
-      //      qDebug() << "-----------------------";
+      FTEX ftex(m_bfres.GetFile(), m_bfres.GetRawNodeLists()[m_group][row]->data_ptr);
+      ftex.SetName(m_bfres.GetRawNodeLists()[m_group][row]->name);
       FTEXNode* child_node = new FTEXNode(ftex, this);
       connect(child_node, SIGNAL(ConnectNode(Node*)), this, SIGNAL(ConnectNode(Node*)));
       emit ConnectNode(child_node);

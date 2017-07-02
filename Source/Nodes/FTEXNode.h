@@ -16,15 +16,14 @@ class FTEXNode : public Node
 {
   Q_OBJECT
 public:
-  explicit FTEXNode(FTEX* ftex, QObject* parent = 0);
-  ~FTEXNode() { delete m_ftex; }
+  explicit FTEXNode(const FTEX& ftex, QObject* parent = 0);
   QStandardItem* MakeItem() override;
   ResultCode LoadAttributeArea() override;
   ResultCode LoadMainWidget() override;
 
 private:
-  FTEX* m_ftex;
-  FTEX::FTEXHeader* m_ftex_header;
+  FTEX m_ftex;
+  FTEX::FTEXHeader m_ftex_header;
 
   // Unlike the other section containers for other nodes, this one is reused for the injection
   // dialog, so it's a member variable.
@@ -35,8 +34,8 @@ private:
   QLineEdit* m_path_line_edit;
   QComboBox* m_format_combo_box;
 
-  bool m_header_loaded;
-  bool m_image_loaded;
+  bool m_header_loaded = false;
+  bool m_image_loaded = false;
 
 private slots:
   void HandleAttributeItemChange(QStandardItem* item) override;

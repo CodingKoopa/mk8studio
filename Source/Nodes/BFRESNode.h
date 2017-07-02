@@ -15,21 +15,14 @@ class BFRESNode : public Node
 {
   Q_OBJECT
 public:
-  explicit BFRESNode(BFRES* bfres, QObject* parent = 0) : Node(parent), m_bfres(bfres) {}
-  ~BFRESNode() { delete m_bfres; }
+  explicit BFRESNode(const BFRES& bfres, QObject* parent = 0);
   ResultCode LoadFileTreeArea() override;
-  ResultCode LoadAttributeArea() override;
   QStandardItem* MakeItem() override;
+  ResultCode LoadAttributeArea() override;
 
 private:
-  QStandardItem* MakeListItemFromRawList(QVector<BFRES::Node*> list, BFRES::GroupType group);
-  QStandardItem* MakeTreeItemFromSubtree(BFRES::Node* node, int blacklist_node = -1);
-
-  BFRES* m_bfres;
-  BFRES::BFRESHeader m_bfres_header;
-
-  QScrollArea* m_file_tree_container;
-  QVBoxLayout* m_file_tree_layout;
+  BFRES m_bfres;
+  BFRES::Header m_bfres_header;
 
 private slots:
   void HandleAttributeItemChange(QStandardItem* item) override;

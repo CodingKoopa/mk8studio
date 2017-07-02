@@ -9,6 +9,7 @@
 #include <QVBoxLayout>
 
 #include "Common.h"
+#include "FileBase.h"
 #include "Formats/BFRES.h"
 #include "Nodes/Node.h"
 
@@ -29,6 +30,7 @@ private:
   Ui::MainWindow* m_ui;
   QSplitter* m_file_tree_attributes_splitter = nullptr;
   QSplitter* m_left_right_splitter = nullptr;
+  FileBase* m_file = nullptr;
 
   Node* m_current_file_node;
 
@@ -37,9 +39,9 @@ private slots:
   void UpdateFileTreeContainer(QScrollArea* area);
   void UpdateSectionsContainer(QScrollArea* area);
   void UpdateMainWidget(QWidget* widget);
-  void UpdateStatus(ResultCode status = ResultCode::Success, QString details = QString());
+  void UpdateStatus(ResultCode status = ResultCode::Success, const QString& details = QString());
 
-  void OpenFile(QString path = QString());
+  void OpenFile(const QString& path = QString());
 };
 
 #endif  // MAINWINDOW_H

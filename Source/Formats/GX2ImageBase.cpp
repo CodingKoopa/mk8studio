@@ -7,9 +7,10 @@ ResultCode GX2ImageBase::SetupInfoStructs()
   // Set up the info structs from the format and tile mode.
   // Default to GX2_SURFACE_FORMAT_INVALID.
   m_format_info = m_format_info_list[0];
+  // bool format_info_found = false;
   for (int i = 0; i < m_format_info_list.size(); i++)
   {
-    if (m_base_header->format == static_cast<quint32>(m_format_info_list[i].id))
+    if (m_base_header.format == static_cast<quint32>(m_format_info_list[i].id))
     {
       m_format_info = m_format_info_list[i];
       m_format_info_index = i;
@@ -18,7 +19,7 @@ ResultCode GX2ImageBase::SetupInfoStructs()
   }
   // If the format couldn't be assigned to a FormatInfo, and it's not actually an invalid texture.
   if (m_format_info.id == m_format_info_list[0].id &&
-      m_base_header->format != m_format_info_list[0].id)
+      m_base_header.format != m_format_info_list[0].id)
     return ResultCode::UnsupportedFileFormat;
 
   m_shared_format_info = m_shared_format_info_list[0];
@@ -33,7 +34,7 @@ ResultCode GX2ImageBase::SetupInfoStructs()
   if (m_shared_format_info.format == m_shared_format_info_list[0].format)
     return ResultCode::UnsupportedFileFormat;
 
-  m_tile_mode_info = m_tile_mode_info_list[m_base_header->tile_mode];
+  m_tile_mode_info = m_tile_mode_info_list[m_base_header.tile_mode];
 
   // Default to a dummy value.
   m_shared_tile_mode_info = m_shared_tile_mode_info_list[0];
@@ -53,12 +54,12 @@ ResultCode GX2ImageBase::SetupInfoStructs()
 
 ResultCode GX2ImageBase::ReadImageFromData()
 {
-  return CopyImage(m_raw_image_data, m_deswizzled_image_data, false);
+  return CopyImage(&m_raw_image_data, &m_deswizzled_image_data, false);
 }
 
 ResultCode GX2ImageBase::WriteDeswizzledImageToData()
 {
-  return CopyImage(m_deswizzled_image_data, m_raw_image_data, true);
+  return CopyImage(&m_deswizzled_image_data, &m_raw_image_data, true);
 }
 
 ResultCode GX2ImageBase::ImportDDS(QString path)
@@ -76,25 +77,50 @@ ResultCode GX2ImageBase::ExportToDDS(QString path)
   dds.SetPath(path);
   dds.SetImageData(m_deswizzled_image_data);
   int bytes_written =
-      dds.WriteFile(m_base_header->width, m_base_header->height, m_base_header->depth,
-                    m_base_header->num_mips, m_element_size, m_format_info, m_shared_format_info);
+      dds.WriteFile(m_base_header.width, m_base_header.height, m_base_header.depth,
+                    m_base_header.num_mips, m_element_size, m_format_info, m_shared_format_info);
   if (bytes_written == 0)
     return ResultCode::NoBytesWritten;
   else
     return ResultCode::Success;
 }
 
-ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray*& destination, bool swizzle)
+const QList<GX2ImageBase::FormatInfo>& GX2ImageBase::GetFormatInfoList()
+{
+  return m_format_info_list;
+}
+
+const QList<GX2ImageBase::TileModeInfo>& GX2ImageBase::GetTileModeInfoList()
+{
+  return m_tile_mode_info_list;
+}
+
+const GX2ImageBase::FormatInfo& GX2ImageBase::GetFormatInfo()
+{
+  return m_format_info;
+}
+
+quint32 GX2ImageBase::GetFormatInfoIndex()
+{
+  return m_format_info_index;
+}
+
+const GX2ImageBase::TileModeInfo& GX2ImageBase::GetTileModeInfo()
+{
+  return m_tile_mode_info;
+}
+
+ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray* destination, bool swizzle)
 {
   // Temporary hack to find special textures.
-  if (m_base_header->aa_mode != 0 || static_cast<quint32>(m_tile_mode_info.thickness) > 1 ||
+  if (m_base_header.aa_mode != 0 || static_cast<quint32>(m_tile_mode_info.thickness) > 1 ||
       m_format_info.name == "GX2_SURFACE_FORMAT_INVALID" ||
       m_shared_format_info.format == Format::Invalid)
     return ResultCode::ImportantUnsupportedFileFormat;
 
   // Set up dimensions.
-  quint32 width = m_base_header->width;
-  quint32 height = m_base_header->height;
+  quint32 width = m_base_header.width;
+  quint32 height = m_base_header.height;
   if (m_shared_format_info.compressed)
   {
     // Split into 4 by 4 compressed blocks of pixels.
@@ -106,7 +132,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray*& destination,
   // a decompressed texture.
   m_element_size = m_shared_format_info.bpp / 8;
 
-  m_num_samples = 1 << m_base_header->aa_mode;
+  m_num_samples = 1 << m_base_header.aa_mode;
 
   switch (m_tile_mode_info.mode)
   {
@@ -122,7 +148,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray*& destination,
     // Physical width of a row of the whole texture /
     // Physical width of a row in one macro tile =
     // Number of macro tiles in a row of the whole texture.
-    m_macro_tiles_per_row = m_base_header->pitch / m_macro_tile_pitch;
+    m_macro_tiles_per_row = m_base_header.pitch / m_macro_tile_pitch;
 
     // Physical width of a row in one macro tile *
     // Height of one macro tile =
@@ -165,12 +191,12 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray*& destination,
     // Number of bits in the whole texture -> Bytes =
     // Number of bytes in the whole texture.
     m_num_slice_bytes =
-        BitsToBytes(m_base_header->pitch * m_base_header->height * m_shared_format_info.bpp *
+        BitsToBytes(m_base_header.pitch * m_base_header.height * m_shared_format_info.bpp *
                     static_cast<quint32>(m_tile_mode_info.thickness) * m_num_samples);
 
-    m_pipe_swizzle = Bit(m_base_header->swizzle, 8);
+    m_pipe_swizzle = Bit(m_base_header.swizzle, 8);
 
-    m_bank_swizzle = GetBits(m_base_header->swizzle, 9, 3);
+    m_bank_swizzle = GetBits(m_base_header.swizzle, 9, 3);
 
   // Fallthrough
   // (This comment is here to prevent compiler warnings.)
@@ -215,8 +241,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray*& destination,
     return ResultCode::UnsupportedFileFormat;
   }
 
-  destination = new QByteArray();
-  destination->resize(m_base_header->data_length);
+  destination->resize(m_base_header.data_length);
   destination->fill(0);
 
   for (quint32 y = 0; y < height; ++y)
@@ -422,7 +447,7 @@ quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y
   if (m_tile_mode_info.swap_banks)
   {
     static const quint32 bankSwapOrder[] = {0, 1, 3, 2, 6, 7, 5, 4, 0, 0};
-    quint64 bank_swap_width = ComputeSurfaceBankSwappedWidth(m_base_header->pitch);
+    quint64 bank_swap_width = ComputeSurfaceBankSwappedWidth(m_base_header.pitch);
     quint64 swap_index = m_macro_tile_pitch * macro_tile_index_x / bank_swap_width;
     quint64 bank_mask = m_num_banks - 1;
     bank ^= bankSwapOrder[swap_index & bank_mask];

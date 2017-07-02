@@ -2,10 +2,6 @@
 #include "FileBase.h"
 #include "GX2ImageBase.h"
 
-DDS::DDS() : m_image_data(new QByteArray())
-{
-}
-
 DDS::~DDS()
 {
   if (m_image_data_buffer)
@@ -73,7 +69,7 @@ ResultCode DDS::ReadFile()
 
   m_image_data_buffer = new char[image_data_size];
   dds_file.ReadBytes(image_data_size, m_image_data_buffer);
-  m_image_data->setRawData(m_image_data_buffer, image_data_size);
+  m_image_data.setRawData(m_image_data_buffer, image_data_size);
 
   return ResultCode::Success;
 }
@@ -206,8 +202,18 @@ int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mip
   dds_file.Write32(m_header.reserved2);
 
   // Image data
-  int image_data_bytes_written = dds_file.WriteBytes(m_image_data->data(), m_image_data->size());
+  int image_data_bytes_written = dds_file.WriteBytes(m_image_data.data(), m_image_data.size());
 
   dds_file.Save();
   return image_data_bytes_written;
+}
+
+const QByteArray& DDS::GetImageData()
+{
+  return m_image_data;
+}
+
+void DDS::SetImageData(const QByteArray& image_data)
+{
+  m_image_data = image_data;
 }
