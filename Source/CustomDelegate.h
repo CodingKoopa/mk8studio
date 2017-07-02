@@ -20,9 +20,10 @@ public:
   CustomItemDelegate(DelegateGroup delegates);
 
   QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem&,
-                        const QModelIndex& index) const;
-  void setEditorData(QWidget* editor, const QModelIndex& index) const;
-  void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const;
+                        const QModelIndex& index) const override;
+  void setEditorData(QWidget* editor, const QModelIndex& index) const override;
+  void setModelData(QWidget* editor, QAbstractItemModel* model,
+                    const QModelIndex& index) const override;
 
 private:
   DelegateGroup m_delegates;
