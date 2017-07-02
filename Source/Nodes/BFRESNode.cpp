@@ -1,4 +1,3 @@
-
 #include "BFRESNode.h"
 
 #include <QAction>

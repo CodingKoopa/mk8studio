@@ -1,10 +1,10 @@
+#include "CustomDelegate.h"
+
 #include <limits>
 
 #include <QComboBox>
 #include <QLineEdit>
 #include <QSpinBox>
-
-#include "CustomDelegate.h"
 
 CustomItemDelegate::CustomItemDelegate(CustomItemDelegate::DelegateGroup delegates)
     : m_delegates(delegates)

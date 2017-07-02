@@ -1,6 +1,7 @@
+#include "FTEX.h"
+
 #include <QImage>
 
-#include "FTEX.h"
 #include "GX2ImageBase.h"
 
 FTEX::FTEX(FileBase* file, quint64 pos) : m_file(file), m_start_offset(pos)

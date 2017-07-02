@@ -1,3 +1,5 @@
+#include "MainWindow.h"
+
 // TODO: some of these might not be necessary
 #include <QAction>
 #include <QFileDialog>
@@ -13,8 +15,6 @@
 #include <QTableView>
 #include <QTreeView>
 #include <QVBoxLayout>
-
-#include "MainWindow.h"
 
 #include "CustomDelegate.h"
 #include "Nodes/BFRESNode.h"

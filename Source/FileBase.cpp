@@ -1,7 +1,5 @@
 #include "FileBase.h"
 
-#include <QDebug>
-
 FileBase::FileBase(const QString& path)
 {
   m_file = new QFile(path);
