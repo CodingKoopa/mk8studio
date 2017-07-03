@@ -6,7 +6,7 @@
 
 #include "Common.h"
 #include "CustomDelegate.h"
-#include "FileBase.h"
+#include "File.h"
 
 class Node : public QObject
 {

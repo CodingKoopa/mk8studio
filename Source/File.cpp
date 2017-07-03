@@ -1,4 +1,4 @@
-#include "FileBase.h"
+#include "File.h"
 
 File::File(const QString& path)
 {

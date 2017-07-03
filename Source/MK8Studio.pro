@@ -15,7 +15,6 @@ SOURCES +=\
     MainWindow.cpp \
     Main.cpp \
     ImageView.cpp \
-    FileBase.cpp \
     CustomDelegate.cpp \
     Nodes/BFRESNode.cpp \
     Nodes/FTEXNode.cpp \
@@ -26,12 +25,12 @@ SOURCES +=\
     Formats/GX2ImageBase.cpp \
     Nodes/Node.cpp \
     IODialog.cpp \
-    Formats/FormatBase.cpp
+    Formats/FormatBase.cpp \
+    File.cpp
 
 HEADERS  += \
     Common.h \
     CustomDelegate.h \
-    FileBase.h \
     ImageView.h \
     MainWindow.h \
     Nodes/Node.h \
@@ -45,7 +44,8 @@ HEADERS  += \
     Formats/GX2ImageBase.h \
     IODialog.h \
     CustomStandardItem.h \
-    NonCopyable.h
+    NonCopyable.h \
+    File.h
 
 FORMS += \
     MainWindow.ui \

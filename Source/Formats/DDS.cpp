@@ -1,6 +1,6 @@
 #include "DDS.h"
 
-#include "FileBase.h"
+#include "File.h"
 #include "GX2ImageBase.h"
 
 DDS::~DDS()

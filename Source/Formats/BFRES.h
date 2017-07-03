@@ -3,7 +3,7 @@
 #include <QVector>
 
 #include "Common.h"
-#include "FileBase.h"
+#include "File.h"
 #include "FormatBase.h"
 
 class BFRES : public FormatBase

@@ -8,7 +8,7 @@
 #include <QVBoxLayout>
 
 #include "Common.h"
-#include "FileBase.h"
+#include "File.h"
 #include "Formats/BFRES.h"
 #include "Nodes/Node.h"
 

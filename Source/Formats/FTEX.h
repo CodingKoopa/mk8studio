@@ -2,7 +2,7 @@
 
 #include <QString>
 
-#include "FileBase.h"
+#include "File.h"
 #include "GX2ImageBase.h"
 
 class FTEX : public GX2ImageBase
