@@ -42,13 +42,13 @@ ResultCode BFRESNode::LoadFileTreeArea()
   m_tree_view->header()->hide();
   m_tree_view->setItemDelegate(new CustomItemDelegate(CustomItemDelegate::DelegateGroup()));
   m_tree_view->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(m_tree_view, SIGNAL(customContextMenuRequested(const QPoint&)), this,
-          SLOT(HandleTreeCustomContextMenuRequest(const QPoint&)));
+  connect(m_tree_view, &QTreeView::customContextMenuRequested, this,
+          &BFRESNode::HandleTreeCustomContextMenuRequest);
 
   m_tree_view->setModel(file_tree_model);
   // TODO: this only works with mouse clicking, i still have to figure out
   // keyboard arrow navigation
-  connect(m_tree_view, SIGNAL(clicked(QModelIndex)), this, SLOT(HandleFileTreeClick(QModelIndex)));
+  connect(m_tree_view, &QTreeView::clicked, this, &BFRESNode::HandleFileTreeClick);
 
   QVBoxLayout* file_tree_layout = new QVBoxLayout();
   file_tree_layout->addWidget(m_tree_view);
@@ -76,7 +76,7 @@ QStandardItem* BFRESNode::MakeItem()
       // Allocate a new Node derived object.
       BFRESGroupNode* group_node =
           new BFRESGroupNode(group, m_bfres, m_bfres.GetRawNodeLists()[group], this);
-      connect(group_node, SIGNAL(ConnectNode(Node*)), this, SIGNAL(ConnectNode(Node*)));
+      connect(group_node, &BFRESGroupNode::ConnectNode, this, &BFRESNode::ConnectNode);
       emit ConnectNode(group_node);
       bfres_item->appendRow(group_node->MakeItem());
     }
@@ -202,8 +202,8 @@ ResultCode BFRESNode::LoadAttributeArea()
   header_attributes_model->setRowCount(row);
   header_attributes_model->setColumnCount(2);
 
-  QObject::connect(header_attributes_model, SIGNAL(itemChanged(QStandardItem*)), this,
-                   SLOT(HandleAttributeItemChange(QStandardItem*)));
+  connect(header_attributes_model, &QStandardItemModel::itemChanged, this,
+          &BFRESNode::HandleAttributeItemChange);
 
   // at this point, the model is ready to go, and be put into a view
 

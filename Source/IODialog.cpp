@@ -27,7 +27,7 @@ IODialog::IODialog(Type type, QWidget* parent)
   setWindowTitle(io_string);
   m_ui->io_button->setText(io_string);
 
-  connect(m_ui->io_button, SIGNAL(clicked()), this, SIGNAL(StartIOAction()));
+  connect(m_ui->io_button, &QPushButton::clicked, this, &IODialog::StartIOAction);
 }
 
 IODialog::~IODialog()
@@ -44,7 +44,6 @@ void IODialog::AddGroup(QGroupBox* group)
 void IODialog::MakeOpenFilePathConnection(QLineEdit* line_edit, QPushButton* button,
                                           const QString& filter)
 {
-  // TODO: Switch to new signal/slot syntax for everything else, for consistency.
   connect(button, &QPushButton::clicked, this, [this, line_edit, filter] {
     line_edit->setText(QFileDialog::getOpenFileName(this, "Open File", QDir::homePath(), filter));
   });
@@ -53,7 +52,6 @@ void IODialog::MakeOpenFilePathConnection(QLineEdit* line_edit, QPushButton* but
 void IODialog::MakeSaveFilePathConnection(QLineEdit* line_edit, QPushButton* button,
                                           const QString& filter)
 {
-  // TODO: Switch to new signal/slot syntax for everything else, for consistency.
   connect(button, &QPushButton::clicked, this, [this, line_edit, filter] {
     line_edit->setText(QFileDialog::getSaveFileName(this, "Save File", QDir::homePath(), filter));
   });

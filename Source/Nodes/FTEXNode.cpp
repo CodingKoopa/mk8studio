@@ -20,11 +20,11 @@ FTEXNode::FTEXNode(const FTEX& ftex, QObject* parent) : Node(parent), m_ftex(fte
   m_context_menu = new QMenu;
 
   QAction* action_export = new QAction("Export", this);
-  connect(action_export, SIGNAL(triggered()), this, SLOT(HandleExportActionClick()));
+  connect(action_export, &QAction::triggered, this, &FTEXNode::HandleExportActionClick);
   m_context_menu->addAction(action_export);
 
   QAction* action_inject = new QAction("Inject", this);
-  connect(action_inject, SIGNAL(triggered()), this, SLOT(HandleInjectActionClick()));
+  connect(action_inject, &QAction::triggered, this, &FTEXNode::HandleInjectActionClick);
   m_context_menu->addAction(action_inject);
 }
 
@@ -161,8 +161,8 @@ ResultCode FTEXNode::LoadAttributeArea()
   header_attributes_model->setRowCount(row);
   header_attributes_model->setColumnCount(2);
 
-  QObject::connect(header_attributes_model, SIGNAL(itemChanged(QStandardItem*)), this,
-                   SLOT(HandleAttributeItemChange(QStandardItem*)));
+  connect(header_attributes_model, &QStandardItemModel::itemChanged, this,
+          &FTEXNode::HandleAttributeItemChange);
 
   m_table_view = new QTableView;
 
@@ -273,7 +273,7 @@ void FTEXNode::HandleExportActionClick()
   output_group->setLayout(output_layout);
   export_dialog.AddGroup(output_group);
 
-  connect(&export_dialog, SIGNAL(StartIOAction()), this, SLOT(HandleExportButtonClick()));
+  connect(&export_dialog, &IODialog::StartIOAction, this, &FTEXNode::HandleExportButtonClick);
   export_dialog.exec();
 }
 
@@ -331,7 +331,7 @@ void FTEXNode::HandleInjectActionClick()
 
   inject_dialog.AddGroup(output_group);
 
-  connect(&inject_dialog, SIGNAL(StartIOAction()), this, SLOT(HandleInjectButtonClick()));
+  connect(&inject_dialog, &IODialog::StartIOAction, this, &FTEXNode::HandleInjectButtonClick);
   inject_dialog.exec();
 }
 

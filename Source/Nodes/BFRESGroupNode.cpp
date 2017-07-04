@@ -41,7 +41,7 @@ QStandardItem* BFRESGroupNode::MakeListItemFromRawList()
       FTEX ftex(m_bfres.GetFile(), m_bfres.GetRawNodeLists()[m_group][row]->data_ptr);
       ftex.SetName(m_bfres.GetRawNodeLists()[m_group][row]->name);
       FTEXNode* child_node = new FTEXNode(ftex, this);
-      connect(child_node, SIGNAL(ConnectNode(Node*)), this, SIGNAL(ConnectNode(Node*)));
+      connect(child_node, &FTEXNode::ConnectNode, this, &BFRESGroupNode::ConnectNode);
       emit ConnectNode(child_node);
       child_item = child_node->MakeItem();
       break;

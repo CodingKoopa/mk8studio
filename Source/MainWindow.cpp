@@ -79,7 +79,7 @@ void MainWindow::OpenFile(const QString& path)
   m_current_file_node = new BFRESNode(bfres, this);
 
   // Make the connections for the BFRES node and any children.
-  connect(m_current_file_node, SIGNAL(ConnectNode(Node*)), this, SLOT(MakeNodeConnections(Node*)));
+  connect(m_current_file_node, &Node::ConnectNode, this, &MainWindow::MakeNodeConnections);
 
   // Manually make the connections for the BFRES parent node.
   MakeNodeConnections(m_current_file_node);
@@ -94,13 +94,10 @@ void MainWindow::OpenFile(const QString& path)
 
 void MainWindow::MakeNodeConnections(Node* node)
 {
-  connect(node, SIGNAL(NewFileTreeArea(QScrollArea*)), this,
-          SLOT(UpdateFileTreeContainer(QScrollArea*)));
-  connect(node, SIGNAL(NewAttributesArea(QScrollArea*)), this,
-          SLOT(UpdateSectionsContainer(QScrollArea*)));
-  connect(node, SIGNAL(NewMainWidget(QWidget*)), this, SLOT(UpdateMainWidget(QWidget*)));
-  connect(node, SIGNAL(NewStatus(ResultCode, QString)), this,
-          SLOT(UpdateStatus(ResultCode, QString)));
+  connect(node, &Node::NewFileTreeArea, this, &MainWindow::UpdateFileTreeContainer);
+  connect(node, &Node::NewAttributesArea, this, &MainWindow::UpdateSectionsContainer);
+  connect(node, &Node::NewMainWidget, this, &MainWindow::UpdateMainWidget);
+  connect(node, &Node::NewStatus, this, &MainWindow::UpdateStatus);
 }
 
 void MainWindow::UpdateFileTreeContainer(QScrollArea* area)
