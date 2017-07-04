@@ -7,46 +7,50 @@ ResultCode GX2ImageBase::SetupInfoStructs()
   // Set up the info structs from the format and tile mode.
   // Default to GX2_SURFACE_FORMAT_INVALID.
   m_format_info = m_format_info_list[0];
-  // bool format_info_found = false;
+  bool format_info_found = false;
   for (int i = 0; i < m_format_info_list.size(); ++i)
   {
     if (m_base_header.format == static_cast<quint32>(m_format_info_list[i].id))
     {
       m_format_info = m_format_info_list[i];
       m_format_info_index = i;
+      format_info_found = true;
       break;
     }
   }
   // If the format couldn't be assigned to a FormatInfo, and it's not actually an invalid texture.
-  if (m_format_info.id == m_format_info_list[0].id &&
-      m_base_header.format != m_format_info_list[0].id)
+  if (!format_info_found)
     return ResultCode::UnsupportedFileFormat;
 
   m_shared_format_info = m_shared_format_info_list[0];
+  bool shared_format_info_found = false;
   foreach (const SharedFormatInfo& shared_format_info, m_shared_format_info_list)
   {
     if (m_format_info.format == shared_format_info.format)
     {
       m_shared_format_info = shared_format_info;
+      shared_format_info_found = true;
       break;
     }
   }
-  if (m_shared_format_info.format == m_shared_format_info_list[0].format)
+  if (!shared_format_info_found)
     return ResultCode::UnsupportedFileFormat;
 
   m_tile_mode_info = m_tile_mode_info_list[m_base_header.tile_mode];
 
   // Default to a dummy value.
   m_shared_tile_mode_info = m_shared_tile_mode_info_list[0];
-  for (int i = 0; i < m_shared_tile_mode_info_list.size(); ++i)
+  bool shared_tile_mode_info_found = false;
+  foreach (const SharedTileModeInfo& shared_tile_mode_info, m_shared_tile_mode_info_list)
   {
-    if (m_tile_mode_info.mode == m_shared_tile_mode_info_list[i].mode)
+    if (m_tile_mode_info.mode == shared_tile_mode_info.mode)
     {
-      m_shared_tile_mode_info = m_shared_tile_mode_info_list[i];
+      m_shared_tile_mode_info = shared_tile_mode_info;
+      shared_tile_mode_info_found = true;
       break;
     }
   }
-  if (m_shared_tile_mode_info.mode == m_shared_tile_mode_info_list[0].mode)
+  if (!shared_tile_mode_info_found)
     return ResultCode::UnsupportedFileFormat;
 
   return ResultCode::Success;
