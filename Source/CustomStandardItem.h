@@ -11,13 +11,9 @@ class CustomStandardItem : public QStandardItem
 public:
   CustomStandardItem(QString string) : QStandardItem(string) {}
 
-  void SetFunction(const std::function<void(QString text)>& value = {}) { m_function = value; }
+  void ExecuteFunction();
 
-  void ExecuteFunction()
-  {
-    if (m_function)
-      m_function(text());
-  }
+  void SetFunction(const std::function<void(QString text)>& value = {});
 
 private:
   std::function<void(QString text)> m_function;

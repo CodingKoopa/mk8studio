@@ -38,7 +38,6 @@ QStandardItem* FTEXNode::MakeItem()
 
 ResultCode FTEXNode::LoadAttributeArea()
 {
-  QStandardItemModel* header_attributes_model = new QStandardItemModel();
   if (!m_header_loaded)
   {
     ResultCode res = m_ftex.ReadHeader();
@@ -49,15 +48,12 @@ ResultCode FTEXNode::LoadAttributeArea()
     }
   }
   m_ftex_header = m_ftex.GetHeader();
-  int row = 0;
+  quint32 row = 0;
 
-  // Magic
-  header_attributes_model->setItem(row, 0, new QStandardItem("Magic File Identifier"));
-  CustomStandardItem* magic_item = new CustomStandardItem(m_ftex_header.magic);
-  magic_item->SetFunction([this](QString text) { m_ftex_header.magic = text; });
-  header_attributes_model->setItem(row, 1, magic_item);
-  m_delegate_group.line_edit_delegates << 0;
-  ++row;
+  QStandardItemModel* header_attributes_model = new QStandardItemModel();
+  m_delegate_group = CustomItemDelegate::DelegateGroup();
+
+  // TODO: Hex Spinbox
 
   // Header Offset
   header_attributes_model->setItem(row, 0, new QStandardItem("Header Offset"));
@@ -65,40 +61,53 @@ ResultCode FTEXNode::LoadAttributeArea()
       row, 1, new QStandardItem("0x" + QString::number(m_ftex.GetStart(), 16)));
   ++row;
 
-  header_attributes_model->setItem(row, 0, new QStandardItem("Texture Offset"));
-  header_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.data_offset, 16)));
+  // Magic
+  header_attributes_model->setItem(row, 0, new QStandardItem("Magic File Identifier"));
+  CustomStandardItem* magic_item = new CustomStandardItem(m_ftex_header.magic);
+  magic_item->SetFunction([this](QString text) { m_ftex_header.magic = text; });
+  header_attributes_model->setItem(row, 1, magic_item);
+  m_delegate_group.line_edit_delegates << row;
   ++row;
 
-  header_attributes_model->setItem(row, 0, new QStandardItem("Texture Length"));
+  // Dimension
+  // (TODO: Enum combo box for this.)
+  header_attributes_model->setItem(row, 0, new QStandardItem("Dimension"));
   header_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.data_length, 16)));
+      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.dimension, 16)));
   ++row;
 
-  header_attributes_model->setItem(row, 0, new QStandardItem("Mipmap Texture Offset"));
-  header_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.mipmap_offset, 16)));
-  ++row;
-
-  header_attributes_model->setItem(row, 0, new QStandardItem("Mipmap Size"));
-  header_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.mipmap_length, 16)));
-  ++row;
-
-  header_attributes_model->setItem(row, 0, new QStandardItem("Number of Mipmaps"));
-  header_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.num_mips, 16)));
-  ++row;
-
+  // Texture Width
   header_attributes_model->setItem(row, 0, new QStandardItem("Width"));
-  header_attributes_model->setItem(row, 1, new QStandardItem(QString::number(m_ftex_header.width)));
+  CustomStandardItem* width_item = new CustomStandardItem(QString::number(m_ftex_header.width));
+  width_item->SetFunction([this](QString text) { m_ftex_header.width = text.toUInt(); });
+  header_attributes_model->setItem(row, 1, width_item);
+  m_delegate_group.spin_box_delegates << row;
   ++row;
 
+  // Texture Height
   header_attributes_model->setItem(row, 0, new QStandardItem("Height"));
-  header_attributes_model->setItem(row, 1,
-                                   new QStandardItem(QString::number(m_ftex_header.height)));
+  CustomStandardItem* height_item = new CustomStandardItem(QString::number(m_ftex_header.height));
+  height_item->SetFunction([this](QString text) { m_ftex_header.height = text.toUInt(); });
+  header_attributes_model->setItem(row, 1, height_item);
+  m_delegate_group.spin_box_delegates << row;
   ++row;
 
+  // Texture Depth
+  header_attributes_model->setItem(row, 0, new QStandardItem("Depth"));
+  CustomStandardItem* depth_item = new CustomStandardItem(QString::number(m_ftex_header.depth));
+  depth_item->SetFunction([this](QString text) { m_ftex_header.depth = text.toUInt(); });
+  header_attributes_model->setItem(row, 1, depth_item);
+  ++row;
+
+  // Number Of Mipmaps
+  header_attributes_model->setItem(row, 0, new QStandardItem("Number of Mipmaps"));
+  CustomStandardItem* num_mipmaps_item =
+      new CustomStandardItem(QString::number(m_ftex_header.num_mips));
+  num_mipmaps_item->SetFunction([this](QString text) { m_ftex_header.num_mips = text.toUInt(); });
+  header_attributes_model->setItem(row, 1, num_mipmaps_item);
+  ++row;
+
+  // Texture Format
   header_attributes_model->setItem(row, 0, new QStandardItem("Format"));
   QList<FTEX::FormatInfo> format_info_list = m_ftex.GetFormatInfoList();
   QStandardItemModel* format_combo_box_entries = new QStandardItemModel(format_info_list.size(), 0);
@@ -107,55 +116,253 @@ ResultCode FTEXNode::LoadAttributeArea()
   m_delegate_group.combo_box_entries << format_combo_box_entries;
   m_delegate_group.combo_box_delegates << row;
   m_delegate_group.combo_box_selections << m_ftex.GetFormatInfoIndex();
-  header_attributes_model->setItem(row, 1, new QStandardItem(m_ftex.GetFormatInfo().name));
+  CustomStandardItem* format_item = new CustomStandardItem(m_ftex.GetFormatInfo().name);
+  format_item->SetFunction(
+      [this](QString text) { m_ftex_header.format = m_ftex.GetFormatInfoFromName(text); });
+  header_attributes_model->setItem(row, 1, format_item);
   ++row;
 
-  header_attributes_model->setItem(row, 0, new QStandardItem("Tiling"));
-  QList<FTEX::TileModeInfo> tile_mode_info_list = m_ftex.GetTileModeInfoList();
-  QStandardItemModel* tiling_combo_box_entries =
-      new QStandardItemModel(tile_mode_info_list.size(), 0);
-  for (int tile_mode = 0; tile_mode < tile_mode_info_list.size(); ++tile_mode)
-    tiling_combo_box_entries->setItem(tile_mode, new QStandardItem(m_ftex.GetTileModeInfo().name));
-  m_delegate_group.combo_box_entries << tiling_combo_box_entries;
-  m_delegate_group.combo_box_delegates << row;
-  m_delegate_group.combo_box_selections << m_ftex_header.tile_mode;
-  header_attributes_model->setItem(
-      row, 1, new QStandardItem(tile_mode_info_list[m_ftex_header.tile_mode].name));
-  ++row;
-
-  header_attributes_model->setItem(row, 0, new QStandardItem("Usage"));
-  header_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.usage, 16)));
-  ++row;
-
+  // Anti-Aliasing
+  // (TODO: Enum combo box for this.)
   header_attributes_model->setItem(row, 0, new QStandardItem("AA Mode"));
   header_attributes_model->setItem(
       row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.aa_mode, 16)));
   ++row;
 
+  // Usage
+  // (TODO: Enum combo box for this.)
+  header_attributes_model->setItem(row, 0, new QStandardItem("Usage"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.usage, 16)));
+  ++row;
+
+  // Texture Size
+  header_attributes_model->setItem(row, 0, new QStandardItem("Texture Size"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.data_length, 16)));
+  ++row;
+
+  header_attributes_model->setItem(row, 0, new QStandardItem("Texture Runtime Pointer"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.data_offset_runtime, 16)));
+  ++row;
+
+  // Mipmap Size
+  header_attributes_model->setItem(row, 0, new QStandardItem("Mipmap Size"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.mipmap_length, 16)));
+  ++row;
+
+  header_attributes_model->setItem(row, 0, new QStandardItem("Mipmap Runtime Pointer"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.mipmap_offset_runtime, 16)));
+  ++row;
+
+  // Tile Mode
+  header_attributes_model->setItem(row, 0, new QStandardItem("Tile Mode"));
+  QList<FTEX::TileModeInfo> tile_mode_info_list = m_ftex.GetTileModeInfoList();
+  QStandardItemModel* tiling_combo_box_entries =
+      new QStandardItemModel(tile_mode_info_list.size(), 0);
+  for (qint32 tile_mode = 0; tile_mode < tile_mode_info_list.size(); ++tile_mode)
+    tiling_combo_box_entries->setItem(tile_mode,
+                                      new QStandardItem(tile_mode_info_list[tile_mode].name));
+  m_delegate_group.combo_box_entries << tiling_combo_box_entries;
+  m_delegate_group.combo_box_delegates << row;
+  m_delegate_group.combo_box_selections << m_ftex_header.tile_mode;
+  CustomStandardItem* tile_mode_item = new CustomStandardItem(m_ftex.GetFormatInfo().name);
+  tile_mode_item->SetFunction(
+      [this](QString text) { m_ftex_header.tile_mode = m_ftex.GetTileModeInfoFromName(text); });
+  header_attributes_model->setItem(row, 1, tile_mode_item);
+  ++row;
+
+  // Swizzle
   header_attributes_model->setItem(row, 0, new QStandardItem("Swizzle"));
   header_attributes_model->setItem(
       row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.swizzle, 16)));
   ++row;
 
-  header_attributes_model->setItem(row, 0, new QStandardItem("Depth"));
-  header_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.depth, 16)));
-  ++row;
-
-  header_attributes_model->setItem(row, 0, new QStandardItem("Dim"));
-  header_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.dim, 16)));
-  ++row;
-
-  header_attributes_model->setItem(row, 0, new QStandardItem("Pitch"));
-  header_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.pitch, 16)));
-  ++row;
-
+  // Alignment
   header_attributes_model->setItem(row, 0, new QStandardItem("Alignment"));
   header_attributes_model->setItem(
       row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.alignment, 16)));
+  ++row;
+
+  // Pitch
+  header_attributes_model->setItem(row, 0, new QStandardItem("Pitch"));
+  CustomStandardItem* pitch_item = new CustomStandardItem(QString::number(m_ftex_header.pitch));
+  pitch_item->SetFunction([this](QString text) { m_ftex_header.pitch = text.toUInt(); });
+  header_attributes_model->setItem(row, 1, pitch_item);
+  m_delegate_group.spin_box_delegates << row;
+  ++row;
+
+  // Mipmap Offsets
+  for (quint32 mipmap = 0; mipmap < m_ftex_header.num_mips; ++mipmap)
+  {
+    header_attributes_model->setItem(row, 0,
+                                     new QStandardItem("Mipmap " + QString::number(mipmap)));
+    header_attributes_model->setItem(
+        row, 1,
+        new QStandardItem("0x" + QString::number(m_ftex_header.mipmap_offsets[mipmap], 16)));
+    ++row;
+  }
+
+  // First Mipmap
+  header_attributes_model->setItem(row, 0, new QStandardItem("First Mipmap"));
+  header_attributes_model->setItem(row, 1,
+                                   new QStandardItem(QString::number(m_ftex_header.first_mipmap)));
+  ++row;
+
+  // Number Of Mipmaps Again
+  header_attributes_model->setItem(row, 0, new QStandardItem("Number of Mipmaps"));
+  CustomStandardItem* num_mipmaps_alt_item =
+      new CustomStandardItem(QString::number(m_ftex_header.num_mips_alt));
+  num_mipmaps_alt_item->SetFunction(
+      [this](QString text) { m_ftex_header.num_mips_alt = text.toUInt(); });
+  header_attributes_model->setItem(row, 1, num_mipmaps_alt_item);
+  m_delegate_group.spin_box_delegates << row;
+  ++row;
+
+  // Number of Slices
+  header_attributes_model->setItem(row, 0, new QStandardItem("Number of Slices"));
+  CustomStandardItem* num_slices_item =
+      new CustomStandardItem(QString::number(m_ftex_header.num_slices));
+  num_slices_item->SetFunction([this](QString text) { m_ftex_header.num_slices = text.toUInt(); });
+  header_attributes_model->setItem(row, 1, num_slices_item);
+  m_delegate_group.spin_box_delegates << row;
+  ++row;
+
+  QVector<QString> component_name_list = m_ftex.GetComponentNameList();
+  QStandardItemModel* component_selector_combo_box_entries = new QStandardItemModel(6, 0);
+  component_selector_combo_box_entries->setItem(0, new QStandardItem(component_name_list[0]));
+  component_selector_combo_box_entries->setItem(1, new QStandardItem(component_name_list[1]));
+  component_selector_combo_box_entries->setItem(2, new QStandardItem(component_name_list[2]));
+  component_selector_combo_box_entries->setItem(3, new QStandardItem(component_name_list[3]));
+  component_selector_combo_box_entries->setItem(4, new QStandardItem(component_name_list[4]));
+  component_selector_combo_box_entries->setItem(5, new QStandardItem(component_name_list[5]));
+
+  // Red Channel Selector
+  header_attributes_model->setItem(row, 0, new QStandardItem("Texture Red Channel Binding"));
+  m_delegate_group.combo_box_entries << component_selector_combo_box_entries;
+  m_delegate_group.combo_box_delegates << row;
+  m_delegate_group.combo_box_selections << m_ftex_header.red_channel_component;
+  CustomStandardItem* red_channel_component_item =
+      new CustomStandardItem(component_name_list[m_ftex_header.red_channel_component]);
+  red_channel_component_item->SetFunction([this](QString text) {
+    m_ftex_header.red_channel_component = m_ftex.GetComponentIDFromName(text);
+  });
+  header_attributes_model->setItem(row, 1, red_channel_component_item);
+  ++row;
+
+  // Green Channel Selector
+  header_attributes_model->setItem(row, 0, new QStandardItem("Texture Green Channel Binding"));
+  m_delegate_group.combo_box_entries << component_selector_combo_box_entries;
+  m_delegate_group.combo_box_delegates << row;
+  m_delegate_group.combo_box_selections << m_ftex_header.green_channel_component;
+  CustomStandardItem* green_channel_component_item =
+      new CustomStandardItem(component_name_list[m_ftex_header.green_channel_component]);
+  green_channel_component_item->SetFunction([this](QString text) {
+    m_ftex_header.green_channel_component = m_ftex.GetComponentIDFromName(text);
+  });
+  header_attributes_model->setItem(row, 1, green_channel_component_item);
+  ++row;
+
+  // Blue Channel Selector
+  header_attributes_model->setItem(row, 0, new QStandardItem("Texture Blue Channel Binding"));
+  m_delegate_group.combo_box_entries << component_selector_combo_box_entries;
+  m_delegate_group.combo_box_delegates << row;
+  m_delegate_group.combo_box_selections << m_ftex_header.blue_channel_component;
+  CustomStandardItem* blue_channel_component_item =
+      new CustomStandardItem(component_name_list[m_ftex_header.blue_channel_component]);
+  blue_channel_component_item->SetFunction([this](QString text) {
+    m_ftex_header.blue_channel_component = m_ftex.GetComponentIDFromName(text);
+  });
+  header_attributes_model->setItem(row, 1, blue_channel_component_item);
+  ++row;
+
+  // Alpha Channel Selector
+  header_attributes_model->setItem(row, 0, new QStandardItem("Texture Alpha Channel Binding"));
+  m_delegate_group.combo_box_entries << component_selector_combo_box_entries;
+  m_delegate_group.combo_box_delegates << row;
+  m_delegate_group.combo_box_selections << m_ftex_header.alpha_channel_component;
+  CustomStandardItem* alpha_channel_component_item =
+      new CustomStandardItem(component_name_list[m_ftex_header.alpha_channel_component]);
+  alpha_channel_component_item->SetFunction([this](QString text) {
+    m_ftex_header.alpha_channel_component = m_ftex.GetComponentIDFromName(text);
+  });
+  header_attributes_model->setItem(row, 1, alpha_channel_component_item);
+  ++row;
+
+  // Texture Registers
+  for (qint32 texture_register = 0; texture_register < m_ftex_header.registers.size();
+       ++texture_register)
+  {
+    header_attributes_model->setItem(
+        row, 0, new QStandardItem("Register " + QString::number(texture_register)));
+    header_attributes_model->setItem(
+        row, 1,
+        new QStandardItem("0x" + QString::number(m_ftex_header.registers[texture_register], 16)));
+    ++row;
+  }
+
+  // Texture Runtime Handle
+  header_attributes_model->setItem(row, 0, new QStandardItem("Texture Runtime Handle"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.texture_handle_runtime, 16)));
+  ++row;
+
+  // Array Length
+  header_attributes_model->setItem(row, 0, new QStandardItem("Array Length"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.array_length, 16)));
+  ++row;
+
+  // File Name Offset
+  header_attributes_model->setItem(row, 0, new QStandardItem("File Name Offset"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.file_name_offset, 16)));
+  ++row;
+
+  // File Path Offset
+  header_attributes_model->setItem(row, 0, new QStandardItem("File Path Offset"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.file_path_offset, 16)));
+  ++row;
+
+  // Texture Offset
+  header_attributes_model->setItem(row, 0, new QStandardItem("Texture Data Offset"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.data_offset, 16)));
+  ++row;
+
+  // Mipmap Offset
+  header_attributes_model->setItem(row, 0, new QStandardItem("Mipmap Data Offset"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.file_path_offset, 16)));
+  ++row;
+
+  // User Data Index Group Offset
+  header_attributes_model->setItem(row, 0, new QStandardItem("User Data Index Group Offset"));
+  header_attributes_model->setItem(
+      row, 1,
+      new QStandardItem("0x" + QString::number(m_ftex_header.user_data_index_group_offset, 16)));
+  ++row;
+
+  // User Data Entry Count
+  header_attributes_model->setItem(row, 0, new QStandardItem("User Data Entry Count"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.user_data_entry_count, 16)));
+  ++row;
+
+  // Texture Offset
+  header_attributes_model->setItem(row, 0, new QStandardItem("Texture Offset"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.data_offset, 16)));
+  ++row;
+
+  // Mipmap Offset
+  header_attributes_model->setItem(row, 0, new QStandardItem("Mipmap Offset"));
+  header_attributes_model->setItem(
+      row, 1, new QStandardItem("0x" + QString::number(m_ftex_header.mipmap_section_offset, 16)));
   ++row;
 
   header_attributes_model->setRowCount(row);
@@ -226,6 +433,7 @@ void FTEXNode::HandleAttributeItemChange(QStandardItem* item)
     custom_item->ExecuteFunction();
 
   m_ftex.SetHeader(m_ftex_header);
+  m_ftex.SetupInfoStructs();
 }
 
 void FTEXNode::HandleExportActionClick()

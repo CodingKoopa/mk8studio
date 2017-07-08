@@ -48,7 +48,7 @@ public:
                 quint32 element_size, GX2ImageBase::FormatInfo format_info,
                 GX2ImageBase::SharedFormatInfo shared_format_info);
 
-  const QByteArray& GetImageData();
+  const QByteArray& GetImageData() const;
   void SetImageData(const QByteArray& image_data);
 
 private:

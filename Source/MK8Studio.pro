@@ -26,7 +26,8 @@ SOURCES +=\
     Nodes/Node.cpp \
     IODialog.cpp \
     Formats/FormatBase.cpp \
-    File.cpp
+    File.cpp \
+    CustomStandardItem.cpp
 
 HEADERS  += \
     Common.h \

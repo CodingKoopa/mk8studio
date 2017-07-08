@@ -22,7 +22,7 @@ public:
 
 private:
   FTEX m_ftex;
-  FTEX::FTEXHeader m_ftex_header;
+  FTEX::Header m_ftex_header;
 
   // Unlike the other section containers for other nodes, this one is reused for the injection
   // dialog, so it's a member variable.

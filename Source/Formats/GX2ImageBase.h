@@ -95,6 +95,7 @@ public:
   {
     virtual ~ImageHeaderBase() {}
     quint32 data_length;
+    quint32 mipmap_length;
     quint32 width;
     quint32 height;
     quint32 pitch;
@@ -118,12 +119,14 @@ public:
   ResultCode ImportDDS(QString path);
   ResultCode ExportToDDS(QString path);
 
-  const QList<FormatInfo>& GetFormatInfoList();
-  const QList<TileModeInfo>& GetTileModeInfoList();
+  const QList<FormatInfo>& GetFormatInfoList() const;
+  quint32 GetFormatInfoFromName(const QString& name) const;
+  const QList<TileModeInfo>& GetTileModeInfoList() const;
+  quint32 GetTileModeInfoFromName(const QString& name) const;
 
-  const FormatInfo& GetFormatInfo();
-  quint32 GetFormatInfoIndex();
-  const TileModeInfo& GetTileModeInfo();
+  const FormatInfo& GetFormatInfo() const;
+  quint32 GetFormatInfoIndex() const;
+  const TileModeInfo& GetTileModeInfo() const;
 
 protected:
   ImageHeaderBase m_base_header;

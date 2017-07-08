@@ -10,11 +10,11 @@ class CustomItemDelegate : public QItemDelegate
 public:
   struct DelegateGroup
   {
-    QList<int> line_edit_delegates;
-    QList<int> spin_box_delegates;
-    QList<int> combo_box_delegates;
-    QList<QStandardItemModel*> combo_box_entries;
-    QList<int> combo_box_selections;
+    QVector<int> line_edit_delegates;
+    QVector<int> spin_box_delegates;
+    QVector<int> combo_box_delegates;
+    QVector<QStandardItemModel*> combo_box_entries;
+    QVector<int> combo_box_selections;
   };
 
   CustomItemDelegate(DelegateGroup delegates);

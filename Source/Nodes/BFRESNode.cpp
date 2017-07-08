@@ -11,6 +11,7 @@
 #include "BFRESGroupNode.h"
 #include "Common.h"
 #include "CustomDelegate.h"
+#include "CustomStandardItem.h"
 #include "ImageView.h"
 
 BFRESNode::BFRESNode(const BFRES& bfres, QObject* parent) : Node(parent), m_bfres(bfres)
@@ -95,10 +96,13 @@ ResultCode BFRESNode::LoadAttributeArea()
 
   // Magic
   header_attributes_model->setItem(row, 0, new QStandardItem("Magic File Identifier"));
-  QStandardItem* magicValueItem = new QStandardItem(m_bfres_header.magic);
-  header_attributes_model->setItem(row, 1, magicValueItem);
+  CustomStandardItem* magic_item = new CustomStandardItem(m_bfres_header.magic);
+  magic_item->SetFunction([this](QString value) { m_bfres_header.magic = value; });
+  header_attributes_model->setItem(row, 1, magic_item);
   m_delegate_group.line_edit_delegates << row;
   ++row;
+
+  // TODO: Add proper entries for the unknowns, as some are found now.
 
   // Unknown A
   header_attributes_model->setItem(row, 0, new QStandardItem("Unknown A"));
@@ -140,30 +144,28 @@ ResultCode BFRESNode::LoadAttributeArea()
   header_attributes_model->setItem(row, 0, new QStandardItem("Endianness"));
   QStandardItemModel* endian_entries = new QStandardItemModel(2, 0);
   // Make a list of possible entries for the endianness
-  endian_entries->setItem(0, 0, new QStandardItem("Big"));
-  endian_entries->setItem(1, 0, new QStandardItem("Little"));
+  endian_entries->setItem(0, 0, new QStandardItem("Little Endian"));
+  endian_entries->setItem(1, 0, new QStandardItem("Big Endian"));
   m_delegate_group.combo_box_entries << endian_entries;
   m_delegate_group.combo_box_delegates << row;
 
-  QStandardItem* endianness_item = new QStandardItem();
+  CustomStandardItem* endianness_item =
+      new CustomStandardItem(m_bfres.GetEndianNameFromValue(m_bfres_header.bom));
 
-  if (m_bfres_header.bom == 0xFEFF)
+  switch (static_cast<BFRES::Endianness>(m_bfres_header.bom))
   {
-    // Visually set text shown without the combobox activated.
-    endianness_item->setText("Big");
-    // Internally set index
+  case BFRES::Endianness::Little:
     m_delegate_group.combo_box_selections << 0;
-  }
-  else if (m_bfres_header.bom == 0xFFFE)
-  {
-    endianness_item->setText("Little");
+    break;
+  case BFRES::Endianness::Big:
     m_delegate_group.combo_box_selections << 1;
-  }
-  else
-  {
+    break;
+  default:
     NewStatus(ResultCode::IncorrectBFRESEndianness);
     return ResultCode::IncorrectBFRESEndianness;
   }
+  endianness_item->SetFunction(
+      [this](QString value) { m_bfres_header.bom = m_bfres.GetEndianValueFromName(value); });
   header_attributes_model->setItem(row, 1, endianness_item);
   ++row;
 
@@ -248,22 +250,9 @@ void BFRESNode::HandleAttributeItemChange(QStandardItem* item)
   qDebug() << "Item changed. Row " << item->row() << " column " << item->column();
 #endif
 
-  if (m_delegate_group.line_edit_delegates.contains(item->row()))
-  {
-    if (item->row() == 0)
-      m_bfres_header.magic = item->text();
-  }
-  else if (m_delegate_group.combo_box_delegates.contains(item->row()))
-  {
-    // TODO: compare to emun instead of hardcoded numbers
-    if (item->row() == 1)
-    {
-      if (item->text() == "Big")
-        m_bfres_header.bom = 0xFEFF;
-      else if (item->text() == "Little")
-        m_bfres_header.bom = 0xFFFE;
-    }
-  }
+  CustomStandardItem* custom_item = dynamic_cast<CustomStandardItem*>(item);
+  if (custom_item)
+    custom_item->ExecuteFunction();
+
   m_bfres.SetHeader(m_bfres_header);
-  // TODO: spin box reaction
 }

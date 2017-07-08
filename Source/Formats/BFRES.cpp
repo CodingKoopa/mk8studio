@@ -43,17 +43,17 @@ ResultCode BFRES::ReadHeader()
   // 00 00 00 00 4      4        read32()
   m_header.bom = m_file->Read16();
   m_header.unknown_e = m_file->Read16();
-  m_header.length = m_file->Read32();
-  m_header.alignment = m_file->Read32();
-  m_header.file_name_offset = m_file->Read32RelativeOffset();
-  m_header.string_table_length = m_file->Read32();
-  m_header.string_table_offset = m_file->Read32RelativeOffset();
+  m_header.length = m_file->ReadU32();
+  m_header.alignment = m_file->ReadU32();
+  m_header.file_name_offset = m_file->ReadU32RelativeOffset();
+  m_header.string_table_length = m_file->ReadU32();
+  m_header.string_table_offset = m_file->ReadU32RelativeOffset();
   for (int i = 0; i < 12; ++i)
-    m_header.file_offsets << m_file->Read32RelativeOffset();
+    m_header.file_offsets << m_file->ReadU32RelativeOffset();
   for (int i = 0; i < 12; ++i)
     m_header.file_counts << m_file->Read16();
 
-  m_header.unknown_f = m_file->Read32();
+  m_header.unknown_f = m_file->ReadU32();
 
   if (m_file->Pos() != 0x6C)
     return ResultCode::IncorrectHeaderSize;
@@ -86,8 +86,8 @@ ResultCode BFRES::ReadIndexGroups()
 #endif
     m_file->Seek(m_header.file_offsets[group]);
 
-    m_index_group_headers[group].length = m_file->Read32();
-    m_index_group_headers[group].num_entries = m_file->Read32();
+    m_index_group_headers[group].length = m_file->ReadU32();
+    m_index_group_headers[group].num_entries = m_file->ReadU32();
 
     // +1 because the number of entries excludes the root node
     m_raw_node_lists[group].resize(m_index_group_headers[group].num_entries + 1);
@@ -128,6 +128,29 @@ const BFRES::Header& BFRES::GetHeader() const
 void BFRES::SetHeader(const Header& header)
 {
   m_header = header;
+}
+
+QString BFRES::GetEndianNameFromValue(quint32 value)
+{
+  switch (static_cast<BFRES::Endianness>(value))
+  {
+  case Endianness::Little:
+    return "Little Endian";
+  case Endianness::Big:
+    return "Big Endian";
+  default:
+    break;
+  }
+  return "";
+}
+
+quint32 BFRES::GetEndianValueFromName(const QString& name)
+{
+  if (name == "Little Endian")
+    return static_cast<quint32>(Endianness::Little);
+  else if (name == "Little Endian")
+    return static_cast<quint32>(Endianness::Big);
+  return 0;
 }
 
 File* BFRES::GetFile() const
@@ -203,11 +226,11 @@ BFRES::Node* BFRES::ReadNodeAtOffset(quint64 offset)
 {
   m_file->Seek(offset);
   Node* node = new Node;
-  node->search_value = m_file->Read32();
+  node->search_value = m_file->ReadU32();
   node->left_index = m_file->Read16();
   node->right_index = m_file->Read16();
-  node->name_ptr = m_file->Read32RelativeOffset();
-  node->data_ptr = m_file->Read32RelativeOffset();
+  node->name_ptr = m_file->ReadU32RelativeOffset();
+  node->data_ptr = m_file->ReadU32RelativeOffset();
   quint64 pos = m_file->Pos();
   m_file->Seek(node->name_ptr);
   if (node->name_ptr)

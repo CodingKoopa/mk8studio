@@ -61,11 +61,20 @@ public:
     FTEX = 1
   };
 
+  enum class Endianness
+  {
+    Little = 0xFEFF,
+    Big = 0xFFFE
+  };
+
   ResultCode ReadHeader();
   ResultCode ReadIndexGroups();
 
   const Header& GetHeader() const;
   void SetHeader(const Header& header);
+
+  QString GetEndianNameFromValue(quint32 value);
+  quint32 GetEndianValueFromName(const QString& name);
 
   File* GetFile() const;
 

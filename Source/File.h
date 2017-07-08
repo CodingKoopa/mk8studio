@@ -34,8 +34,10 @@ public:
 
   quint8 Read8();
   quint16 Read16();
-  quint32 Read32();
-  quint32 Read32RelativeOffset();
+  quint32 ReadU32();
+  qint32 ReadS32();
+  quint32 ReadU32RelativeOffset();
+  qint32 ReadS32RelativeOffset();
   void ReadBytes(quint32 len, char* buffer);
   QString ReadStringASCII(quint32 len = 0);
 

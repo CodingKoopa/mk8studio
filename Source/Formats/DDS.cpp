@@ -14,27 +14,27 @@ ResultCode DDS::ReadFile()
   File dds_file(m_path);
   dds_file.SetByteOrder(QDataStream::LittleEndian);
   m_header.magic = dds_file.ReadStringASCII(4);
-  m_header.header_size = dds_file.Read32();
-  m_header.flags = dds_file.Read32();
-  m_header.height = dds_file.Read32();
-  m_header.width = dds_file.Read32();
-  m_header.pitch_or_linear_size = dds_file.Read32();
-  m_header.depth = dds_file.Read32();
-  m_header.num_mips = dds_file.Read32();
+  m_header.header_size = dds_file.ReadU32();
+  m_header.flags = dds_file.ReadU32();
+  m_header.height = dds_file.ReadU32();
+  m_header.width = dds_file.ReadU32();
+  m_header.pitch_or_linear_size = dds_file.ReadU32();
+  m_header.depth = dds_file.ReadU32();
+  m_header.num_mips = dds_file.ReadU32();
   dds_file.Skip(44);
-  m_header.pixel_format.format_size = dds_file.Read32();
-  m_header.pixel_format.pixel_flags = dds_file.Read32();
+  m_header.pixel_format.format_size = dds_file.ReadU32();
+  m_header.pixel_format.pixel_flags = dds_file.ReadU32();
   m_header.pixel_format.four_cc = dds_file.ReadStringASCII(4);
-  m_header.pixel_format.rgb_bit_count = dds_file.Read32();
-  m_header.pixel_format.red_bit_mask = dds_file.Read32();
-  m_header.pixel_format.green_bit_mask = dds_file.Read32();
-  m_header.pixel_format.blue_bit_mask = dds_file.Read32();
-  m_header.pixel_format.alpha_bit_mask = dds_file.Read32();
-  m_header.complexity_flags = dds_file.Read32();
-  m_header.caps2 = dds_file.Read32();
-  m_header.caps3 = dds_file.Read32();
-  m_header.caps4 = dds_file.Read32();
-  m_header.reserved2 = dds_file.Read32();
+  m_header.pixel_format.rgb_bit_count = dds_file.ReadU32();
+  m_header.pixel_format.red_bit_mask = dds_file.ReadU32();
+  m_header.pixel_format.green_bit_mask = dds_file.ReadU32();
+  m_header.pixel_format.blue_bit_mask = dds_file.ReadU32();
+  m_header.pixel_format.alpha_bit_mask = dds_file.ReadU32();
+  m_header.complexity_flags = dds_file.ReadU32();
+  m_header.caps2 = dds_file.ReadU32();
+  m_header.caps3 = dds_file.ReadU32();
+  m_header.caps4 = dds_file.ReadU32();
+  m_header.reserved2 = dds_file.ReadU32();
   // For a COMPRESSED texture with no mipmaps, the layout might look something like this:
   // Magic:             0x00004
   // Header Size:       0x0007c
@@ -209,7 +209,7 @@ int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mip
   return image_data_bytes_written;
 }
 
-const QByteArray& DDS::GetImageData()
+const QByteArray& DDS::GetImageData() const
 {
   return m_image_data;
 }

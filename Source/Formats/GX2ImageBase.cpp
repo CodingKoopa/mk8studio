@@ -89,27 +89,47 @@ ResultCode GX2ImageBase::ExportToDDS(QString path)
     return ResultCode::Success;
 }
 
-const QList<GX2ImageBase::FormatInfo>& GX2ImageBase::GetFormatInfoList()
+const QList<GX2ImageBase::FormatInfo>& GX2ImageBase::GetFormatInfoList() const
 {
   return m_format_info_list;
 }
 
-const QList<GX2ImageBase::TileModeInfo>& GX2ImageBase::GetTileModeInfoList()
+quint32 GX2ImageBase::GetFormatInfoFromName(const QString& name) const
+{
+  foreach (const FormatInfo& format, m_format_info_list)
+  {
+    if (name == format.name)
+      return format.id;
+  }
+  return m_format_info_list[0].id;
+}
+
+const QList<GX2ImageBase::TileModeInfo>& GX2ImageBase::GetTileModeInfoList() const
 {
   return m_tile_mode_info_list;
 }
 
-const GX2ImageBase::FormatInfo& GX2ImageBase::GetFormatInfo()
+quint32 GX2ImageBase::GetTileModeInfoFromName(const QString& name) const
+{
+  foreach (const TileModeInfo& tile_mode, m_tile_mode_info_list)
+  {
+    if (name == tile_mode.name)
+      return tile_mode.id;
+  }
+  return m_tile_mode_info_list[0].id;
+}
+
+const GX2ImageBase::FormatInfo& GX2ImageBase::GetFormatInfo() const
 {
   return m_format_info;
 }
 
-quint32 GX2ImageBase::GetFormatInfoIndex()
+quint32 GX2ImageBase::GetFormatInfoIndex() const
 {
   return m_format_info_index;
 }
 
-const GX2ImageBase::TileModeInfo& GX2ImageBase::GetTileModeInfo()
+const GX2ImageBase::TileModeInfo& GX2ImageBase::GetTileModeInfo() const
 {
   return m_tile_mode_info;
 }

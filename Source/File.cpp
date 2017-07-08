@@ -74,17 +74,34 @@ quint16 File::Read16()
   return ret;
 }
 
-quint32 File::Read32()
+quint32 File::ReadU32()
 {
   quint32 ret;
   *m_stream >> ret;
   return ret;
 }
 
-quint32 File::Read32RelativeOffset()
+qint32 File::ReadS32()
+{
+  qint32 ret;
+  *m_stream >> ret;
+  return ret;
+}
+
+quint32 File::ReadU32RelativeOffset()
 {
   quint32 pos = Pos();
-  quint32 ret = Read32();
+  quint32 ret = ReadU32();
+  if (!ret)
+    return 0;
+  else
+    return pos + ret;
+}
+
+qint32 File::ReadS32RelativeOffset()
+{
+  quint64 pos = Pos();
+  qint32 ret = ReadS32();
   if (!ret)
     return 0;
   else
