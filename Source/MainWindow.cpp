@@ -112,20 +112,14 @@ void MainWindow::UpdateFileTreeContainer(QScrollArea* area)
 void MainWindow::UpdateSectionsContainer(QScrollArea* area)
 {
   if (m_file_tree_attributes_splitter->widget(1))
-  {
-    area->resize(m_file_tree_attributes_splitter->widget(1)->size());
     delete m_file_tree_attributes_splitter->widget(1);
-  }
   m_file_tree_attributes_splitter->insertWidget(1, area);
 }
 
 void MainWindow::UpdateMainWidget(QWidget* widget)
 {
   if (m_left_right_splitter->widget(1))
-  {
-    widget->resize(m_left_right_splitter->widget(1)->size());
     delete m_left_right_splitter->widget(1);
-  }
   m_left_right_splitter->addWidget(widget);
 }
 
