@@ -1,5 +1,9 @@
 #include "CustomStandardItem.h"
 
+CustomStandardItem::CustomStandardItem(QString string) : QStandardItem(string)
+{
+}
+
 void CustomStandardItem::ExecuteFunction()
 {
   if (m_function)

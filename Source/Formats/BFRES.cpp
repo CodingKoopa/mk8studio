@@ -41,7 +41,19 @@ ResultCode BFRES::ReadHeader()
   // 00          1      1        read8()
   // 00 00       2      2        read16()
   // 00 00 00 00 4      4        read32()
-  m_header.bom = m_file->Read16();
+  quint16 bom = m_file->Read16();
+  bool endian_info_found = false;
+  foreach (const EndianInfo& endian_info, m_endian_info_list)
+  {
+    if (endian_info.value == static_cast<EndianInfo::Endianness>(bom))
+    {
+      m_header.endian_info = endian_info;
+      endian_info_found = true;
+      break;
+    }
+  }
+  if (!endian_info_found)
+    return ResultCode::IncorrectBFRESEndianness;
   m_header.unknown_e = m_file->Read16();
   m_header.length = m_file->ReadU32();
   m_header.alignment = m_file->ReadU32();
@@ -128,29 +140,6 @@ const BFRES::Header& BFRES::GetHeader() const
 void BFRES::SetHeader(const Header& header)
 {
   m_header = header;
-}
-
-QString BFRES::GetEndianNameFromValue(quint32 value)
-{
-  switch (static_cast<BFRES::Endianness>(value))
-  {
-  case Endianness::Little:
-    return "Little Endian";
-  case Endianness::Big:
-    return "Big Endian";
-  default:
-    break;
-  }
-  return "";
-}
-
-quint32 BFRES::GetEndianValueFromName(const QString& name)
-{
-  if (name == "Little Endian")
-    return static_cast<quint32>(Endianness::Little);
-  else if (name == "Little Endian")
-    return static_cast<quint32>(Endianness::Big);
-  return 0;
 }
 
 File* BFRES::GetFile() const
@@ -272,4 +261,29 @@ void BFRES::CopyNode(BFRES::Node* source_node, BFRES::Node* destination_node)
   destination_node->name_ptr = source_node->name_ptr;
   destination_node->data_ptr = source_node->data_ptr;
   destination_node->name = source_node->name;
+}
+
+const QVector<BFRES::EndianInfo>& BFRES::GetEndianInfoList() const
+{
+  return m_endian_info_list;
+}
+
+const BFRES::EndianInfo& BFRES::GetEndianInfoFromName(const QString& name)
+{
+  foreach (const EndianInfo& endian_info, m_endian_info_list)
+  {
+    if (endian_info.name == name)
+      return endian_info;
+  }
+  return m_endian_info_list[0];
+}
+
+quint32 BFRES::GetEndianIndexFromInfo(const BFRES::EndianInfo& endian_info)
+{
+  for (qint32 index = 0; index < m_endian_info_list.size(); ++index)
+  {
+    if (m_endian_info_list[index].value == endian_info.value)
+      return index;
+  }
+  return 0;
 }

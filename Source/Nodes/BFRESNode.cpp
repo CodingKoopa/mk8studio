@@ -143,29 +143,16 @@ ResultCode BFRESNode::LoadAttributeArea()
   // Endianess
   header_attributes_model->setItem(row, 0, new QStandardItem("Endianness"));
   QStandardItemModel* endian_entries = new QStandardItemModel(2, 0);
-  // Make a list of possible entries for the endianness
-  endian_entries->setItem(0, 0, new QStandardItem("Little Endian"));
-  endian_entries->setItem(1, 0, new QStandardItem("Big Endian"));
+  QVector<BFRES::EndianInfo> endian_info_list = m_bfres.GetEndianInfoList();
+  for (qint32 row = 0; row < endian_info_list.size(); ++row)
+    endian_entries->setItem(row, 0, new QStandardItem(endian_info_list[row].name));
   m_delegate_group.combo_box_entries << endian_entries;
+  m_delegate_group.combo_box_selections
+      << m_bfres.GetEndianIndexFromInfo(m_bfres_header.endian_info);
   m_delegate_group.combo_box_delegates << row;
-
-  CustomStandardItem* endianness_item =
-      new CustomStandardItem(m_bfres.GetEndianNameFromValue(m_bfres_header.bom));
-
-  switch (static_cast<BFRES::Endianness>(m_bfres_header.bom))
-  {
-  case BFRES::Endianness::Little:
-    m_delegate_group.combo_box_selections << 0;
-    break;
-  case BFRES::Endianness::Big:
-    m_delegate_group.combo_box_selections << 1;
-    break;
-  default:
-    NewStatus(ResultCode::IncorrectBFRESEndianness);
-    return ResultCode::IncorrectBFRESEndianness;
-  }
+  CustomStandardItem* endianness_item = new CustomStandardItem(m_bfres_header.endian_info.name);
   endianness_item->SetFunction(
-      [this](QString value) { m_bfres_header.bom = m_bfres.GetEndianValueFromName(value); });
+      [this](QString value) { m_bfres_header.endian_info = m_bfres.GetEndianInfoFromName(value); });
   header_attributes_model->setItem(row, 1, endianness_item);
   ++row;
 

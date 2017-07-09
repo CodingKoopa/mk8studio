@@ -7,6 +7,7 @@
 #include <QTableView>
 
 #include "CustomDelegate.h"
+#include "CustomStandardItem.h"
 #include "Formats/FTEX.h"
 #include "ImageView.h"
 #include "Node.h"
@@ -16,7 +17,7 @@ class FTEXNode : public Node
   Q_OBJECT
 public:
   explicit FTEXNode(const FTEX& ftex, QObject* parent = 0);
-  QStandardItem* MakeItem() override;
+  CustomStandardItem* MakeItem() override;
   ResultCode LoadAttributeArea() override;
   ResultCode LoadMainWidget() override;
 

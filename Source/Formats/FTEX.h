@@ -54,6 +54,12 @@ public:
   const Header& GetHeader() const;
   void SetHeader(const Header& ftex_header);
 
+  struct Component
+  {
+    quint8 id;
+    QString name;
+  };
+
 private:
   void DeepCopyRawImageDataBuffer(const FTEX& other);
 
@@ -61,6 +67,10 @@ private:
   quint64 m_start_offset;
   Header m_header;
   char* m_raw_image_data_buffer = nullptr;
+
+  QVector<Component> m_component_list{
+
+  };
 
   QVector<QString> m_component_name_list{"Texture Red Values",
                                          "Texture Green Values",

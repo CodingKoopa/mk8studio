@@ -120,7 +120,7 @@ public:
   ResultCode ExportToDDS(QString path);
 
   const QList<FormatInfo>& GetFormatInfoList() const;
-  quint32 GetFormatInfoFromName(const QString& name) const;
+  quint32 GetFormatIDFromName(const QString& name) const;
   const QList<TileModeInfo>& GetTileModeInfoList() const;
   quint32 GetTileModeInfoFromName(const QString& name) const;
 

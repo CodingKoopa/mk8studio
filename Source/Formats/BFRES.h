@@ -15,6 +15,19 @@ public:
   BFRES& operator=(const BFRES& other);
   ~BFRES();
 
+  // TODO (For C++17) Make a base structs for the info structs like this, or the ones in
+  // GX2ImageBase, so the GetValueFromName or GetIndexOf functions can be there instead of redoing
+  // it for every struct.
+  struct EndianInfo
+  {
+    enum class Endianness
+    {
+      Little = 0xFFFE,
+      Big = 0xFEFF
+    } value;
+    QString name;
+  };
+
   struct Header
   {
     QString magic;
@@ -22,7 +35,7 @@ public:
     quint8 unknown_b;
     quint8 unknown_c;
     quint8 unknown_d;
-    quint16 bom;
+    EndianInfo endian_info;
     quint16 unknown_e;
     quint32 length;
     quint32 alignment;
@@ -61,24 +74,19 @@ public:
     FTEX = 1
   };
 
-  enum class Endianness
-  {
-    Little = 0xFEFF,
-    Big = 0xFFFE
-  };
-
   ResultCode ReadHeader();
   ResultCode ReadIndexGroups();
 
   const Header& GetHeader() const;
   void SetHeader(const Header& header);
 
-  QString GetEndianNameFromValue(quint32 value);
-  quint32 GetEndianValueFromName(const QString& name);
-
   File* GetFile() const;
 
   const QVector<QVector<Node*>>& GetRawNodeLists();
+
+  const QVector<EndianInfo>& GetEndianInfoList() const;
+  const BFRES::EndianInfo& GetEndianInfoFromName(const QString& name);
+  quint32 GetEndianIndexFromInfo(const EndianInfo& endian_info);
 
 private:
   void ReadSubtreeFromNode(Node* node, quint32 group);
@@ -89,7 +97,9 @@ private:
   void DeepCopyNodes(const BFRES& other);
   void CopyNode(Node* source_node, Node* destination_node);
 
-  // http://mk8.tockdom.com/wiki/BFRES_(File_Format)
+  const QVector<EndianInfo> m_endian_info_list{{EndianInfo::Endianness::Little, "Little Endian"},
+                                               {EndianInfo::Endianness::Big, "Big Endian"}};
+
   Header m_header;
   QVector<IndexGroupHeader> m_index_group_headers;
 

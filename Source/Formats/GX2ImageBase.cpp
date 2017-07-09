@@ -94,7 +94,7 @@ const QList<GX2ImageBase::FormatInfo>& GX2ImageBase::GetFormatInfoList() const
   return m_format_info_list;
 }
 
-quint32 GX2ImageBase::GetFormatInfoFromName(const QString& name) const
+quint32 GX2ImageBase::GetFormatIDFromName(const QString& name) const
 {
   foreach (const FormatInfo& format, m_format_info_list)
   {

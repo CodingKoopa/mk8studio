@@ -9,10 +9,10 @@
 class CustomStandardItem : public QStandardItem
 {
 public:
-  CustomStandardItem(QString string) : QStandardItem(string) {}
+  CustomStandardItem() = default;
+  CustomStandardItem(QString string);
 
   void ExecuteFunction();
-
   void SetFunction(const std::function<void(QString text)>& value = {});
 
 private:

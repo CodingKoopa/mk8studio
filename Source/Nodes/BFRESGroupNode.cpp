@@ -6,6 +6,7 @@
 #include <QVBoxLayout>
 
 #include "CustomDelegate.h"
+#include "CustomStandardItem.h"
 #include "FTEXNode.h"
 
 BFRESGroupNode::BFRESGroupNode(quint32 group, const BFRES& bfres,
@@ -33,7 +34,7 @@ QStandardItem* BFRESGroupNode::MakeListItemFromRawList()
   // Skip the first node (Dummy root node.).
   for (int row = 1; row < m_node_list.size(); ++row)
   {
-    QStandardItem* child_item = new QStandardItem;
+    CustomStandardItem* child_item = new CustomStandardItem;
     switch (static_cast<BFRES::GroupType>(m_group))
     {
     case BFRES::GroupType::FTEX:

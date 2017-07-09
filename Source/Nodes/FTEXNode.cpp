@@ -12,7 +12,6 @@
 #include <QSettings>
 
 #include "Common.h"
-#include "CustomStandardItem.h"
 #include "IODialog.h"
 
 FTEXNode::FTEXNode(const FTEX& ftex, QObject* parent) : Node(parent), m_ftex(ftex)
@@ -28,11 +27,11 @@ FTEXNode::FTEXNode(const FTEX& ftex, QObject* parent) : Node(parent), m_ftex(fte
   m_context_menu->addAction(action_inject);
 }
 
-QStandardItem* FTEXNode::MakeItem()
+CustomStandardItem* FTEXNode::MakeItem()
 {
-  QStandardItem* item = new QStandardItem();
+  CustomStandardItem* item = new CustomStandardItem();
   item->setData(QString(m_ftex.GetName() + " (FTEX)"), Qt::DisplayRole);
-  item->setData(QVariant::fromValue(static_cast<Node*>(this)), Qt::UserRole + 1);
+  item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
   return item;
 }
 
@@ -118,7 +117,7 @@ ResultCode FTEXNode::LoadAttributeArea()
   m_delegate_group.combo_box_selections << m_ftex.GetFormatInfoIndex();
   CustomStandardItem* format_item = new CustomStandardItem(m_ftex.GetFormatInfo().name);
   format_item->SetFunction(
-      [this](QString text) { m_ftex_header.format = m_ftex.GetFormatInfoFromName(text); });
+      [this](QString text) { m_ftex_header.format = m_ftex.GetFormatIDFromName(text); });
   header_attributes_model->setItem(row, 1, format_item);
   ++row;
 
