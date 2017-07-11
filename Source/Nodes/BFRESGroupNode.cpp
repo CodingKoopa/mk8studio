@@ -6,7 +6,7 @@
 #include <QVBoxLayout>
 
 #include "CustomDelegate.h"
-#include "CustomStandardItem.h"
+#include "FMDLNode.h"
 #include "FTEXNode.h"
 
 BFRESGroupNode::BFRESGroupNode(quint32 group, const BFRES& bfres,
@@ -16,9 +16,9 @@ BFRESGroupNode::BFRESGroupNode(quint32 group, const BFRES& bfres,
 {
 }
 
-QStandardItem* BFRESGroupNode::MakeItem()
+CustomStandardItem* BFRESGroupNode::MakeItem()
 {
-  QStandardItem* item;
+  CustomStandardItem* item;
   // TODO: Make this a configurable option, add in MakeTreeItemFromSubtree.
   bool use_bst = false;
   if (!use_bst)
@@ -27,9 +27,9 @@ QStandardItem* BFRESGroupNode::MakeItem()
   return item;
 }
 
-QStandardItem* BFRESGroupNode::MakeListItemFromRawList()
+CustomStandardItem* BFRESGroupNode::MakeListItemFromRawList()
 {
-  QStandardItem* item = new QStandardItem();
+  CustomStandardItem* item = new CustomStandardItem();
   item->setData(QString("Group " + QString::number(m_group)), Qt::DisplayRole);
   // Skip the first node (Dummy root node.).
   for (int row = 1; row < m_node_list.size(); ++row)
@@ -37,6 +37,16 @@ QStandardItem* BFRESGroupNode::MakeListItemFromRawList()
     CustomStandardItem* child_item = new CustomStandardItem;
     switch (static_cast<BFRES::GroupType>(m_group))
     {
+    case BFRES::GroupType::FMDL:
+    {
+      FMDL fmdl(m_bfres.GetFile(), m_bfres.GetRawNodeLists()[m_group][row]->data_ptr);
+      fmdl.SetName(m_bfres.GetRawNodeLists()[m_group][row]->name);
+      FMDLNode* child_node = new FMDLNode(fmdl, this);
+      connect(child_node, &FMDLNode::ConnectNode, this, &BFRESGroupNode::ConnectNode);
+      emit ConnectNode(child_node);
+      child_item = child_node->MakeItem();
+      break;
+    }
     case BFRES::GroupType::FTEX:
     {
       FTEX ftex(m_bfres.GetFile(), m_bfres.GetRawNodeLists()[m_group][row]->data_ptr);
@@ -48,7 +58,7 @@ QStandardItem* BFRESGroupNode::MakeListItemFromRawList()
       break;
     }
     default:
-      child_item->setText(m_node_list[row]->name);
+      child_item->setData(m_node_list[row]->name, Qt::DisplayRole);
       child_item->setData(QVariant::fromValue<Node*>(nullptr), Qt::UserRole + 1);
       break;
     }
@@ -57,11 +67,11 @@ QStandardItem* BFRESGroupNode::MakeListItemFromRawList()
   return item;
 }
 
-QStandardItem* BFRESGroupNode::MakeTreeItemFromSubtree(BFRES::Node* node, int blacklist_node)
+CustomStandardItem* BFRESGroupNode::MakeTreeItemFromSubtree(BFRES::Node* node, int blacklist_node)
 {
   if (node)
   {
-    QStandardItem* item = new QStandardItem();
+    CustomStandardItem* item = new CustomStandardItem();
     item->setData(node->name, Qt::DisplayRole);
     if (!m_node_blacklist.contains(node->left_index))
     {

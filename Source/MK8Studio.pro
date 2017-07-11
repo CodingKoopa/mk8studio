@@ -27,7 +27,9 @@ SOURCES +=\
     IODialog.cpp \
     Formats/FormatBase.cpp \
     File.cpp \
-    CustomStandardItem.cpp
+    CustomStandardItem.cpp \
+    Formats/FMDL.cpp \
+    Nodes/FMDLNode.cpp
 
 HEADERS  += \
     Common.h \
@@ -46,7 +48,9 @@ HEADERS  += \
     IODialog.h \
     CustomStandardItem.h \
     NonCopyable.h \
-    File.h
+    File.h \
+    Formats/FMDL.h \
+    Nodes/FMDLNode.h
 
 FORMS += \
     MainWindow.ui \

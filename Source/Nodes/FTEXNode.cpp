@@ -4,7 +4,6 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QHBoxLayout>
-#include <QHeaderView>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMenu>
@@ -29,8 +28,8 @@ FTEXNode::FTEXNode(const FTEX& ftex, QObject* parent) : Node(parent), m_ftex(fte
 
 CustomStandardItem* FTEXNode::MakeItem()
 {
-  CustomStandardItem* item = new CustomStandardItem();
-  item->setData(QString(m_ftex.GetName() + " (FTEX)"), Qt::DisplayRole);
+  CustomStandardItem* item = new CustomStandardItem;
+  item->setData(m_ftex.GetName() + " (FTEX)", Qt::DisplayRole);
   item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
   return item;
 }
@@ -45,11 +44,12 @@ ResultCode FTEXNode::LoadAttributeArea()
       emit NewStatus(res);
       return res;
     }
+    else
+      m_ftex_header = m_ftex.GetHeader();
   }
-  m_ftex_header = m_ftex.GetHeader();
-  quint32 row = 0;
 
-  QStandardItemModel* header_attributes_model = new QStandardItemModel();
+  quint32 row = 0;
+  QStandardItemModel* header_attributes_model = new QStandardItemModel;
   m_delegate_group = CustomItemDelegate::DelegateGroup();
 
   // TODO: Hex Spinbox
@@ -370,31 +370,7 @@ ResultCode FTEXNode::LoadAttributeArea()
   connect(header_attributes_model, &QStandardItemModel::itemChanged, this,
           &FTEXNode::HandleAttributeItemChange);
 
-  m_table_view = new QTableView;
-
-  m_table_view->setModel(header_attributes_model);
-  // stretch out table to fit space
-  m_table_view->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-  m_table_view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-  m_table_view->verticalHeader()->hide();
-  m_table_view->horizontalHeader()->hide();
-
-  m_table_view->setItemDelegate(new CustomItemDelegate(m_delegate_group));
-
-  // To have all editors open by default, uncomment this out
-  // PROS: Looks nicer, possibly more convienient
-  // CONS: Scrolling can accidentally change values, and opening a new sections
-  // seems to select the text
-  // in every open editor for some reason
-  // for (int i = 0; i < sectionHeaderModel->rowCount(); i++)
-  // tableView->openPersistentEditor(sectionHeaderModel->index(i, 1));
-
-  QVBoxLayout* attributes_layout = new QVBoxLayout();
-  attributes_layout->addWidget(new QLabel("Header"));
-  attributes_layout->addWidget(m_table_view);
-
-  m_sections_container = new QScrollArea();
-  m_sections_container->setLayout(attributes_layout);
+  m_sections_container = MakeAttributeSection(header_attributes_model);
 
   emit NewAttributesArea(m_sections_container);
   return ResultCode::Success;
@@ -420,13 +396,9 @@ ResultCode FTEXNode::LoadMainWidget()
 
 void FTEXNode::HandleAttributeItemChange(QStandardItem* item)
 {
-#define DEBUG
   // Colum 1 is the only editable row
   if (item->column() != 1)
     return;
-#ifdef DEBUG
-  qDebug() << "Item changed. Row " << item->row() << " column " << item->column();
-#endif
   CustomStandardItem* custom_item = dynamic_cast<CustomStandardItem*>(item);
   if (custom_item)
     custom_item->ExecuteFunction();

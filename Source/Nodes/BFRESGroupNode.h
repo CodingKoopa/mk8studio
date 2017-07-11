@@ -1,5 +1,6 @@
 #pragma once
 
+#include "CustomStandardItem.h"
 #include "Formats/BFRES.h"
 #include "Node.h"
 
@@ -10,9 +11,9 @@ public:
   explicit BFRESGroupNode(quint32 group, const BFRES& bfres, const QVector<BFRES::Node*>& node_list,
                           QObject* parent = 0);
 
-  QStandardItem* MakeItem();
-  QStandardItem* MakeListItemFromRawList();
-  QStandardItem* MakeTreeItemFromSubtree(BFRES::Node* node, int blacklist_node = -1);
+  CustomStandardItem* MakeItem();
+  CustomStandardItem* MakeListItemFromRawList();
+  CustomStandardItem* MakeTreeItemFromSubtree(BFRES::Node* node, int blacklist_node = -1);
   ResultCode LoadAttributeArea();
 
 private:

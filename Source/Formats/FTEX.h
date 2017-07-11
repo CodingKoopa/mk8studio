@@ -13,6 +13,16 @@ public:
   FTEX& operator=(const FTEX& other);
   ~FTEX();
 
+  ResultCode ReadHeader();
+  ResultCode ReadImage();
+
+  void InjectImage();
+
+  const QVector<QString> GetComponentNameList() const;
+  quint8 GetComponentIDFromName(const QString& name) const;
+
+  quint64 GetStart() const;
+
   struct Header : ImageHeaderBase
   {
     QString magic;
@@ -41,16 +51,6 @@ public:
     quint16 user_data_entry_count;
   };
 
-  ResultCode ReadHeader();
-  ResultCode ReadImage();
-
-  void InjectImage();
-
-  const QVector<QString> GetComponentNameList() const;
-  quint8 GetComponentIDFromName(const QString& name) const;
-
-  quint64 GetStart() const;
-
   const Header& GetHeader() const;
   void SetHeader(const Header& ftex_header);
 
@@ -68,10 +68,7 @@ private:
   Header m_header;
   char* m_raw_image_data_buffer = nullptr;
 
-  QVector<Component> m_component_list{
-
-  };
-
+  // TODO: Make a ComponentInfo list when the Info base class becomes a thing.
   QVector<QString> m_component_name_list{"Texture Red Values",
                                          "Texture Green Values",
                                          "Texture Blue Values",

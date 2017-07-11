@@ -41,7 +41,7 @@ ResultCode BFRES::ReadHeader()
   // 00          1      1        read8()
   // 00 00       2      2        read16()
   // 00 00 00 00 4      4        read32()
-  quint16 bom = m_file->Read16();
+  quint16 bom = m_file->ReadU16();
   bool endian_info_found = false;
   foreach (const EndianInfo& endian_info, m_endian_info_list)
   {
@@ -54,7 +54,7 @@ ResultCode BFRES::ReadHeader()
   }
   if (!endian_info_found)
     return ResultCode::IncorrectBFRESEndianness;
-  m_header.unknown_e = m_file->Read16();
+  m_header.unknown_e = m_file->ReadU16();
   m_header.length = m_file->ReadU32();
   m_header.alignment = m_file->ReadU32();
   m_header.file_name_offset = m_file->ReadU32RelativeOffset();
@@ -63,7 +63,7 @@ ResultCode BFRES::ReadHeader()
   for (int i = 0; i < 12; ++i)
     m_header.file_offsets << m_file->ReadU32RelativeOffset();
   for (int i = 0; i < 12; ++i)
-    m_header.file_counts << m_file->Read16();
+    m_header.file_counts << m_file->ReadU16();
 
   m_header.unknown_f = m_file->ReadU32();
 
@@ -216,8 +216,8 @@ BFRES::Node* BFRES::ReadNodeAtOffset(quint64 offset)
   m_file->Seek(offset);
   Node* node = new Node;
   node->search_value = m_file->ReadU32();
-  node->left_index = m_file->Read16();
-  node->right_index = m_file->Read16();
+  node->left_index = m_file->ReadU16();
+  node->right_index = m_file->ReadU16();
   node->name_ptr = m_file->ReadU32RelativeOffset();
   node->data_ptr = m_file->ReadU32RelativeOffset();
   quint64 pos = m_file->Pos();

@@ -69,7 +69,7 @@ ResultCode FTEX::ReadHeader()
   m_header.data_offset = m_file->ReadS32RelativeOffset();
   m_header.mipmap_section_offset = m_file->ReadS32RelativeOffset();
   m_header.user_data_index_group_offset = m_file->ReadS32RelativeOffset();
-  m_header.user_data_entry_count = m_file->Read16();
+  m_header.user_data_entry_count = m_file->ReadU16();
   m_file->Skip(2);
 
   // Fix the mipmap offsets to be absolute.

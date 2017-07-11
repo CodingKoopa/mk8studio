@@ -2,10 +2,13 @@
 
 #include <QScrollArea>
 #include <QStandardItem>
+#include <QTableView>
 #include <QTreeView>
+#include <QVBoxLayout>
 
 #include "Common.h"
 #include "CustomDelegate.h"
+#include "CustomStandardItem.h"
 #include "File.h"
 
 class Node : public QObject
@@ -19,7 +22,7 @@ public:
   // Optional because not every file type may have a file tree to show.
   // TODO: maybe a better way of going about making this optional?
   virtual ResultCode LoadFileTreeArea() { return ResultCode::NotAvailable; }
-  virtual QStandardItem* MakeItem() = 0;
+  virtual CustomStandardItem* MakeItem() = 0;
   // Every format must have attributes to show.
   virtual ResultCode LoadAttributeArea() = 0;
   // Same as file trees.
@@ -35,6 +38,8 @@ protected:
   QTreeView* m_tree_view;
   QWidget* m_main_widget;
   QMenu* m_context_menu;
+
+  QScrollArea* MakeAttributeSection(QStandardItemModel* table_view_layout);
 
 signals:
   void NewFileTreeArea(QScrollArea*);

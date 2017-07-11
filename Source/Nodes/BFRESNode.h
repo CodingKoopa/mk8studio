@@ -7,6 +7,7 @@
 #include <QVBoxLayout>
 
 #include "CustomDelegate.h"
+#include "CustomStandardItem.h"
 #include "FTEXNode.h"
 #include "Formats/BFRES.h"
 
@@ -16,7 +17,7 @@ class BFRESNode : public Node
 public:
   explicit BFRESNode(const BFRES& bfres, QObject* parent = 0);
   ResultCode LoadFileTreeArea() override;
-  QStandardItem* MakeItem() override;
+  CustomStandardItem* MakeItem() override;
   ResultCode LoadAttributeArea() override;
 
 private:

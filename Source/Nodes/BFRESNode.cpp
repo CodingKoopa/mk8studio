@@ -63,9 +63,9 @@ ResultCode BFRESNode::LoadFileTreeArea()
   return res;
 }
 
-QStandardItem* BFRESNode::MakeItem()
+CustomStandardItem* BFRESNode::MakeItem()
 {
-  QStandardItem* bfres_item = new QStandardItem();
+  CustomStandardItem* bfres_item = new CustomStandardItem();
   bfres_item->setData(QString(m_bfres_header.file_name + " (BFRES)"), Qt::DisplayRole);
   // Store the current instance in a QVariant as an upcasted Node pointer.
   // Will be downcasted back to a BFRES Group Node later.

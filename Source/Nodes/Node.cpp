@@ -1,14 +1,49 @@
 #include "Node.h"
 
+#include <QHeaderView>
+#include <QLabel>
 #include <QMenu>
+#include <QTableView>
 
 #include "BFRESGroupNode.h"
 #include "BFRESNode.h"
+#include "FMDLNode.h"
 #include "FTEXNode.h"
 
 QMenu* Node::GetContextMenu()
 {
   return m_context_menu;
+}
+
+QScrollArea* Node::MakeAttributeSection(QStandardItemModel* table_view_layout)
+{
+  QTableView* table_view = new QTableView;
+
+  table_view->setModel(table_view_layout);
+  // stretch out table to fit space
+  table_view->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+  table_view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+  table_view->verticalHeader()->hide();
+  table_view->horizontalHeader()->hide();
+
+  table_view->setItemDelegate(new CustomItemDelegate(m_delegate_group));
+
+  // To have all editors open by default, uncomment this out
+  // PROS: Looks nicer, possibly more convienient
+  // CONS: Scrolling can accidentally change values, and opening a new sections
+  // seems to select the text
+  // in every open editor for some reason
+  // for (int i = 0; i < sectionHeaderModel->rowCount(); i++)
+  // tableView->openPersistentEditor(sectionHeaderModel->index(i, 1));
+
+  QVBoxLayout* attributes_layout = new QVBoxLayout();
+  attributes_layout->addWidget(new QLabel("Header"));
+  attributes_layout->addWidget(table_view);
+
+  QScrollArea* container = new QScrollArea();
+  container->setLayout(attributes_layout);
+
+  return container;
 }
 
 void Node::HandleFileTreeClick(QModelIndex index)
@@ -19,6 +54,9 @@ void Node::HandleFileTreeClick(QModelIndex index)
   else if (BFRESGroupNode* bfres_group_node =
                qvariant_cast<BFRESGroupNode*>(index.data(Qt::UserRole + 1)))
     bfres_group_node->LoadAttributeArea();
+
+  else if (FMDLNode* fmdl_node = qvariant_cast<FMDLNode*>(index.data(Qt::UserRole + 1)))
+    fmdl_node->LoadAttributeArea();
 
   else if (FTEXNode* ftex_node = qvariant_cast<FTEXNode*>(index.data(Qt::UserRole + 1)))
   {

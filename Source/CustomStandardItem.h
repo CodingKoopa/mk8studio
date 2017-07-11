@@ -4,13 +4,12 @@
 
 #include <QStandardItem>
 
-#include "Nodes/Node.h"
-
 class CustomStandardItem : public QStandardItem
 {
 public:
   CustomStandardItem() = default;
   CustomStandardItem(QString string);
+  ~CustomStandardItem();
 
   void ExecuteFunction();
   void SetFunction(const std::function<void(QString text)>& value = {});

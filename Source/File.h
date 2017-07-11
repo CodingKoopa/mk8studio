@@ -33,7 +33,8 @@ public:
   bool GetCanRead();
 
   quint8 Read8();
-  quint16 Read16();
+  quint16 ReadU16();
+  qint16 ReadS16();
   quint32 ReadU32();
   qint32 ReadS32();
   quint32 ReadU32RelativeOffset();

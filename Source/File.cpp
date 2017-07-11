@@ -67,9 +67,16 @@ quint8 File::Read8()
   return ret;
 }
 
-quint16 File::Read16()
+quint16 File::ReadU16()
 {
   quint16 ret;
+  *m_stream >> ret;
+  return ret;
+}
+
+qint16 File::ReadS16()
+{
+  qint16 ret;
   *m_stream >> ret;
   return ret;
 }
