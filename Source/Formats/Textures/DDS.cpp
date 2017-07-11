@@ -1,7 +1,7 @@
-#include "DDS.h"
+#include "Formats/Textures/DDS.h"
 
 #include "File.h"
-#include "GX2ImageBase.h"
+#include "Formats/Textures/GX2ImageBase.h"
 
 DDS::~DDS()
 {

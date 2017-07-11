@@ -1,4 +1,4 @@
-#include "BFRES.h"
+#include "Formats/Archives/BFRES.h"
 
 BFRES::BFRES(File* file) : m_file(file)
 {

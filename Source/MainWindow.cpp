@@ -17,7 +17,7 @@
 #include <QVBoxLayout>
 
 #include "CustomDelegate.h"
-#include "Nodes/BFRESNode.h"
+#include "Nodes/Archives/BFRESNode.h"
 #include "NonCopyable.h"
 #include "ui_MainWindow.h"
 

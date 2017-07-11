@@ -3,7 +3,7 @@
 #include <QString>
 
 #include "File.h"
-#include "GX2ImageBase.h"
+#include "Formats/Textures/GX2ImageBase.h"
 
 class FTEX : public GX2ImageBase
 {

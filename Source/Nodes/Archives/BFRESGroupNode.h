@@ -1,8 +1,8 @@
 #pragma once
 
 #include "CustomStandardItem.h"
-#include "Formats/BFRES.h"
-#include "Node.h"
+#include "Formats/Archives/BFRES.h"
+#include "Nodes/Node.h"
 
 class BFRESGroupNode : public Node
 {

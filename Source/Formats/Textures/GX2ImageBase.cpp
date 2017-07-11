@@ -1,6 +1,6 @@
-#include "GX2ImageBase.h"
+#include "Formats/Textures/GX2ImageBase.h"
 
-#include "DDS.h"
+#include "Formats/Textures/DDS.h"
 
 ResultCode GX2ImageBase::SetupInfoStructs()
 {

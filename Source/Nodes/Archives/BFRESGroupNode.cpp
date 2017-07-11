@@ -6,8 +6,8 @@
 #include <QVBoxLayout>
 
 #include "CustomDelegate.h"
-#include "FMDLNode.h"
-#include "FTEXNode.h"
+#include "Nodes/Models/FMDLNode.h"
+#include "Nodes/Textures/FTEXNode.h"
 
 BFRESGroupNode::BFRESGroupNode(quint32 group, const BFRES& bfres,
                                const QVector<BFRES::Node*>& node_list, QObject* parent)

@@ -16,20 +16,20 @@ SOURCES +=\
     Main.cpp \
     ImageView.cpp \
     CustomDelegate.cpp \
-    Nodes/BFRESNode.cpp \
-    Nodes/FTEXNode.cpp \
-    Nodes/BFRESGroupNode.cpp \
-    Formats/FTEX.cpp \
-    Formats/DDS.cpp \
-    Formats/BFRES.cpp \
-    Formats/GX2ImageBase.cpp \
     Nodes/Node.cpp \
     IODialog.cpp \
     Formats/FormatBase.cpp \
     File.cpp \
     CustomStandardItem.cpp \
-    Formats/FMDL.cpp \
-    Nodes/FMDLNode.cpp
+    Formats/Models/FMDL.cpp \
+    Formats/Textures/GX2ImageBase.cpp \
+    Formats/Textures/DDS.cpp \
+    Formats/Textures/FTEX.cpp \
+    Formats/Archives/BFRES.cpp \
+    Nodes/Archives/BFRESGroupNode.cpp \
+    Nodes/Archives/BFRESNode.cpp \
+    Nodes/Textures/FTEXNode.cpp \
+    Nodes/Models/FMDLNode.cpp
 
 HEADERS  += \
     Common.h \
@@ -37,20 +37,20 @@ HEADERS  += \
     ImageView.h \
     MainWindow.h \
     Nodes/Node.h \
-    Nodes/FTEXNode.h \
-    Nodes/BFRESNode.h \
-    Nodes/BFRESGroupNode.h \
-    Formats/FTEX.h \
-    Formats/DDS.h \
-    Formats/BFRES.h \
     Formats/FormatBase.h \
-    Formats/GX2ImageBase.h \
     IODialog.h \
     CustomStandardItem.h \
     NonCopyable.h \
     File.h \
-    Formats/FMDL.h \
-    Nodes/FMDLNode.h
+    Formats/Models/FMDL.h \
+    Formats/Textures/GX2ImageBase.h \
+    Formats/Textures/FTEX.h \
+    Formats/Textures/DDS.h \
+    Formats/Archives/BFRES.h \
+    Nodes/Archives/BFRESGroupNode.h \
+    Nodes/Archives/BFRESNode.h \
+    Nodes/Textures/FTEXNode.h \
+    Nodes/Models/FMDLNode.h
 
 FORMS += \
     MainWindow.ui \

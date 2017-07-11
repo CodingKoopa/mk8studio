@@ -4,7 +4,7 @@
 #include <QList>
 
 #include "Common.h"
-#include "FormatBase.h"
+#include "Formats/FormatBase.h"
 
 class GX2ImageBase : public FormatBase
 {

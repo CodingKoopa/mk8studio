@@ -1,4 +1,4 @@
-#include "FormatBase.h"
+#include "Formats/FormatBase.h"
 
 const QString& FormatBase::GetName() const
 {

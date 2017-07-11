@@ -1,8 +1,8 @@
 #ifndef FMDLNODE_H
 #define FMDLNODE_H
 
-#include "Formats/FMDL.h"
-#include "Node.h"
+#include "Formats/Models/FMDL.h"
+#include "Nodes/Node.h"
 
 class FMDLNode : public Node
 {

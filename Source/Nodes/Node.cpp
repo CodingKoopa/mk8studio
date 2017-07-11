@@ -1,14 +1,14 @@
-#include "Node.h"
+#include "Nodes/Node.h"
 
 #include <QHeaderView>
 #include <QLabel>
 #include <QMenu>
 #include <QTableView>
 
-#include "BFRESGroupNode.h"
-#include "BFRESNode.h"
-#include "FMDLNode.h"
-#include "FTEXNode.h"
+#include "Nodes/Archives/BFRESGroupNode.h"
+#include "Nodes/Archives/BFRESNode.h"
+#include "Nodes/Models/FMDLNode.h"
+#include "Nodes/Textures/FTEXNode.h"
 
 QMenu* Node::GetContextMenu()
 {

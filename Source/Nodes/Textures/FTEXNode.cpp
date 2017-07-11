@@ -1,4 +1,4 @@
-#include "FTEXNode.h"
+#include "Nodes/Textures/FTEXNode.h"
 
 #include <QAction>
 #include <QDir>

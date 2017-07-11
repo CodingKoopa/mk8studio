@@ -8,8 +8,8 @@
 
 #include "CustomDelegate.h"
 #include "CustomStandardItem.h"
-#include "FTEXNode.h"
-#include "Formats/BFRES.h"
+#include "Formats/Archives/BFRES.h"
+#include "Nodes/Textures/FTEXNode.h"
 
 class BFRESNode : public Node
 {

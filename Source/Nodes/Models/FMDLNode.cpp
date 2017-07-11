@@ -1,4 +1,4 @@
-#include "FMDLNode.h"
+#include "Nodes/Models/FMDLNode.h"
 
 FMDLNode::FMDLNode(const FMDL& fmdl, QObject* parent) : Node(parent), m_fmdl(fmdl)
 {

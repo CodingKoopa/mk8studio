@@ -8,9 +8,9 @@
 
 #include "CustomDelegate.h"
 #include "CustomStandardItem.h"
-#include "Formats/FTEX.h"
+#include "Formats/Textures/FTEX.h"
 #include "ImageView.h"
-#include "Node.h"
+#include "Nodes/Node.h"
 
 class FTEXNode : public Node
 {

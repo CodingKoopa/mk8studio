@@ -1,4 +1,4 @@
-#include "FMDL.h"
+#include "Formats/Models//FMDL.h"
 
 FMDL::FMDL(File* file, quint32 start_offset) : m_file(file), m_start_offset(start_offset)
 {

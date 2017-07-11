@@ -4,7 +4,7 @@
 
 #include "Common.h"
 #include "File.h"
-#include "FormatBase.h"
+#include "Formats/FormatBase.h"
 
 class BFRES : public FormatBase
 {

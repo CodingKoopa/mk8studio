@@ -9,7 +9,6 @@
 
 #include "Common.h"
 #include "File.h"
-#include "Formats/BFRES.h"
 #include "Nodes/Node.h"
 
 namespace Ui

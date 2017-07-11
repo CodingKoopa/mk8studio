@@ -3,8 +3,8 @@
 #include <QByteArray>
 
 #include "Common.h"
-#include "FormatBase.h"
-#include "GX2ImageBase.h"
+#include "Formats/FormatBase.h"
+#include "Formats/Textures/GX2ImageBase.h"
 #include "NonCopyable.h"
 
 class DDS : public FormatBase, NonCopyable
