@@ -17,5 +17,3 @@ public:
 private:
   std::function<void(QString text)> m_function;
 };
-
-Q_DECLARE_METATYPE(std::function<void(QString text)>)

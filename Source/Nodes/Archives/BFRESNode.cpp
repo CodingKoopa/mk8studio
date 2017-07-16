@@ -29,9 +29,6 @@ ResultCode BFRESNode::LoadFileTreeArea()
     return res;
   }
   m_bfres_header = m_bfres.GetHeader();
-  m_bfres.ReadIndexGroups();
-  // QVector<BFRES::Node*> root_nodes = bfres.GetRootNodes();
-  QVector<QVector<BFRES::Node*>> raw_node_list = m_bfres.GetRawNodeLists();
 
   QStandardItemModel* file_tree_model = new QStandardItemModel(0, 1);
 
@@ -70,6 +67,7 @@ CustomStandardItem* BFRESNode::MakeItem()
   // Store the current instance in a QVariant as an upcasted Node pointer.
   // Will be downcasted back to a BFRES Group Node later.
   bfres_item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
+  m_bfres.ReadIndexGroups();
   for (int group = 0; group < m_bfres_header.file_counts.size(); ++group)
   {
     if (m_bfres_header.file_counts[group])

@@ -27,5 +27,3 @@ private:
 private slots:
   void HandleAttributeItemChange(QStandardItem* item);
 };
-
-Q_DECLARE_METATYPE(BFRESGroupNode*)

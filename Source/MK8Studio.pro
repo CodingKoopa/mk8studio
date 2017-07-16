@@ -29,7 +29,9 @@ SOURCES +=\
     Nodes/Archives/BFRESGroupNode.cpp \
     Nodes/Archives/BFRESNode.cpp \
     Nodes/Textures/FTEXNode.cpp \
-    Nodes/Models/FMDLNode.cpp
+    Nodes/Models/FMDLNode.cpp \
+    Formats/Models/FVTX.cpp \
+    Nodes/Models/FVTXNode.cpp
 
 HEADERS  += \
     Common.h \
@@ -50,7 +52,9 @@ HEADERS  += \
     Nodes/Archives/BFRESGroupNode.h \
     Nodes/Archives/BFRESNode.h \
     Nodes/Textures/FTEXNode.h \
-    Nodes/Models/FMDLNode.h
+    Nodes/Models/FMDLNode.h \
+    Formats/Models/FVTX.h \
+    Nodes/Models/FVTXNode.h
 
 FORMS += \
     MainWindow.ui \

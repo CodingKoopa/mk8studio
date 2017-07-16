@@ -15,10 +15,7 @@ class Node : public QObject
 {
   Q_OBJECT
 public:
-  explicit Node(QObject* parent = 0)
-      : QObject(parent), m_tree_view(nullptr), m_main_widget(nullptr), m_context_menu(nullptr)
-  {
-  }
+  explicit Node(QObject* parent = 0);
   // Optional because not every file type may have a file tree to show.
   // TODO: maybe a better way of going about making this optional?
   virtual ResultCode LoadFileTreeArea() { return ResultCode::NotAvailable; }

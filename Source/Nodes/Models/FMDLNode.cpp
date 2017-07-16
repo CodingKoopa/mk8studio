@@ -1,4 +1,5 @@
 #include "Nodes/Models/FMDLNode.h"
+#include "Nodes/Models/FVTXNode.h"
 
 FMDLNode::FMDLNode(const FMDL& fmdl, QObject* parent) : Node(parent), m_fmdl(fmdl)
 {
@@ -6,10 +7,48 @@ FMDLNode::FMDLNode(const FMDL& fmdl, QObject* parent) : Node(parent), m_fmdl(fmd
 
 CustomStandardItem* FMDLNode::MakeItem()
 {
-  CustomStandardItem* item = new CustomStandardItem;
-  item->setData(m_fmdl.GetName() + " (FMDL)", Qt::DisplayRole);
-  item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
-  return item;
+  if (!m_header_loaded)
+  {
+    ResultCode res = m_fmdl.ReadHeader();
+    if (res != ResultCode::Success)
+    {
+      emit NewStatus(res);
+      return nullptr;
+    }
+    else
+    {
+      m_fmdl_header = m_fmdl.GetHeader();
+      m_header_loaded = true;
+    }
+  }
+  if (!m_fvtxs_loaded)
+  {
+    ResultCode res = m_fmdl.ReadFVTXArray();
+    if (res != ResultCode::Success)
+    {
+      emit NewStatus(res);
+      return nullptr;
+    }
+    else
+    {
+      m_fvtx_list = m_fmdl.GetFVTXList();
+      m_fvtxs_loaded = true;
+    }
+  }
+
+  CustomStandardItem* fmdl_item = new CustomStandardItem;
+  fmdl_item->setData(m_fmdl.GetName() + " (FMDL)", Qt::DisplayRole);
+  fmdl_item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
+  CustomStandardItem* fvtx_group_item = new CustomStandardItem("FVTX Sections");
+  fmdl_item->appendRow(fvtx_group_item);
+  foreach (const FVTX& fvtx, m_fvtx_list)
+  {
+    FVTXNode* fvtx_node = new FVTXNode(fvtx, this);
+    connect(fvtx_node, &FVTXNode::ConnectNode, this, &FMDLNode::ConnectNode);
+    emit ConnectNode(fvtx_node);
+    fvtx_group_item->appendRow(fvtx_node->MakeItem());
+  }
+  return fmdl_item;
 }
 
 ResultCode FMDLNode::LoadAttributeArea()
@@ -24,7 +63,10 @@ ResultCode FMDLNode::LoadAttributeArea()
       return res;
     }
     else
+    {
       m_fmdl_header = m_fmdl.GetHeader();
+      m_header_loaded = true;
+    }
   }
 
   quint32 row = 0;
@@ -57,10 +99,10 @@ ResultCode FMDLNode::LoadAttributeArea()
       row, 1, new QStandardItem("0x" + QString::number(m_fmdl_header.fskl_offset, 16)));
   ++row;
 
-  // FTEX Array Offset
-  header_attributes_model->setItem(row, 0, new QStandardItem("FTEX Array Offset"));
+  // FVTX Array Offset
+  header_attributes_model->setItem(row, 0, new QStandardItem("FVTX Array Offset"));
   header_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(m_fmdl_header.ftex_array_offset, 16)));
+      row, 1, new QStandardItem("0x" + QString::number(m_fmdl_header.fvtx_array_offset, 16)));
   ++row;
 
   // FSHP Index Group Offset

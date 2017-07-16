@@ -27,6 +27,3 @@ private:
 private slots:
   void HandleAttributeItemChange(QStandardItem* item) override;
 };
-
-// Make this class known to the template-based functions to allow casting to and from a QVariant.
-Q_DECLARE_METATYPE(BFRESNode*)

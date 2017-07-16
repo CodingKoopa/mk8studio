@@ -1,15 +1,16 @@
-#ifndef FMDL_H
-#define FMDL_H
+#pragma once
 
 #include "Common.h"
 #include "File.h"
 #include "Formats/FormatBase.h"
+#include "Formats/Models/FVTX.h"
 
 class FMDL : public FormatBase
 {
 public:
   FMDL(File* file, quint32 start_offset);
   ResultCode ReadHeader();
+  ResultCode ReadFVTXArray();
 
   struct Header
   {
@@ -17,7 +18,7 @@ public:
     qint32 file_name_offset;
     qint32 file_path_offset;
     qint32 fskl_offset;
-    qint32 ftex_array_offset;
+    qint32 fvtx_array_offset;
     qint32 fshp_index_group_offset;
     qint32 fmat_index_group_offset;
     qint32 user_data_index_group_offset;
@@ -32,10 +33,13 @@ public:
   const Header& GetHeader() const;
   void SetHeader(const Header& header);
 
+  const QVector<FVTX>& GetFVTXList() const;
+  void SetFVTXList(const QVector<FVTX>& GetFVTXList);
+
 private:
   File* m_file;
   quint32 m_start_offset;
   Header m_header;
-};
 
-#endif  // FMDL_H
+  QVector<FVTX> m_fvtx_list;
+};

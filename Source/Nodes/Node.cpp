@@ -8,7 +8,13 @@
 #include "Nodes/Archives/BFRESGroupNode.h"
 #include "Nodes/Archives/BFRESNode.h"
 #include "Nodes/Models/FMDLNode.h"
+#include "Nodes/Models/FVTXNode.h"
 #include "Nodes/Textures/FTEXNode.h"
+
+Node::Node(QObject* parent)
+    : QObject(parent), m_tree_view(nullptr), m_main_widget(nullptr), m_context_menu(nullptr)
+{
+}
 
 QMenu* Node::GetContextMenu()
 {
@@ -57,6 +63,9 @@ void Node::HandleFileTreeClick(QModelIndex index)
 
   else if (FMDLNode* fmdl_node = qvariant_cast<FMDLNode*>(index.data(Qt::UserRole + 1)))
     fmdl_node->LoadAttributeArea();
+
+  else if (FVTXNode* fvtx_node = qvariant_cast<FVTXNode*>(index.data(Qt::UserRole + 1)))
+    fvtx_node->LoadAttributeArea();
 
   else if (FTEXNode* ftex_node = qvariant_cast<FTEXNode*>(index.data(Qt::UserRole + 1)))
   {

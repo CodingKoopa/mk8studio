@@ -1,4 +1,4 @@
-#include "Formats/Models//FMDL.h"
+#include "Formats/Models/FMDL.h"
 
 FMDL::FMDL(File* file, quint32 start_offset) : m_file(file), m_start_offset(start_offset)
 {
@@ -11,7 +11,7 @@ ResultCode FMDL::ReadHeader()
   m_header.file_name_offset = m_file->ReadS32RelativeOffset();
   m_header.file_path_offset = m_file->ReadS32RelativeOffset();
   m_header.fskl_offset = m_file->ReadS32RelativeOffset();
-  m_header.ftex_array_offset = m_file->ReadS32RelativeOffset();
+  m_header.fvtx_array_offset = m_file->ReadS32RelativeOffset();
   m_header.fshp_index_group_offset = m_file->ReadS32RelativeOffset();
   m_header.fmat_index_group_offset = m_file->ReadS32RelativeOffset();
   m_header.user_data_index_group_offset = m_file->ReadS32RelativeOffset();
@@ -28,6 +28,20 @@ ResultCode FMDL::ReadHeader()
   return ResultCode::Success;
 }
 
+ResultCode FMDL::ReadFVTXArray()
+{
+  m_file->Seek(m_header.fvtx_array_offset);
+  m_fvtx_list.resize(m_header.fvtx_count);
+  for (quint16 index = 0; index < m_header.fvtx_count; ++index)
+  {
+    FVTX fvtx(m_file, m_file->Pos());
+    m_fvtx_list[index] = fvtx;
+    // TODO: Have FVTX expose a const header size.
+    m_file->Skip(0x20);
+  }
+  return ResultCode::Success;
+}
+
 const FMDL::Header& FMDL::GetHeader() const
 {
   return m_header;
@@ -36,4 +50,14 @@ const FMDL::Header& FMDL::GetHeader() const
 void FMDL::SetHeader(const Header& header)
 {
   m_header = header;
+}
+
+const QVector<FVTX>& FMDL::GetFVTXList() const
+{
+  return m_fvtx_list;
+}
+
+void FMDL::SetFVTXList(const QVector<FVTX>& fvtx_list)
+{
+  m_fvtx_list = fvtx_list;
 }

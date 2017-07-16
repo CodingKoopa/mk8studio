@@ -1,25 +1,22 @@
 #pragma once
 
-#include "Formats/Models/FMDL.h"
 #include "Formats/Models/FVTX.h"
 #include "Nodes/Node.h"
 
-class FMDLNode : public Node
+class FVTXNode : public Node
 {
   Q_OBJECT
 public:
-  explicit FMDLNode(const FMDL& fmdl, QObject* parent = 0);
+  explicit FVTXNode(const FVTX& fvtx, QObject* parent = 0);
 
   CustomStandardItem* MakeItem() override;
   ResultCode LoadAttributeArea() override;
 
 private:
-  FMDL m_fmdl;
-  FMDL::Header m_fmdl_header;
-  QVector<FVTX> m_fvtx_list;
+  FVTX m_fvtx;
+  FVTX::Header m_fvtx_header;
 
   bool m_header_loaded = false;
-  bool m_fvtxs_loaded = false;
 
 private slots:
   void HandleAttributeItemChange(QStandardItem* item) override;
