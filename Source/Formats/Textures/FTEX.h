@@ -8,6 +8,7 @@
 class FTEX : public GX2ImageBase
 {
 public:
+  FTEX() = default;
   FTEX(File* file, quint64 pos);
   FTEX(const FTEX& other);
   FTEX& operator=(const FTEX& other);
@@ -63,9 +64,9 @@ public:
 private:
   void DeepCopyRawImageDataBuffer(const FTEX& other);
 
-  File* m_file;
-  quint64 m_start_offset;
-  Header m_header;
+  File* m_file = nullptr;
+  quint64 m_start_offset = 0;
+  Header m_header = Header();
   char* m_raw_image_data_buffer = nullptr;
 
   // TODO: Make a ComponentInfo list when the Info base class becomes a thing.

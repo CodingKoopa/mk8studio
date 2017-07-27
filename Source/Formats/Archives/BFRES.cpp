@@ -6,8 +6,8 @@ BFRES::BFRES(File* file) : m_file(file)
 
 BFRES::BFRES(const BFRES& other)
     : FormatBase(other), m_header(other.m_header),
-      m_index_group_headers(other.m_index_group_headers), m_node_blacklist(other.m_node_blacklist),
-      m_file(other.m_file)
+      m_index_group_headers(other.m_index_group_headers), m_fmdl_list(other.m_fmdl_list),
+      m_ftex_list(other.m_ftex_list), m_node_blacklist(other.m_node_blacklist), m_file(other.m_file)
 {
   DeepCopyNodes(other);
 }
@@ -17,6 +17,8 @@ BFRES& BFRES::operator=(const BFRES& other)
   m_header = other.m_header;
   m_index_group_headers = other.m_index_group_headers;
   m_node_blacklist = other.m_node_blacklist;
+  m_fmdl_list = other.m_fmdl_list;
+  m_ftex_list = other.m_ftex_list;
   m_file = other.m_file;
   DeepCopyNodes(other);
   return *this;
@@ -79,9 +81,10 @@ ResultCode BFRES::ReadHeader()
 
 ResultCode BFRES::ReadIndexGroups()
 {
-  m_index_group_headers.resize(m_header.file_offsets.size());
-  m_raw_node_lists.resize(m_header.file_offsets.size());
-  for (int group = 0; group < m_header.file_offsets.size(); ++group)
+  m_index_group_headers.resize(m_num_groups);
+  m_raw_node_lists.resize(m_num_groups);
+  // Read each of the 12 groups into the raw node list, and record the index group header info.
+  for (quint32 group = 0; group < m_num_groups; ++group)
   {
     if (m_header.file_offsets[group] == 0)
     {
@@ -102,15 +105,11 @@ ResultCode BFRES::ReadIndexGroups()
     m_index_group_headers[group].num_entries = m_file->ReadU32();
 
     // +1 because the number of entries excludes the root node
-    m_raw_node_lists[group].resize(m_index_group_headers[group].num_entries + 1);
+    for (quint32 node = 0; node < m_index_group_headers[group].num_entries + 1; ++node)
+      m_raw_node_lists[group].append(
+          ReadNodeAtOffset(m_header.file_offsets[group] + 0x8 + node * 0x10));
 
-    Node* root_node = ReadNodeAtOffset(m_header.file_offsets[group] + 0x8);
-    m_raw_node_lists[group][0] = root_node;
-    for (quint32 node = 1; node < m_index_group_headers[group].num_entries + 1; ++node)
-      m_raw_node_lists[group][node] =
-          ReadNodeAtOffset(m_header.file_offsets[group] + 0x8 + node * 0x10);
-
-    ReadSubtreeFromNode(root_node, group);
+    ReadSubtreeFromNode(m_raw_node_lists[group][0], group);
     m_node_blacklist.clear();
 
 #ifdef DEBUG
@@ -129,6 +128,27 @@ ResultCode BFRES::ReadIndexGroups()
            node.rightIndex, node.namePtr, node.dataPtr);
 #endif
   }
+
+  // Populate each of the group lists for ease of access for outside classes.
+
+  for (qint32 subfile = 0; subfile < m_raw_node_lists[static_cast<quint32>(GroupType::FMDL)].size();
+       ++subfile)
+  {
+    FMDL fmdl =
+        FMDL(m_file, m_raw_node_lists[static_cast<quint32>(GroupType::FMDL)][subfile]->data_ptr);
+    fmdl.SetName(m_raw_node_lists[static_cast<quint32>(GroupType::FMDL)][subfile]->name);
+    m_fmdl_list.append(fmdl);
+  }
+
+  for (qint32 subfile = 0; subfile < m_raw_node_lists[static_cast<quint32>(GroupType::FTEX)].size();
+       ++subfile)
+  {
+    FTEX ftex =
+        FTEX(m_file, m_raw_node_lists[static_cast<quint32>(GroupType::FTEX)][subfile]->data_ptr);
+    ftex.SetName(m_raw_node_lists[static_cast<quint32>(GroupType::FTEX)][subfile]->name);
+    m_ftex_list.append(ftex);
+  }
+
   return ResultCode::Success;
 }
 
@@ -147,9 +167,19 @@ File* BFRES::GetFile() const
   return m_file;
 }
 
-const QVector<QVector<BFRES::Node*>>& BFRES::GetRawNodeLists()
+const QVector<QVector<BFRES::Node*>>& BFRES::GetNodeList()
 {
   return m_raw_node_lists;
+}
+
+const QVector<FMDL>& BFRES::GetFMDLList()
+{
+  return m_fmdl_list;
+}
+
+const QVector<FTEX>& BFRES::GetFTEXList()
+{
+  return m_ftex_list;
 }
 
 void BFRES::ReadSubtreeFromNode(Node* node, quint32 group)

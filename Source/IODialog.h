@@ -28,8 +28,8 @@ public:
   void MakeSaveFilePathConnection(QLineEdit* line_edit, QPushButton* button, const QString& filter);
 
 private:
-  Ui::IODialog* m_ui;
-  quint32 m_current_group;
+  Ui::IODialog* m_ui = nullptr;
+  quint32 m_current_group = 0;
 
 signals:
   void StartIOAction();

@@ -13,6 +13,6 @@ public:
   void SetPath(const QString& value);
 
 protected:
-  QString m_name;
-  QString m_path;
+  QString m_name = QString();
+  QString m_path = QString();
 };

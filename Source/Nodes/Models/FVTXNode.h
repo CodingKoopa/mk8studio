@@ -13,8 +13,8 @@ public:
   ResultCode LoadAttributeArea() override;
 
 private:
-  FVTX m_fvtx;
-  FVTX::Header m_fvtx_header;
+  FVTX m_fvtx = FVTX();
+  FVTX::Header m_fvtx_header = FVTX::Header();
 
   bool m_header_loaded = false;
 

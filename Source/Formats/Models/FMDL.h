@@ -8,6 +8,7 @@
 class FMDL : public FormatBase
 {
 public:
+  FMDL() = default;
   FMDL(File* file, quint32 start_offset);
   ResultCode ReadHeader();
   ResultCode ReadFVTXArray();
@@ -37,9 +38,9 @@ public:
   void SetFVTXList(const QVector<FVTX>& GetFVTXList);
 
 private:
-  File* m_file;
-  quint32 m_start_offset;
-  Header m_header;
+  File* m_file = nullptr;
+  quint32 m_start_offset = 0;
+  Header m_header = Header();
 
-  QVector<FVTX> m_fvtx_list;
+  QVector<FVTX> m_fvtx_list = QVector<FVTX>();
 };

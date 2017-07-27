@@ -5,6 +5,8 @@
 #include "Common.h"
 #include "File.h"
 #include "Formats/FormatBase.h"
+#include "Formats/Models/FMDL.h"
+#include "Formats/Textures/FTEX.h"
 
 class BFRES : public FormatBase
 {
@@ -82,7 +84,9 @@ public:
 
   File* GetFile() const;
 
-  const QVector<QVector<Node*>>& GetRawNodeLists();
+  const QVector<QVector<Node*>>& GetNodeList();
+  const QVector<FMDL>& GetFMDLList();
+  const QVector<FTEX>& GetFTEXList();
 
   const QVector<EndianInfo>& GetEndianInfoList() const;
   const BFRES::EndianInfo& GetEndianInfoFromName(const QString& name);
@@ -100,11 +104,18 @@ private:
   const QVector<EndianInfo> m_endian_info_list{{EndianInfo::Endianness::Little, "Little Endian"},
                                                {EndianInfo::Endianness::Big, "Big Endian"}};
 
-  Header m_header;
-  QVector<IndexGroupHeader> m_index_group_headers;
+  Header m_header = Header();
+  QVector<IndexGroupHeader> m_index_group_headers = QVector<IndexGroupHeader>();
 
-  QVector<QVector<Node*>> m_raw_node_lists;
-  QVector<int> m_node_blacklist;
+  // This is the raw node list because it's just a list of the nodes in the order that appear,
+  // mostly disregarding the trees. To avoid complications with accessing specific nodes, the goto
+  // node list should be the root node list, with some exceptions where
+  QVector<QVector<Node*>> m_raw_node_lists = QVector<QVector<Node*>>();
+  QVector<FMDL> m_fmdl_list = QVector<FMDL>();
+  QVector<FTEX> m_ftex_list = QVector<FTEX>();
+  QVector<int> m_node_blacklist = QVector<int>();
 
-  File* m_file;
+  File* m_file = nullptr;
+
+  const quint32 m_num_groups = 12;
 };

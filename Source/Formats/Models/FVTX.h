@@ -29,7 +29,7 @@ public:
   void SetHeader(const Header& header);
 
 private:
-  File* m_file;
-  quint32 m_start_offset;
-  Header m_header;
+  File* m_file = nullptr;
+  quint32 m_start_offset = 0;
+  Header m_header = Header();
 };

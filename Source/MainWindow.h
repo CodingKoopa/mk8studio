@@ -25,7 +25,7 @@ public:
   ~MainWindow();
 
 private:
-  Ui::MainWindow* m_ui;
+  Ui::MainWindow* m_ui = nullptr;
 
   QSplitter* m_file_tree_attributes_splitter = nullptr;
   QSplitter* m_left_right_splitter = nullptr;

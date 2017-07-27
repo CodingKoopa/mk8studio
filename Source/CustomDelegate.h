@@ -26,5 +26,5 @@ public:
                     const QModelIndex& index) const override;
 
 private:
-  DelegateGroup m_delegates;
+  DelegateGroup m_delegates = DelegateGroup();
 };

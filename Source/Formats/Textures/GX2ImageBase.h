@@ -224,10 +224,10 @@ private:
   const quint32 m_micro_tile_height = 8;
   const quint32 m_num_micro_tile_pixels = m_micro_tile_width * m_micro_tile_height;
 
-  MicroTileType m_micro_tile_type;
-  quint64 m_num_micro_tile_bits;
-  quint64 m_num_micro_tile_bytes;
-  quint64 m_bytes_per_sample;
+  MicroTileType m_micro_tile_type = MicroTileType();
+  quint64 m_num_micro_tile_bits = 0;
+  quint64 m_num_micro_tile_bytes = 0;
+  quint64 m_bytes_per_sample = 0;
 
   // Macro Tiling info
   const quint32 m_num_banks = 4;
@@ -241,20 +241,20 @@ private:
   const quint32 m_row_size = 2048;
   const quint32 m_pipe_interleave_bytes = 256;
 
-  quint64 m_macro_tile_pitch;
-  quint64 m_macro_tile_height;
-  quint64 m_macro_tiles_per_row;
-  quint64 m_num_macro_tile_bytes;
+  quint64 m_macro_tile_pitch = 0;
+  quint64 m_macro_tile_height = 0;
+  quint64 m_macro_tiles_per_row = 0;
+  quint64 m_num_macro_tile_bytes = 0;
 
-  quint64 m_num_slice_bytes;
+  quint64 m_num_slice_bytes = 0;
 
-  quint32 m_pipe_swizzle;
-  quint32 m_bank_swizzle;
+  quint32 m_pipe_swizzle = 0;
+  quint32 m_bank_swizzle = 0;
 
-  FormatInfo m_format_info;
+  FormatInfo m_format_info = FormatInfo();
   // The index of the current format, in the list.
-  quint32 m_format_info_index;
-  SharedFormatInfo m_shared_format_info;
-  TileModeInfo m_tile_mode_info;
-  SharedTileModeInfo m_shared_tile_mode_info;
+  quint32 m_format_info_index = 0;
+  SharedFormatInfo m_shared_format_info = SharedFormatInfo();
+  TileModeInfo m_tile_mode_info = TileModeInfo();
+  SharedTileModeInfo m_shared_tile_mode_info = SharedTileModeInfo();
 };

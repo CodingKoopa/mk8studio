@@ -39,9 +39,7 @@ CustomStandardItem* BFRESGroupNode::MakeListItemFromRawList()
     {
     case BFRES::GroupType::FMDL:
     {
-      FMDL fmdl(m_bfres.GetFile(), m_bfres.GetRawNodeLists()[m_group][row]->data_ptr);
-      fmdl.SetName(m_bfres.GetRawNodeLists()[m_group][row]->name);
-      FMDLNode* child_node = new FMDLNode(fmdl, this);
+      FMDLNode* child_node = new FMDLNode(m_bfres.GetFMDLList()[row], this);
       connect(child_node, &FMDLNode::ConnectNode, this, &BFRESGroupNode::ConnectNode);
       emit ConnectNode(child_node);
       child_item = child_node->MakeItem();
@@ -49,9 +47,7 @@ CustomStandardItem* BFRESGroupNode::MakeListItemFromRawList()
     }
     case BFRES::GroupType::FTEX:
     {
-      FTEX ftex(m_bfres.GetFile(), m_bfres.GetRawNodeLists()[m_group][row]->data_ptr);
-      ftex.SetName(m_bfres.GetRawNodeLists()[m_group][row]->name);
-      FTEXNode* child_node = new FTEXNode(ftex, this);
+      FTEXNode* child_node = new FTEXNode(m_bfres.GetFTEXList()[row], this);
       connect(child_node, &FTEXNode::ConnectNode, this, &BFRESGroupNode::ConnectNode);
       emit ConnectNode(child_node);
       child_item = child_node->MakeItem();

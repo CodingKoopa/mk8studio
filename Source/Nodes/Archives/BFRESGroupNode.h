@@ -17,12 +17,13 @@ public:
   ResultCode LoadAttributeArea();
 
 private:
-  quint32 m_group;
-  BFRES m_bfres;
-  BFRES::Header m_bfres_header;
+  quint32 m_group = 0;
+  // TODO: might not be necessary
+  BFRES m_bfres = BFRES(nullptr);
+  BFRES::Header m_bfres_header = BFRES::Header();
 
-  QVector<BFRES::Node*> m_node_list;
-  QVector<int> m_node_blacklist;
+  QVector<BFRES::Node*> m_node_list = QVector<BFRES::Node*>();
+  QVector<int> m_node_blacklist = QVector<int>();
 
 private slots:
   void HandleAttributeItemChange(QStandardItem* item);

@@ -74,7 +74,7 @@ CustomStandardItem* BFRESNode::MakeItem()
     {
       // Allocate a new Node derived object.
       BFRESGroupNode* group_node =
-          new BFRESGroupNode(group, m_bfres, m_bfres.GetRawNodeLists()[group], this);
+          new BFRESGroupNode(group, m_bfres, m_bfres.GetNodeList()[group], this);
       connect(group_node, &BFRESGroupNode::ConnectNode, this, &BFRESNode::ConnectNode);
       emit ConnectNode(group_node);
       bfres_item->appendRow(group_node->MakeItem());

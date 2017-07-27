@@ -21,8 +21,9 @@ public:
   ResultCode LoadAttributeArea() override;
 
 private:
-  BFRES m_bfres;
-  BFRES::Header m_bfres_header;
+  // TODO: this default init might not be necessary
+  BFRES m_bfres = BFRES(nullptr);
+  BFRES::Header m_bfres_header = BFRES::Header();
 
 private slots:
   void HandleAttributeItemChange(QStandardItem* item) override;
