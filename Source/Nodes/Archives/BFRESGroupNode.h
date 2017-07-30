@@ -18,8 +18,7 @@ public:
 
 private:
   quint32 m_group = 0;
-  // TODO: might not be necessary
-  BFRES m_bfres = BFRES(nullptr);
+  BFRES m_bfres;
   BFRES::Header m_bfres_header = BFRES::Header();
 
   QVector<BFRES::Node*> m_node_list = QVector<BFRES::Node*>();

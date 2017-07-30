@@ -32,8 +32,6 @@ BFRES::~BFRES()
 
 ResultCode BFRES::ReadHeader()
 {
-  // TODO: read all the read 32s, read 8s in different for loops like so:
-  // https://github.com/citra-emu/citra/blob/master/src/citra_qt/main.cpp#L115
   m_header.magic = m_file->ReadStringASCII(4);
   m_header.unknown_a = m_file->Read8();
   m_header.unknown_b = m_file->Read8();

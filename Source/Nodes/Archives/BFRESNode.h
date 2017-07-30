@@ -21,8 +21,7 @@ public:
   ResultCode LoadAttributeArea() override;
 
 private:
-  // TODO: this default init might not be necessary
-  BFRES m_bfres = BFRES(nullptr);
+  BFRES m_bfres;
   BFRES::Header m_bfres_header = BFRES::Header();
 
 private slots:
