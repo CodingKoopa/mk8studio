@@ -8,6 +8,7 @@
 #include "Nodes/Archives/BFRESGroupNode.h"
 #include "Nodes/Archives/BFRESNode.h"
 #include "Nodes/Models/FMDLNode.h"
+#include "Nodes/Models/FVTXAttributeNode.h"
 #include "Nodes/Models/FVTXNode.h"
 #include "Nodes/Textures/FTEXNode.h"
 
@@ -66,6 +67,10 @@ void Node::HandleFileTreeClick(QModelIndex index)
 
   else if (FVTXNode* fvtx_node = qvariant_cast<FVTXNode*>(index.data(Qt::UserRole + 1)))
     fvtx_node->LoadAttributeArea();
+
+  else if (FVTXAttributeNode* fvtx_attribute_node =
+               qvariant_cast<FVTXAttributeNode*>(index.data(Qt::UserRole + 1)))
+    fvtx_attribute_node->LoadAttributeArea();
 
   else if (FTEXNode* ftex_node = qvariant_cast<FTEXNode*>(index.data(Qt::UserRole + 1)))
   {

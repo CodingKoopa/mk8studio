@@ -31,7 +31,8 @@ SOURCES +=\
     Nodes/Textures/FTEXNode.cpp \
     Nodes/Models/FMDLNode.cpp \
     Formats/Models/FVTX.cpp \
-    Nodes/Models/FVTXNode.cpp
+    Nodes/Models/FVTXNode.cpp \
+    Nodes/Models/FVTXAttributeNode.cpp
 
 HEADERS  += \
     Common.h \
@@ -54,7 +55,8 @@ HEADERS  += \
     Nodes/Textures/FTEXNode.h \
     Nodes/Models/FMDLNode.h \
     Formats/Models/FVTX.h \
-    Nodes/Models/FVTXNode.h
+    Nodes/Models/FVTXNode.h \
+    Nodes/Models/FVTXAttributeNode.h
 
 FORMS += \
     MainWindow.ui \

@@ -15,8 +15,10 @@ public:
 private:
   FVTX m_fvtx = FVTX();
   FVTX::Header m_fvtx_header = FVTX::Header();
+  QVector<FVTX::Attribute> m_attribute_list = QVector<FVTX::Attribute>();
 
   bool m_header_loaded = false;
+  bool m_attributes_loaded = false;
 
 private slots:
   void HandleAttributeItemChange(QStandardItem* item) override;

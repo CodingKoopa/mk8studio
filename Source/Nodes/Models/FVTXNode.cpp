@@ -1,4 +1,5 @@
 #include "Nodes/Models/FVTXNode.h"
+#include "Nodes/Models/FVTXAttributeNode.h"
 
 FVTXNode::FVTXNode(const FVTX& fvtx, QObject* parent) : Node(parent), m_fvtx(fvtx)
 {
@@ -17,10 +18,31 @@ CustomStandardItem* FVTXNode::MakeItem()
     else
       m_fvtx_header = m_fvtx.GetHeader();
   }
-  CustomStandardItem* item = new CustomStandardItem;
-  item->setData("FVTX " + QString::number(m_fvtx_header.section_index), Qt::DisplayRole);
-  item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
-  return item;
+  if (!m_attributes_loaded)
+  {
+    ResultCode res = m_fvtx.ReadAttributes();
+    if (res != ResultCode::Success)
+    {
+      emit NewStatus(res);
+      return nullptr;
+    }
+    else
+      m_attribute_list = m_fvtx.GetAttributeList();
+  }
+
+  CustomStandardItem* fvtx_item = new CustomStandardItem;
+  fvtx_item->setData("FVTX " + QString::number(m_fvtx_header.section_index), Qt::DisplayRole);
+  fvtx_item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
+  CustomStandardItem* attribute_group_item = new CustomStandardItem("Attributes");
+  fvtx_item->appendRow(attribute_group_item);
+  foreach (const FVTX::Attribute& attribute, m_attribute_list)
+  {
+    FVTXAttributeNode* fvtx_attribute_node = new FVTXAttributeNode(attribute, this);
+    connect(fvtx_attribute_node, &FVTXAttributeNode::ConnectNode, this, &FVTXNode::ConnectNode);
+    emit ConnectNode(fvtx_attribute_node);
+    attribute_group_item->appendRow(fvtx_attribute_node->MakeItem());
+  }
+  return fvtx_item;
 }
 
 ResultCode FVTXNode::LoadAttributeArea()
