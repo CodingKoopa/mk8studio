@@ -17,11 +17,6 @@ Node::Node(QObject* parent)
 {
 }
 
-QMenu* Node::GetContextMenu()
-{
-  return m_context_menu;
-}
-
 QScrollArea* Node::MakeAttributeSection(QStandardItemModel* table_view_layout)
 {
   QTableView* table_view = new QTableView;
@@ -88,8 +83,7 @@ void Node::HandleTreeCustomContextMenuRequest(const QPoint& point)
 
   if (Node* node = qvariant_cast<Node*>(index.data(Qt::UserRole + 1)))
   {
-    QMenu* context_menu = node->GetContextMenu();
-    if (context_menu)
-      context_menu->exec(m_tree_view->mapToGlobal(point));
+    if (node->m_context_menu)
+      node->m_context_menu->exec(m_tree_view->mapToGlobal(point));
   }
 }

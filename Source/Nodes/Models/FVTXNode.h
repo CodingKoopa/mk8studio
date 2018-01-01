@@ -13,7 +13,7 @@ public:
   ResultCode LoadAttributeArea() override;
 
 private:
-  FVTX m_fvtx = FVTX();
+  FVTX m_fvtx;
   FVTX::Header m_fvtx_header = FVTX::Header();
   QVector<FVTX::Attribute> m_attribute_list = QVector<FVTX::Attribute>();
 

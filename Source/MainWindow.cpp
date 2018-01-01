@@ -18,7 +18,6 @@
 
 #include "CustomDelegate.h"
 #include "Nodes/Archives/BFRESNode.h"
-#include "NonCopyable.h"
 #include "ui_MainWindow.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::MainWindow)
@@ -137,12 +136,14 @@ void MainWindow::UpdateStatus(ResultCode status, const QString& details)
     break;
   case ResultCode::NoBytesWritten:
     QMessageBox::critical(
-        this, "Error", QString("No bytes were written to the file. This may be due to it not being "
-                               "found, or this application not having sufficient permissions."));
+        this, "Error",
+        QString("No bytes were written to the file. This may be due to it not being found, or this "
+                "application not having sufficient permissions."));
     break;
   case ResultCode::IncorrectHeaderSize:
-    QMessageBox::critical(this, "Error", "Header size didn't match. This may be due to either a "
-                                         "corrupt file or a bug in the code.");
+    QMessageBox::critical(
+        this, "Error",
+        "Header size didn't match. This may be due to either a corrupt file or a bug in the code.");
     break;
   case ResultCode::IncorrectBFRESEndianness:
     QMessageBox::critical(this, "Error",

@@ -27,8 +27,6 @@ public:
   // Optional.
   virtual ResultCode SaveFile() { return ResultCode::NotAvailable; }
 
-  QMenu* GetContextMenu();
-
 protected:
   // List of what each table cell's editor should be.
   CustomItemDelegate::DelegateGroup m_delegate_group;

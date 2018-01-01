@@ -8,8 +8,9 @@
 class FMDL : public FormatBase
 {
 public:
-  FMDL() = default;
-  FMDL(File* file, quint32 start_offset);
+  // This constructor must have the ability to be called without arguments so that a vector can
+  // construct default objects.
+  FMDL(File* file = nullptr, quint32 start_offset = 0);
   ResultCode ReadHeader();
   ResultCode ReadFVTXArray();
 
@@ -38,9 +39,7 @@ public:
   void SetFVTXList(const QVector<FVTX>& GetFVTXList);
 
 private:
-  File* m_file = nullptr;
-  quint32 m_start_offset = 0;
-  Header m_header = Header();
+  Header m_header;
 
-  QVector<FVTX> m_fvtx_list = QVector<FVTX>();
+  QVector<FVTX> m_fvtx_list;
 };

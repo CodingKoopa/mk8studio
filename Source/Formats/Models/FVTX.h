@@ -7,8 +7,7 @@
 class FVTX : public FormatBase
 {
 public:
-  FVTX() = default;
-  FVTX(File* file, quint32 start_offset);
+  FVTX(File* file = nullptr, quint32 start_offset = 0);
   ResultCode ReadHeader();
   ResultCode ReadAttributes();
 
@@ -84,9 +83,7 @@ private:
       {AttributeNameInfo::Use::Color1, "_c1", "Color 1"},
   };
 
-  File* m_file = nullptr;
-  quint32 m_start_offset = 0;
-  Header m_header = Header();
+  Header m_header;
 
-  QVector<Attribute> m_attribute_list = QVector<Attribute>();
+  QVector<Attribute> m_attribute_list;
 };

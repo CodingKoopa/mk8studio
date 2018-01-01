@@ -4,9 +4,7 @@
 
 #include "Formats/Textures/GX2ImageBase.h"
 
-FTEX::FTEX(File* file, quint64 pos) : m_file(file), m_start_offset(pos)
-{
-}
+FTEX::FTEX(File* file, quint64 start_offset) : m_file(file), m_start_offset(start_offset) {}
 
 FTEX::FTEX(const FTEX& other)
     : GX2ImageBase(other), m_file(other.m_file), m_start_offset(other.m_start_offset),

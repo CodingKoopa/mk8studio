@@ -14,9 +14,7 @@
 #include "ImageView.h"
 #include "Nodes/Archives/BFRESGroupNode.h"
 
-BFRESNode::BFRESNode(const BFRES& bfres, QObject* parent) : Node(parent), m_bfres(bfres)
-{
-}
+BFRESNode::BFRESNode(const BFRES& bfres, QObject* parent) : Node(parent), m_bfres(bfres) {}
 
 ResultCode BFRESNode::LoadFileTreeArea()
 {
@@ -32,7 +30,7 @@ ResultCode BFRESNode::LoadFileTreeArea()
 
   QStandardItemModel* file_tree_model = new QStandardItemModel(0, 1);
 
-  QStandardItem* root_item = MakeItem();
+  CustomStandardItem* root_item = MakeItem();
   file_tree_model->appendRow(root_item);
 
   m_tree_view = new QTreeView;
@@ -188,43 +186,45 @@ ResultCode BFRESNode::LoadAttributeArea()
       row, 1, new QStandardItem("0x" + QString::number(m_bfres_header.string_table_offset, 16)));
   ++row;
 
+  // Preserve the current row so it can be revisited later.
+  int original_row = row;
+
+  // Group Offsets
+  for (qint32 i = 0; i < m_bfres_header.file_offsets.size(); ++i)
+  {
+    header_attributes_model->setItem(row, 0,
+                                     new QStandardItem("Group " + QString::number(i) + " Offset"));
+    header_attributes_model->setItem(
+        row, 1, new QStandardItem("0x" + QString::number(m_bfres_header.file_offsets[i], 16)));
+    // Skip ahead 2 rows instead of 1 to make room for the number of files items.
+    row += 2;
+  }
+  // Go back to the start of the group items.
+  row = original_row;
+  // Skip one ahead.
+  row++;
+
+  // Group File Counts
+  for (qint32 i = 0; i < m_bfres_header.file_counts.size(); ++i)
+  {
+    header_attributes_model->setItem(
+        row, 0, new QStandardItem("Number of files in group " + QString::number(i)));
+    header_attributes_model->setItem(
+        row, 1, new QStandardItem(QString::number(m_bfres_header.file_counts[i])));
+    m_delegate_group.spin_box_delegates << row;
+    // Skip ahead 2 to get around the file group offsets.
+    row += 2;
+  }
+  // The file group count loop will leave one empty space at the end.
+  row--;
+
   header_attributes_model->setRowCount(row);
   header_attributes_model->setColumnCount(2);
 
   connect(header_attributes_model, &QStandardItemModel::itemChanged, this,
           &BFRESNode::HandleAttributeItemChange);
 
-  // at this point, the model is ready to go, and be put into a view
-
-  QTableView* table_view = new QTableView();
-
-  table_view->setModel(header_attributes_model);
-  // stretch out table to fit space
-  table_view->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-  table_view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-  table_view->verticalHeader()->hide();
-  table_view->horizontalHeader()->hide();
-
-  table_view->setItemDelegate(new CustomItemDelegate(m_delegate_group));
-
-  // To have all editors open by default, uncomment this out
-  // PROS: Looks nicer, possibly more convienient
-  // CONS: Scrolling can accidentally change values, and opening a new sections
-  // seems to select the text
-  // in every open editor for some reason
-  // for (int i = 0; i < sectionHeaderModel->rowCount(); ++i)
-  // tableView->openPersistentEditor(sectionHeaderModel->index(i, 1));
-
-  QVBoxLayout* sections_layout = new QVBoxLayout();
-  sections_layout->addWidget(new QLabel("Header"));
-  sections_layout->addWidget(table_view);
-
-  QScrollArea* attributes_container = new QScrollArea();
-  attributes_container->setLayout(sections_layout);
-
-  emit NewAttributesArea(attributes_container);
-
-  emit NewStatus(ResultCode::Success);
+  emit NewAttributesArea(MakeAttributeSection(header_attributes_model));
   return ResultCode::Success;
 }
 

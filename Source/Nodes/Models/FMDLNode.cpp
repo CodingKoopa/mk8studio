@@ -201,4 +201,5 @@ void FMDLNode::HandleAttributeItemChange(QStandardItem* item)
     custom_item->ExecuteFunction();
 
   m_fmdl.SetHeader(m_fmdl_header);
+  emit NewFMDL(m_fmdl);
 }

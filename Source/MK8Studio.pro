@@ -25,13 +25,13 @@ SOURCES +=\
     Formats/Textures/DDS.cpp \
     Formats/Textures/FTEX.cpp \
     Formats/Archives/BFRES.cpp \
-    Nodes/Archives/BFRESGroupNode.cpp \
     Nodes/Archives/BFRESNode.cpp \
     Nodes/Textures/FTEXNode.cpp \
     Nodes/Models/FMDLNode.cpp \
     Formats/Models/FVTX.cpp \
     Nodes/Models/FVTXNode.cpp \
-    Nodes/Models/FVTXAttributeNode.cpp
+    Nodes/Models/FVTXAttributeNode.cpp \
+    Nodes/Archives/BFRESGroupNode.cpp
 
 HEADERS  += \
     Common.h \
@@ -42,7 +42,6 @@ HEADERS  += \
     Formats/FormatBase.h \
     IODialog.h \
     CustomStandardItem.h \
-    NonCopyable.h \
     File.h \
     Formats/Models/FMDL.h \
     Formats/Textures/GX2ImageBase.h \
@@ -55,7 +54,8 @@ HEADERS  += \
     Nodes/Models/FMDLNode.h \
     Formats/Models/FVTX.h \
     Nodes/Models/FVTXNode.h \
-    Nodes/Models/FVTXAttributeNode.h
+    Nodes/Models/FVTXAttributeNode.h \
+    Formats/Common/ResourceDictionary.h
 
 FORMS += \
     MainWindow.ui \

@@ -92,6 +92,6 @@ private:
   }
 
   char* m_image_data_buffer = nullptr;
-  QByteArray m_image_data = QByteArray();
-  DDSHeader m_header = DDSHeader();
+  QByteArray m_image_data;
+  DDSHeader m_header;
 };

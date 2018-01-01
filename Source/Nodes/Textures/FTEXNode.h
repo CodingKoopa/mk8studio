@@ -22,17 +22,17 @@ public:
   ResultCode LoadMainWidget() override;
 
 private:
-  FTEX m_ftex = FTEX();
-  FTEX::Header m_ftex_header = FTEX::Header();
+  FTEX m_ftex;
+  FTEX::Header m_ftex_header;
 
   // Unlike the other section containers for other nodes, this one is reused for the injection
   // dialog, so it's a member variable.
-  QScrollArea* m_sections_container = nullptr;
+  QScrollArea* m_sections_container;
 
-  QTableView* m_table_view = nullptr;
+  QTableView* m_table_view;
 
-  QLineEdit* m_path_line_edit = nullptr;
-  QComboBox* m_format_combo_box = nullptr;
+  QLineEdit* m_path_line_edit;
+  QComboBox* m_format_combo_box;
 
   bool m_header_loaded = false;
   bool m_image_loaded = false;

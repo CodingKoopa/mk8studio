@@ -60,8 +60,8 @@ public:
   void Save();
 
 protected:
-  QFile* m_file = nullptr;
-  QDataStream* m_stream = nullptr;
+  QFile* m_file;
+  QDataStream* m_stream;
   bool m_read_only = false;
   bool m_can_read = true;
 };

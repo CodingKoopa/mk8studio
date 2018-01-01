@@ -1,8 +1,6 @@
 #include "Formats/Models/FVTX.h"
 
-FVTX::FVTX(File* file, quint32 start_offset) : m_file(file), m_start_offset(start_offset)
-{
-}
+FVTX::FVTX(File* file, quint32 start_offset) : FormatBase(file, start_offset) {}
 
 ResultCode FVTX::ReadHeader()
 {

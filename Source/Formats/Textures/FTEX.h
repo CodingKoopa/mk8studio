@@ -9,7 +9,7 @@ class FTEX : public GX2ImageBase
 {
 public:
   FTEX() = default;
-  FTEX(File* file, quint64 pos);
+  FTEX(File* file, quint64 start_offset);
   FTEX(const FTEX& other);
   FTEX& operator=(const FTEX& other);
   ~FTEX();

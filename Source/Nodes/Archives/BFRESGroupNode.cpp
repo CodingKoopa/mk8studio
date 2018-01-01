@@ -1,144 +1,184 @@
-#include "BFRESGroupNode.h"
+#include "Nodes/Archives/BFRESGroupNode.h"
 
-#include <QHeaderView>
-#include <QLabel>
-#include <QTableView>
-#include <QVBoxLayout>
-
-#include "CustomDelegate.h"
 #include "Nodes/Models/FMDLNode.h"
 #include "Nodes/Textures/FTEXNode.h"
 
-BFRESGroupNode::BFRESGroupNode(quint32 group, const BFRES& bfres,
-                               const QVector<BFRES::Node*>& node_list, QObject* parent)
-    : Node(parent), m_group(group), m_bfres(bfres), m_bfres_header(m_bfres.GetHeader()),
-      m_node_list(node_list)
+BFRESGroupNodeQObject::BFRESGroupNodeQObject(QObject* parent) : Node(parent) {}
+
+void BFRESGroupNodeQObject::HandleAttributeItemChange(QStandardItem* item)
+{
+  // TODO. See: BFRESNode::HandleAttributeItemChange
+  item = item;
+}
+
+template <typename GroupType>
+BFRESGroupNode<GroupType>::BFRESGroupNode(const ResourceDictionary<GroupType>& dictionary,
+                                          QObject* parent)
+    : BFRESGroupNodeQObject(parent), m_dictionary(dictionary)
 {
 }
 
-CustomStandardItem* BFRESGroupNode::MakeItem()
+template <typename GroupType>
+BFRESGroupNode<GroupType>::BFRESGroupNode(const BFRESGroupNode& other)
+    : BFRESGroupNodeQObject(other.parent()), m_dictionary(other.m_dictionary)
 {
-  CustomStandardItem* item;
-  // TODO: Make this a configurable option, add in MakeTreeItemFromSubtree.
-  bool use_bst = false;
-  if (!use_bst)
-    item = MakeListItemFromRawList();
+}
+
+template <typename GroupType>
+BFRESGroupNode<GroupType>& BFRESGroupNode<GroupType>::operator=(const BFRESGroupNode& other)
+{
+  m_dictionary = other.m_dictionary;
+  return *this;
+}
+
+template <typename GroupType>
+CustomStandardItem* BFRESGroupNode<GroupType>::MakeItem()
+{
+  if (!m_header_loaded)
+  {
+    ResultCode res = m_dictionary.ReadHeader();
+    if (res != ResultCode::Success)
+    {
+      emit NewStatus(res);
+      return nullptr;
+    }
+    else
+    {
+      m_dictionary_header = m_dictionary.GetHeader();
+      m_header_loaded = true;
+    }
+  }
+  if (!m_nodes_loaded)
+  {
+    ResultCode res = m_dictionary.ReadNodes();
+    if (res != ResultCode::Success)
+    {
+      emit NewStatus(res);
+      return nullptr;
+    }
+    else
+      // There's no node list or anything to populate, the nodes are accessed directly with [].
+      m_nodes_loaded = true;
+  }
+
+  CustomStandardItem* item = MakeGroupDependentItem();
+
   item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
   return item;
 }
 
-CustomStandardItem* BFRESGroupNode::MakeListItemFromRawList()
+template <>
+CustomStandardItem* BFRESGroupNode<FMDL>::MakeGroupDependentItem()
 {
-  CustomStandardItem* item = new CustomStandardItem();
-  item->setData(QString("Group " + QString::number(m_group)), Qt::DisplayRole);
-  // Skip the first node (Dummy root node.).
-  for (int row = 1; row < m_node_list.size(); ++row)
+  CustomStandardItem* group_node = new CustomStandardItem("FMDL Models");
+
+  // Skip the root node by starting at 1.
+  for (quint32 row = 1; row < m_dictionary.Size(); ++row)
   {
-    CustomStandardItem* child_item = new CustomStandardItem;
-    switch (static_cast<BFRES::GroupType>(m_group))
-    {
-    case BFRES::GroupType::FMDL:
-    {
-      FMDLNode* child_node = new FMDLNode(m_bfres.GetFMDLList()[row], this);
-      connect(child_node, &FMDLNode::ConnectNode, this, &BFRESGroupNode::ConnectNode);
-      emit ConnectNode(child_node);
-      child_item = child_node->MakeItem();
-      break;
-    }
-    case BFRES::GroupType::FTEX:
-    {
-      FTEXNode* child_node = new FTEXNode(m_bfres.GetFTEXList()[row], this);
-      connect(child_node, &FTEXNode::ConnectNode, this, &BFRESGroupNode::ConnectNode);
-      emit ConnectNode(child_node);
-      child_item = child_node->MakeItem();
-      break;
-    }
-    default:
-      child_item->setData(m_node_list[row]->name, Qt::DisplayRole);
-      child_item->setData(QVariant::fromValue<Node*>(nullptr), Qt::UserRole + 1);
-      break;
-    }
-    item->appendRow(child_item);
+    FMDLNode* fmdl_node = new FMDLNode(m_dictionary[row].value, this);
+    // Sync the FMDL object.
+    connect(fmdl_node, &FMDLNode::NewFMDL, this, [this, row](const FMDL& fmdl) {
+      m_dictionary[row].value = fmdl;
+      emit NewDictionary(m_dictionary);
+    });
+    connect(fmdl_node, &FMDLNode::ConnectNode, this, &BFRESGroupNode::ConnectNode);
+    emit ConnectNode(fmdl_node);
+    group_node->appendRow(fmdl_node->MakeItem());
   }
-  return item;
+
+  return group_node;
 }
 
-CustomStandardItem* BFRESGroupNode::MakeTreeItemFromSubtree(BFRES::Node* node, int blacklist_node)
+template <>
+CustomStandardItem* BFRESGroupNode<FTEX>::MakeGroupDependentItem()
 {
-  if (node)
+  CustomStandardItem* group_node = new CustomStandardItem("FTEX Textures");
+
+  // Skip the root node by starting at 1.
+  for (quint32 row = 1; row < m_dictionary.Size(); ++row)
   {
-    CustomStandardItem* item = new CustomStandardItem();
-    item->setData(node->name, Qt::DisplayRole);
-    if (!m_node_blacklist.contains(node->left_index))
-    {
-      // TODO: use the better way in BFRES class
-      if (blacklist_node != -1)
-        m_node_blacklist.append(blacklist_node);
-
-      QStandardItem* left_node_item = MakeTreeItemFromSubtree(node->left_node, node->left_index);
-      if (left_node_item)
-        item->appendRow(left_node_item);
-    }
-    if (!m_node_blacklist.contains(node->right_index))
-    {
-      if (blacklist_node != -1)
-        m_node_blacklist.append(blacklist_node);
-
-      QStandardItem* right_node_item = MakeTreeItemFromSubtree(node->right_node, node->right_index);
-      if (right_node_item)
-        item->appendRow(right_node_item);
-    }
-    return item;
+    FTEXNode* ftex_node = new FTEXNode(m_dictionary[row].value, this);
+    // Sync the FMDL object.
+    //  connect(child_node, &FMDLNode::NewFMDL, this, [this, row](const FMDL& fmdl) {
+    //    m_bfres.SetFMDL(fmdl, row);
+    //    emit NewNodeList(this->);
+    //  });
+    connect(ftex_node, &FTEXNode::ConnectNode, this, &BFRESGroupNode::ConnectNode);
+    emit ConnectNode(ftex_node);
+    group_node->appendRow(ftex_node->MakeItem());
   }
-  else
-    return nullptr;
+
+  return group_node;
 }
 
-ResultCode BFRESGroupNode::LoadAttributeArea()
+template <typename GroupType>
+ResultCode BFRESGroupNode<GroupType>::LoadAttributeArea()
 {
+  if (!m_header_loaded)
+  {
+    ResultCode res = m_dictionary.ReadHeader();
+    if (res != ResultCode::Success)
+    {
+      emit NewStatus(res);
+      return res;
+    }
+    else
+    {
+      m_dictionary_header = m_dictionary.GetHeader();
+      m_header_loaded = true;
+    }
+  }
+  if (!m_nodes_loaded)
+  {
+    ResultCode res = m_dictionary.ReadNodes();
+    if (res != ResultCode::Success)
+    {
+      emit NewStatus(res);
+      return res;
+    }
+    else
+      // There's no node list or anything to populate, the nodes are accessed directly with [].
+      m_nodes_loaded = true;
+  }
+
   m_delegate_group = CustomItemDelegate::DelegateGroup();
 
   QStandardItemModel* group_attributes_model = new QStandardItemModel();
 
   int row = 0;
 
-  group_attributes_model->setItem(row, 0, new QStandardItem("Offset"));
-  group_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(m_bfres_header.file_offsets[m_group], 16)));
+  // Size (In bytes)
+  group_attributes_model->setItem(row, 0, new QStandardItem("Size"));
+  group_attributes_model->setItem(row, 1,
+                                  new QStandardItem(QString::number(m_dictionary_header.size)));
+  m_delegate_group.spin_box_delegates << row;
   ++row;
 
-  group_attributes_model->setItem(row, 0, new QStandardItem("Number of files"));
+  // Number of nodes (Files)
+  group_attributes_model->setItem(row, 0, new QStandardItem("Number of nodes"));
   group_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(m_bfres_header.file_counts[m_group], 16)));
-  m_delegate_group.spin_box_delegates.append(1);
+      row, 1, new QStandardItem(QString::number(m_dictionary_header.num_nodes)));
+  m_delegate_group.spin_box_delegates << row;
+  ++row;
 
   group_attributes_model->setRowCount(row);
   group_attributes_model->setColumnCount(2);
 
-  QTableView* table_view = new QTableView;
-  table_view->setModel(group_attributes_model);
-  // stretch out table to fit space
-  table_view->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-  table_view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-  table_view->verticalHeader()->hide();
-  table_view->horizontalHeader()->hide();
+  connect(group_attributes_model, &QStandardItemModel::itemChanged, this,
+          &BFRESGroupNodeQObject::HandleAttributeItemChange);
 
-  CustomItemDelegate* customDelegate = new CustomItemDelegate(m_delegate_group);
-  table_view->setItemDelegate(customDelegate);
-
-  QVBoxLayout* sections_layout = new QVBoxLayout();
-  sections_layout->addWidget(new QLabel("Group " + QString::number(m_group)));
-  sections_layout->addWidget(table_view);
-
-  QScrollArea* attributes_container = new QScrollArea();
-  attributes_container->setLayout(sections_layout);
-
-  emit NewAttributesArea(attributes_container);
+  emit NewAttributesArea(MakeAttributeSection(group_attributes_model));
   return ResultCode::Success;
 }
 
-void BFRESGroupNode::HandleAttributeItemChange(QStandardItem* item)
+template <typename GroupType>
+void BFRESGroupNode<GroupType>::SetDictionary(const ResourceDictionary<GroupType>& value)
 {
-  // TODO. See: BFRESNode::HandleAttributeItemChange
-  item = item;
+  m_dictionary = value;
 }
+
+//      FTEXNode* child_node = new FTEXNode(m_bfres.GetFTEXList()[row], this);
+//      connect(child_node, &FTEXNode::ConnectNode, this, &BFRESGroupNode::ConnectNode);
+//      emit ConnectNode(child_node);
+//      child_item = child_node->MakeItem();
+//      break;
