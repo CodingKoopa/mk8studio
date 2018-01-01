@@ -67,19 +67,21 @@ CustomStandardItem* BFRESNode::MakeItem()
   // Store the current instance in a QVariant as an upcasted Node pointer.
   // Will be downcasted back to a BFRES Group Node later.
   bfres_item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
-  m_bfres.ReadIndexGroups();
-  for (int group = 0; group < m_bfres_header.file_counts.size(); ++group)
-  {
-    if (m_bfres_header.file_counts[group])
-    {
-      // Allocate a new Node derived object.
-      BFRESGroupNode* group_node =
-          new BFRESGroupNode(group, m_bfres, m_bfres.GetNodeList()[group], this);
-      connect(group_node, &BFRESGroupNode::ConnectNode, this, &BFRESNode::ConnectNode);
-      emit ConnectNode(group_node);
-      bfres_item->appendRow(group_node->MakeItem());
-    }
-  }
+  m_bfres.ReadDictionaries();
+
+  // Allocate a new Node derived object.
+  BFRESGroupNode<FMDL>* fmdl_group_node =
+      new BFRESGroupNode<FMDL>(m_bfres.GetFMDLDictionary(), this);
+  connect(fmdl_group_node, &BFRESGroupNode<FMDL>::ConnectNode, this, &BFRESNode::ConnectNode);
+  emit ConnectNode(fmdl_group_node);
+  bfres_item->appendRow(fmdl_group_node->MakeItem());
+
+  BFRESGroupNode<FTEX>* ftex_group_node =
+      new BFRESGroupNode<FTEX>(m_bfres.GetFTEXDictionary(), this);
+  connect(ftex_group_node, &BFRESGroupNode<FTEX>::ConnectNode, this, &BFRESNode::ConnectNode);
+  emit ConnectNode(ftex_group_node);
+  bfres_item->appendRow(ftex_group_node->MakeItem());
+
   return bfres_item;
 }
 

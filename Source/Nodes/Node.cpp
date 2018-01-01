@@ -55,28 +55,31 @@ QScrollArea* Node::MakeAttributeSection(QStandardItemModel* table_view_layout)
 
 void Node::HandleFileTreeClick(QModelIndex index)
 {
-  if (BFRESNode* bfres_node = qvariant_cast<BFRESNode*>(index.data(Qt::UserRole + 1)))
+  Node* upcast = index.data(Qt::UserRole + 1).value<Node*>();
+
+  // Normal Classes
+
+  if (BFRESNode* bfres_node = dynamic_cast<BFRESNode*>(upcast))
     bfres_node->LoadAttributeArea();
 
-  else if (BFRESGroupNode* bfres_group_node =
-               qvariant_cast<BFRESGroupNode*>(index.data(Qt::UserRole + 1)))
-    bfres_group_node->LoadAttributeArea();
-
-  else if (FMDLNode* fmdl_node = qvariant_cast<FMDLNode*>(index.data(Qt::UserRole + 1)))
+  else if (FMDLNode* fmdl_node = dynamic_cast<FMDLNode*>(upcast))
     fmdl_node->LoadAttributeArea();
 
-  else if (FVTXNode* fvtx_node = qvariant_cast<FVTXNode*>(index.data(Qt::UserRole + 1)))
+  else if (FVTXNode* fvtx_node = dynamic_cast<FVTXNode*>(upcast))
     fvtx_node->LoadAttributeArea();
 
-  else if (FVTXAttributeNode* fvtx_attribute_node =
-               qvariant_cast<FVTXAttributeNode*>(index.data(Qt::UserRole + 1)))
-    fvtx_attribute_node->LoadAttributeArea();
-
-  else if (FTEXNode* ftex_node = qvariant_cast<FTEXNode*>(index.data(Qt::UserRole + 1)))
+  else if (FTEXNode* ftex_node = dynamic_cast<FTEXNode*>(upcast))
   {
     ftex_node->LoadAttributeArea();
     ftex_node->LoadMainWidget();
   }
+
+  else if (FVTXAttributeNode* fvtx_attribute_node = dynamic_cast<FVTXAttributeNode*>(upcast))
+    fvtx_attribute_node->LoadAttributeArea();
+
+  // TODO: dunno if there's any way to not have to specify a type?
+  else if (BFRESGroupNode<FMDL>* bfres_group_node = dynamic_cast<BFRESGroupNode<FMDL>*>(upcast))
+    bfres_group_node->LoadAttributeArea();
 }
 
 void Node::HandleTreeCustomContextMenuRequest(const QPoint& point)

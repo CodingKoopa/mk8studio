@@ -4,6 +4,7 @@
 
 #include "Common.h"
 #include "File.h"
+#include "Formats/Common/ResourceDictionary.h"
 #include "Formats/FormatBase.h"
 #include "Formats/Models/FMDL.h"
 #include "Formats/Textures/FTEX.h"
@@ -11,11 +12,9 @@
 class BFRES : public FormatBase
 {
 public:
-  BFRES(File* file);
-  // Copy Constructor
+  BFRES(File* file = nullptr, quint32 start_offset = 0);
   BFRES(const BFRES& other);
   BFRES& operator=(const BFRES& other);
-  ~BFRES();
 
   // TODO (For C++17) Make a base structs for the info structs like this, or the ones in
   // GX2ImageBase, so the GetValueFromName or GetIndexOf functions can be there instead of redoing
@@ -77,45 +76,30 @@ public:
   };
 
   ResultCode ReadHeader();
-  ResultCode ReadIndexGroups();
+  ResultCode ReadDictionaries();
 
   const Header& GetHeader() const;
   void SetHeader(const Header& header);
 
   File* GetFile() const;
 
-  const QVector<QVector<Node*>>& GetNodeList();
-  const QVector<FMDL>& GetFMDLList();
-  const QVector<FTEX>& GetFTEXList();
+  const ResourceDictionary<FMDL>& GetFMDLDictionary();
+  void SetFMDLDictionary(const ResourceDictionary<FMDL>& dictionary);
+  const ResourceDictionary<FTEX>& GetFTEXDictionary();
+  void SetFTEXDictionary(const ResourceDictionary<FTEX>& dictionary);
 
   const QVector<EndianInfo>& GetEndianInfoList() const;
   const BFRES::EndianInfo& GetEndianInfoFromName(const QString& name);
   quint32 GetEndianIndexFromInfo(const EndianInfo& endian_info);
 
 private:
-  void ReadSubtreeFromNode(Node* node, quint32 group);
-  void CopySubtreeFromNode(Node* source_node, Node* destination_node);
-  void DeleteSubtreeFromNode(Node* node);
-
-  Node* ReadNodeAtOffset(quint64 offset);
-  void DeepCopyNodes(const BFRES& other);
-  void CopyNode(Node* source_node, Node* destination_node);
-
   const QVector<EndianInfo> m_endian_info_list{{EndianInfo::Endianness::Little, "Little Endian"},
                                                {EndianInfo::Endianness::Big, "Big Endian"}};
 
-  Header m_header = Header();
-  QVector<IndexGroupHeader> m_index_group_headers = QVector<IndexGroupHeader>();
+  Header m_header;
 
-  // This is the raw node list because it's just a list of the nodes in the order that appear,
-  // mostly disregarding the trees. To avoid complications with accessing specific nodes, the goto
-  // node list should be the root node list, with some exceptions where
-  QVector<QVector<Node*>> m_raw_node_lists = QVector<QVector<Node*>>();
-  QVector<FMDL> m_fmdl_list = QVector<FMDL>();
-  QVector<FTEX> m_ftex_list = QVector<FTEX>();
-  QVector<int> m_node_blacklist = QVector<int>();
-
-  File* m_file = nullptr;
+  ResourceDictionary<FMDL> m_fmdl_dictionary;
+  ResourceDictionary<FTEX> m_ftex_dictionary;
 
   const quint32 m_num_groups = 12;
 };
