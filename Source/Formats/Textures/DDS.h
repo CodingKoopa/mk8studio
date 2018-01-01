@@ -5,12 +5,15 @@
 #include "Common.h"
 #include "Formats/FormatBase.h"
 #include "Formats/Textures/GX2ImageBase.h"
-#include "NonCopyable.h"
 
-class DDS : public FormatBase, NonCopyable
+class DDS : public FormatBase
 {
 public:
+  DDS() = default;
   ~DDS();
+
+  DDS(const DDS&) = delete;
+  DDS& operator=(const DDS&) = delete;
 
   struct PixelFormat
   {

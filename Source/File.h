@@ -21,13 +21,14 @@
 #include <QFile>
 #include <QString>
 
-#include "NonCopyable.h"
-
-class File : NonCopyable
+class File
 {
 public:
   File(const QString& path);
   ~File();
+
+  File(const File&) = delete;
+  File& operator=(const File&) = delete;
 
   bool GetReadOnly();
   bool GetCanRead();
