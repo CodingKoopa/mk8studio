@@ -84,7 +84,7 @@ File* BFRES::GetFile() const
   return m_file;
 }
 
-const ResourceDictionary<FMDL>& BFRES::GetFMDLDictionary()
+const ResourceDictionary<FMDL>& BFRES::GetFMDLDictionary() const
 {
   return m_fmdl_dictionary;
 }
@@ -94,7 +94,7 @@ void BFRES::SetFMDLDictionary(const ResourceDictionary<FMDL>& dictionary)
   m_fmdl_dictionary = dictionary;
 }
 
-const ResourceDictionary<FTEX>& BFRES::GetFTEXDictionary()
+const ResourceDictionary<FTEX>& BFRES::GetFTEXDictionary() const
 {
   return m_ftex_dictionary;
 }

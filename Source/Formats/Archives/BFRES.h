@@ -74,9 +74,9 @@ public:
 
   File* GetFile() const;
 
-  const ResourceDictionary<FMDL>& GetFMDLDictionary();
+  const ResourceDictionary<FMDL>& GetFMDLDictionary() const;
   void SetFMDLDictionary(const ResourceDictionary<FMDL>& dictionary);
-  const ResourceDictionary<FTEX>& GetFTEXDictionary();
+  const ResourceDictionary<FTEX>& GetFTEXDictionary() const;
   void SetFTEXDictionary(const ResourceDictionary<FTEX>& dictionary);
 
   const std::map<Endianness, QString>& GetEndianNames() const;
