@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QVector>
-
 #include "Common.h"
 #include "File.h"
 #include "Formats/Common/ResourceDictionary.h"
@@ -16,18 +14,11 @@ public:
   BFRES(const BFRES& other);
   BFRES& operator=(const BFRES& other);
 
-  // TODO (For C++17) Make a base structs for the info structs like this, or the ones in
-  // GX2ImageBase, so the GetValueFromName or GetIndexOf functions can be there instead of redoing
-  // it for every struct.
-  struct EndianInfo
+  enum class Endianness
   {
-    enum class Endianness
-    {
-      Little = 0xFFFE,
-      Big = 0xFEFF
-    } value;
-    QString name;
-  };
+    Little = 0xFFFE,
+    Big = 0xFEFF
+  } value;
 
   struct Header
   {
@@ -36,7 +27,7 @@ public:
     quint8 unknown_b;
     quint8 unknown_c;
     quint8 unknown_d;
-    EndianInfo endian_info;
+    quint16 bom;
     quint16 unknown_e;
     quint32 length;
     quint32 alignment;
@@ -88,13 +79,13 @@ public:
   const ResourceDictionary<FTEX>& GetFTEXDictionary();
   void SetFTEXDictionary(const ResourceDictionary<FTEX>& dictionary);
 
-  const QVector<EndianInfo>& GetEndianInfoList() const;
-  const BFRES::EndianInfo& GetEndianInfoFromName(const QString& name);
-  quint32 GetEndianIndexFromInfo(const EndianInfo& endian_info);
+  const std::map<Endianness, QString>& GetEndianNames() const;
+  const QString& GetEndianName() const;
 
 private:
-  const QVector<EndianInfo> m_endian_info_list{{EndianInfo::Endianness::Little, "Little Endian"},
-                                               {EndianInfo::Endianness::Big, "Big Endian"}};
+  const std::map<Endianness, QString> m_endian_names{{Endianness::Little, "Little Endian"},
+                                                     {Endianness::Big, "Big Endian"}};
+  QString m_endian_name;
 
   Header m_header;
 

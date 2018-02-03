@@ -81,9 +81,8 @@ ResultCode FTEX::ReadHeader()
     return ResultCode::IncorrectHeaderSize;
 
   m_base_header = static_cast<ImageHeaderBase>(m_header);
-  ResultCode res = SetupInfoStructs();
 
-  return res;
+  return SetupInfo();
 }
 
 ResultCode FTEX::ReadImage()

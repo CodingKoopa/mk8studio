@@ -2,57 +2,20 @@
 
 #include "Formats/Textures/DDS.h"
 
-ResultCode GX2ImageBase::SetupInfoStructs()
+ResultCode GX2ImageBase::SetupInfo()
 {
-  // Set up the info structs from the format and tile mode.
-  // Default to GX2_SURFACE_FORMAT_INVALID.
-  m_format_info = m_format_info_list[0];
-  bool format_info_found = false;
-  for (int i = 0; i < m_format_info_list.size(); ++i)
+  try
   {
-    if (m_base_header.format == static_cast<quint32>(m_format_info_list[i].id))
-    {
-      m_format_info = m_format_info_list[i];
-      m_format_info_index = i;
-      format_info_found = true;
-      break;
-    }
-  }
-  // If the format couldn't be assigned to a FormatInfo, and it's not actually an invalid texture.
-  if (!format_info_found)
-    return ResultCode::UnsupportedFileFormat;
+    m_format_info = m_format_infos.at(m_base_header.format);
+    m_common_format_info = m_common_format_infos.at(m_format_info.common_format);
 
-  m_shared_format_info = m_shared_format_info_list[0];
-  bool shared_format_info_found = false;
-  foreach (const SharedFormatInfo& shared_format_info, m_shared_format_info_list)
+    m_tile_mode_info = m_tile_mode_infos.at(m_base_header.tile_mode);
+    m_common_tile_mode_rotation = m_common_tile_mode_rotations.at(m_tile_mode_info.mode);
+  }
+  catch (std::out_of_range)
   {
-    if (m_format_info.format == shared_format_info.format)
-    {
-      m_shared_format_info = shared_format_info;
-      shared_format_info_found = true;
-      break;
-    }
+    return ResultCode::UnsupportedTextureFormat;
   }
-  if (!shared_format_info_found)
-    return ResultCode::UnsupportedFileFormat;
-
-  m_tile_mode_info = m_tile_mode_info_list[m_base_header.tile_mode];
-
-  // Default to a dummy value.
-  m_shared_tile_mode_info = m_shared_tile_mode_info_list[0];
-  bool shared_tile_mode_info_found = false;
-  foreach (const SharedTileModeInfo& shared_tile_mode_info, m_shared_tile_mode_info_list)
-  {
-    if (m_tile_mode_info.mode == shared_tile_mode_info.mode)
-    {
-      m_shared_tile_mode_info = shared_tile_mode_info;
-      shared_tile_mode_info_found = true;
-      break;
-    }
-  }
-  if (!shared_tile_mode_info_found)
-    return ResultCode::UnsupportedFileFormat;
-
   return ResultCode::Success;
 }
 
@@ -82,51 +45,26 @@ ResultCode GX2ImageBase::ExportToDDS(QString path)
   dds.SetImageData(m_deswizzled_image_data);
   int bytes_written =
       dds.WriteFile(m_base_header.width, m_base_header.height, m_base_header.depth,
-                    m_base_header.num_mips, m_element_size, m_format_info, m_shared_format_info);
+                    m_base_header.num_mips, m_element_size, m_format_info, m_common_format_info);
   if (bytes_written == 0)
     return ResultCode::NoBytesWritten;
   else
     return ResultCode::Success;
 }
 
-const QList<GX2ImageBase::FormatInfo>& GX2ImageBase::GetFormatInfoList() const
+const std::map<quint32, GX2ImageBase::FormatInfo> GX2ImageBase::GetFormatInfos() const
 {
-  return m_format_info_list;
+  return m_format_infos;
 }
 
-quint32 GX2ImageBase::GetFormatIDFromName(const QString& name) const
+const std::map<quint32, GX2ImageBase::TileModeInfo>& GX2ImageBase::GetTileModeInfos() const
 {
-  foreach (const FormatInfo& format, m_format_info_list)
-  {
-    if (name == format.name)
-      return format.id;
-  }
-  return m_format_info_list[0].id;
-}
-
-const QList<GX2ImageBase::TileModeInfo>& GX2ImageBase::GetTileModeInfoList() const
-{
-  return m_tile_mode_info_list;
-}
-
-quint32 GX2ImageBase::GetTileModeInfoFromName(const QString& name) const
-{
-  foreach (const TileModeInfo& tile_mode, m_tile_mode_info_list)
-  {
-    if (name == tile_mode.name)
-      return tile_mode.id;
-  }
-  return m_tile_mode_info_list[0].id;
+  return m_tile_mode_infos;
 }
 
 const GX2ImageBase::FormatInfo& GX2ImageBase::GetFormatInfo() const
 {
   return m_format_info;
-}
-
-quint32 GX2ImageBase::GetFormatInfoIndex() const
-{
-  return m_format_info_index;
 }
 
 const GX2ImageBase::TileModeInfo& GX2ImageBase::GetTileModeInfo() const
@@ -139,13 +77,13 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray* destination, 
   // Temporary hack to find special textures.
   if (m_base_header.aa_mode != 0 || static_cast<quint32>(m_tile_mode_info.thickness) > 1 ||
       m_format_info.name == "GX2_SURFACE_FORMAT_INVALID" ||
-      m_shared_format_info.format == Format::Invalid)
+      m_format_info.common_format == CommonFormat::Invalid)
     return ResultCode::ImportantUnsupportedFileFormat;
 
   // Set up dimensions.
   quint32 width = m_base_header.width;
   quint32 height = m_base_header.height;
-  if (m_shared_format_info.compressed)
+  if (m_common_format_info.compressed)
   {
     // Split into 4 by 4 compressed blocks of pixels.
     width /= 4;
@@ -154,7 +92,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray* destination, 
 
   // The size of the element, the size of 1 tile in a compressed texture, or the size of 1 pixel in
   // a decompressed texture.
-  m_element_size = m_shared_format_info.bpp / 8;
+  m_element_size = m_common_format_info.bpp / 8;
 
   m_num_samples = 1 << m_base_header.aa_mode;
 
@@ -162,7 +100,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray* destination, 
   {
   // Macro Tiled
   // TODO: Add support for 3D textures.
-  case TileMode::Macro:
+  case CommonTileMode::Macro:
     // Calculate the size of the macro tiles, determined by the number of pipes/banks, and the
     // aspect ratio.
 
@@ -193,7 +131,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray* destination, 
     // Number of bits in all samples of a macro tile including thickness -> Bytes =
     // Number of bytes in one macro tile (All samples).
     m_num_macro_tile_bytes =
-        BitsToBytes(m_macro_tile_pitch * m_macro_tile_height * m_shared_format_info.bpp *
+        BitsToBytes(m_macro_tile_pitch * m_macro_tile_height * m_common_format_info.bpp *
                     static_cast<quint32>(m_tile_mode_info.thickness) * m_num_samples);
 
     // Physical width of a row of the whole texture *
@@ -215,7 +153,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray* destination, 
     // Number of bits in the whole texture -> Bytes =
     // Number of bytes in the whole texture.
     m_num_slice_bytes =
-        BitsToBytes(m_base_header.pitch * m_base_header.height * m_shared_format_info.bpp *
+        BitsToBytes(m_base_header.pitch * m_base_header.height * m_common_format_info.bpp *
                     static_cast<quint32>(m_tile_mode_info.thickness) * m_num_samples);
 
     m_pipe_swizzle = Bit(m_base_header.swizzle, 8);
@@ -226,8 +164,8 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray* destination, 
   // (This comment is here to prevent compiler warnings.)
 
   // Micro Tiled
-  case TileMode::Micro:
-    if (m_shared_format_info.use == SharedFormatInfo::Use::DepthBuffer)
+  case CommonTileMode::Micro:
+    if (m_common_format_info.use == CommonFormatInfo::Use::DepthBuffer)
       m_micro_tile_type = MicroTileType::NonDisplayable;
     else
       m_micro_tile_type = MicroTileType::Displayable;
@@ -246,7 +184,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray* destination, 
 
     // Number of bits in all samples of a micro tile including thickness -> Bytes =
     // Number of bytes in one micro tile.
-    m_num_micro_tile_bits = m_num_micro_tile_pixels * m_shared_format_info.bpp *
+    m_num_micro_tile_bits = m_num_micro_tile_pixels * m_common_format_info.bpp *
                             static_cast<quint32>(m_tile_mode_info.thickness) * m_num_samples;
 
     // Number of bits in one micro tile /
@@ -260,7 +198,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray* destination, 
     m_bytes_per_sample = m_num_micro_tile_bytes / m_num_samples;
     break;
 
-  case TileMode::Linear:
+  case CommonTileMode::Linear:
   default:
     return ResultCode::UnsupportedFileFormat;
   }
@@ -276,7 +214,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray* destination, 
       // Get the offset of the pixel at the current coordinate.
       switch (m_tile_mode_info.mode)
       {
-      case TileMode::Macro:
+      case CommonTileMode::Macro:
         original_offset = ComputeSurfaceAddrFromCoordMacroTiled(x, y, 0, 0, 0, 0);
         break;
       default:
@@ -326,18 +264,18 @@ quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y
   // Offset of the current pixel relative to the beginning of the current sample.
   quint64 pixel_offset_within_sample;
 
-  if (m_shared_format_info.use == SharedFormatInfo::Use::DepthBuffer)
+  if (m_common_format_info.use == CommonFormatInfo::Use::DepthBuffer)
   {
-    if (comp_bits && comp_bits != m_shared_format_info.bpp)
+    if (comp_bits && comp_bits != m_common_format_info.bpp)
     {
       sample_offset_within_micro_tile = tile_base + comp_bits * sample;
       pixel_offset_within_sample = num_samples * comp_bits * pixel_index_within_micro_tile;
     }
     else
     {
-      sample_offset_within_micro_tile = m_shared_format_info.bpp * sample;
+      sample_offset_within_micro_tile = m_common_format_info.bpp * sample;
       pixel_offset_within_sample =
-          num_samples * m_shared_format_info.bpp * pixel_index_within_micro_tile;
+          num_samples * m_common_format_info.bpp * pixel_index_within_micro_tile;
     }
   }
   else
@@ -361,7 +299,7 @@ quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y
     // Number of bits in one pixel *
     // The pixel index =
     // The offset of the current pixel relative to the beginning of the current sample.
-    pixel_offset_within_sample = m_shared_format_info.bpp * pixel_index_within_micro_tile;
+    pixel_offset_within_sample = m_common_format_info.bpp * pixel_index_within_micro_tile;
   }
 
   // Offset of the pixel within the sample +
@@ -445,7 +383,7 @@ quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y
 
   // Algorithm to recalculate bank and pipe?
   bank_pipe ^= (sample_slice * ((m_num_banks >> 1) + 1)) << m_pipe_bit_count ^
-               (swizzle + sliceIn * m_shared_tile_mode_info.rotation);
+               (swizzle + sliceIn * m_common_tile_mode_rotation);
   bank_pipe %= m_num_pipes * m_num_banks;
   pipe = bank_pipe % m_num_pipes;
   bank = bank_pipe / m_num_pipes;
@@ -553,7 +491,7 @@ quint32 GX2ImageBase::ComputePixelIndexWithinMicroTile(quint32 x, quint32 y, qui
   }
   else
   {
-    switch (m_shared_format_info.bpp)
+    switch (m_common_format_info.bpp)
     {
     case 8:
       pixel_bit_0 = x_0;
@@ -617,7 +555,7 @@ quint32 GX2ImageBase::ComputeSurfaceBankSwappedWidth(quint32 pitch)
 
   quint32 num_samples = m_num_samples;
   // TODO: Same as m_bytes_per_sample?
-  quint32 bytes_per_sample = 8 * m_shared_format_info.bpp;
+  quint32 bytes_per_sample = 8 * m_common_format_info.bpp;
   quint32 samples_per_tile = m_split_size / bytes_per_sample;
 
   if (m_split_size / m_bytes_per_sample)
@@ -632,10 +570,10 @@ quint32 GX2ImageBase::ComputeSurfaceBankSwappedWidth(quint32 pitch)
 
   if (m_tile_mode_info.thickness == TileModeInfo::Thickness::Thick)
   {
-    auto swapTiles = qMax<uint32_t>(1u, (m_swap_size >> 1) / m_shared_format_info.bpp);
+    auto swapTiles = qMax<uint32_t>(1u, (m_swap_size >> 1) / m_common_format_info.bpp);
     quint64 swapWidth = swapTiles * 8 * m_num_banks;
     auto heightBytes = num_samples * m_tile_mode_info.aspect_ratio * m_num_pipes *
-                       m_shared_format_info.bpp / slices_per_tile;
+                       m_common_format_info.bpp / slices_per_tile;
     quint64 swapMax = m_num_pipes * m_num_banks * m_row_size / heightBytes;
     quint64 swapMin = m_pipe_interleave_bytes * 8 * m_num_banks / bytes_per_tile_slice;
 

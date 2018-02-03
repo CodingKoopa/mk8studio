@@ -108,16 +108,21 @@ ResultCode FTEXNode::LoadAttributeArea()
 
   // Texture Format
   header_attributes_model->setItem(row, 0, new QStandardItem("Format"));
-  QList<FTEX::FormatInfo> format_info_list = m_ftex.GetFormatInfoList();
-  QStandardItemModel* format_combo_box_entries = new QStandardItemModel(format_info_list.size(), 0);
-  for (int format = 0; format < format_info_list.size(); ++format)
-    format_combo_box_entries->setItem(format, new QStandardItem(format_info_list[format].name));
+  auto format_infos = m_ftex.GetFormatInfos();
+  QStandardItemModel* format_combo_box_entries = new QStandardItemModel();
+  for (auto const& format_info : format_infos)
+    format_combo_box_entries->appendRow(new QStandardItem(format_info.second.name));
   m_delegate_group.combo_box_entries << format_combo_box_entries;
   m_delegate_group.combo_box_delegates << row;
-  m_delegate_group.combo_box_selections << m_ftex.GetFormatInfoIndex();
+  m_delegate_group.combo_box_selections
+      << std::distance(format_infos.begin(), format_infos.find(m_ftex_header.format));
   CustomStandardItem* format_item = new CustomStandardItem(m_ftex.GetFormatInfo().name);
-  format_item->SetFunction(
-      [this](QString text) { m_ftex_header.format = m_ftex.GetFormatIDFromName(text); });
+  // Here, index is the index of the overall map, and NOT a key.
+  format_item->SetFunction([this, format_infos](quint32 index) {
+    auto it =
+        next(format_infos.begin(), std::min(index, static_cast<quint32>(format_infos.size())));
+    m_ftex_header.format = it->first;
+  });
   header_attributes_model->setItem(row, 1, format_item);
   ++row;
 
@@ -159,18 +164,17 @@ ResultCode FTEXNode::LoadAttributeArea()
 
   // Tile Mode
   header_attributes_model->setItem(row, 0, new QStandardItem("Tile Mode"));
-  QList<FTEX::TileModeInfo> tile_mode_info_list = m_ftex.GetTileModeInfoList();
-  QStandardItemModel* tiling_combo_box_entries =
-      new QStandardItemModel(tile_mode_info_list.size(), 0);
-  for (qint32 tile_mode = 0; tile_mode < tile_mode_info_list.size(); ++tile_mode)
-    tiling_combo_box_entries->setItem(tile_mode,
-                                      new QStandardItem(tile_mode_info_list[tile_mode].name));
+  auto tile_mode_infos = m_ftex.GetTileModeInfos();
+  QStandardItemModel* tiling_combo_box_entries = new QStandardItemModel();
+  for (auto const& tile_mode_info : tile_mode_infos)
+    tiling_combo_box_entries->appendRow(new QStandardItem(tile_mode_info.second.name));
   m_delegate_group.combo_box_entries << tiling_combo_box_entries;
   m_delegate_group.combo_box_delegates << row;
+  // The tile mode corresponds with the index because they're consecutive.
   m_delegate_group.combo_box_selections << m_ftex_header.tile_mode;
-  CustomStandardItem* tile_mode_item = new CustomStandardItem(m_ftex.GetFormatInfo().name);
+  CustomStandardItem* tile_mode_item = new CustomStandardItem(m_ftex.GetTileModeInfo().name);
   tile_mode_item->SetFunction(
-      [this](QString text) { m_ftex_header.tile_mode = m_ftex.GetTileModeInfoFromName(text); });
+      [this](quint32 index) { m_ftex_header.tile_mode = static_cast<quint32>(index); });
   header_attributes_model->setItem(row, 1, tile_mode_item);
   ++row;
 
@@ -231,13 +235,13 @@ ResultCode FTEXNode::LoadAttributeArea()
   ++row;
 
   QVector<QString> component_name_list = m_ftex.GetComponentNameList();
-  QStandardItemModel* component_selector_combo_box_entries = new QStandardItemModel(6, 0);
-  component_selector_combo_box_entries->setItem(0, new QStandardItem(component_name_list[0]));
-  component_selector_combo_box_entries->setItem(1, new QStandardItem(component_name_list[1]));
-  component_selector_combo_box_entries->setItem(2, new QStandardItem(component_name_list[2]));
-  component_selector_combo_box_entries->setItem(3, new QStandardItem(component_name_list[3]));
-  component_selector_combo_box_entries->setItem(4, new QStandardItem(component_name_list[4]));
-  component_selector_combo_box_entries->setItem(5, new QStandardItem(component_name_list[5]));
+  QStandardItemModel* component_selector_combo_box_entries = new QStandardItemModel();
+  component_selector_combo_box_entries->appendRow(new QStandardItem(component_name_list[0]));
+  component_selector_combo_box_entries->appendRow(new QStandardItem(component_name_list[1]));
+  component_selector_combo_box_entries->appendRow(new QStandardItem(component_name_list[2]));
+  component_selector_combo_box_entries->appendRow(new QStandardItem(component_name_list[3]));
+  component_selector_combo_box_entries->appendRow(new QStandardItem(component_name_list[4]));
+  component_selector_combo_box_entries->appendRow(new QStandardItem(component_name_list[5]));
 
   // Red Channel Selector
   header_attributes_model->setItem(row, 0, new QStandardItem("Texture Red Channel Binding"));
@@ -404,7 +408,7 @@ void FTEXNode::HandleAttributeItemChange(QStandardItem* item)
     custom_item->ExecuteFunction();
 
   m_ftex.SetHeader(m_ftex_header);
-  m_ftex.SetupInfoStructs();
+  m_ftex.SetupInfo();
 }
 
 void FTEXNode::HandleExportActionClick()

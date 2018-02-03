@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QByteArray>
-#include <QList>
 
 #include "Common.h"
 #include "Formats/FormatBase.h"
@@ -9,8 +8,8 @@
 class GX2ImageBase : public FormatBase
 {
 public:
-  // Format enumerations just for convienience.
-  enum class Format
+  // Common kinds of formats.
+  enum class CommonFormat
   {
     Invalid = 0x0,
     BC1 = 0x31,
@@ -18,12 +17,10 @@ public:
     BC5 = 0x35
   };
 
-  // Info that's consistent across any texture with the same format.
-  struct SharedFormatInfo
+  // Information about a common format.
+  struct CommonFormatInfo
   {
-    Format format;
     quint32 bpp;
-
     enum class Use
     {
       // Not a real use.
@@ -33,19 +30,16 @@ public:
       DepthBuffer,
       ScanBuffer
     } use;
-
     bool compressed;
   };
 
+  // Information about a specific format.
   struct FormatInfo
   {
-    // This is used in both info structs, but making a base class would make them become non
-    // aggregates. C++17 will allow public inherited base classes in aggregates.
-    quint32 id;
+    CommonFormat common_format;
+
+    // Use Decaf's name for the format.
     QString name;
-
-    Format format;
-
     enum class Type
     {
       Invalid,
@@ -59,34 +53,23 @@ public:
   };
 
   // Tile Mode enumerations just for convienience.
-  enum class TileMode
+  enum class CommonTileMode
   {
-    Invalid,
     Linear,
     Micro,
     Macro
   };
 
-  struct SharedTileModeInfo
-  {
-    TileMode mode;
-
-    quint32 rotation;
-  };
-
   struct TileModeInfo
   {
-    quint32 id;
+    CommonTileMode mode;
+
     QString name;
-
-    TileMode mode;
-
     enum class Thickness
     {
       Thin = 1,
       Thick = 4
     } thickness;
-
     quint32 aspect_ratio;
     bool swap_banks;
   };
@@ -111,7 +94,7 @@ public:
     quint32 swizzle;
   };
 
-  ResultCode SetupInfoStructs();
+  ResultCode SetupInfo();
 
   ResultCode ReadImageFromData();
   ResultCode WriteDeswizzledImageToData();
@@ -119,13 +102,10 @@ public:
   ResultCode ImportDDS(QString path);
   ResultCode ExportToDDS(QString path);
 
-  const QList<FormatInfo>& GetFormatInfoList() const;
-  quint32 GetFormatIDFromName(const QString& name) const;
-  const QList<TileModeInfo>& GetTileModeInfoList() const;
-  quint32 GetTileModeInfoFromName(const QString& name) const;
+  const std::map<quint32, FormatInfo> GetFormatInfos() const;
+  const std::map<quint32, TileModeInfo>& GetTileModeInfos() const;
 
   const FormatInfo& GetFormatInfo() const;
-  quint32 GetFormatInfoIndex() const;
   const TileModeInfo& GetTileModeInfo() const;
 
 protected:
@@ -154,67 +134,69 @@ private:
     ThickTiliing = 0x3,
   };
 
-  const QList<SharedFormatInfo> m_shared_format_info_list{
-      {Format::Invalid, 0, SharedFormatInfo::Use::None, false},
-      {Format::BC1, 64, SharedFormatInfo::Use::Texture, true},
-      {Format::BC4, 64, SharedFormatInfo::Use::Texture, true},
-      {Format::BC5, 128, SharedFormatInfo::Use::Texture, true}};
+  // "information" is an uncountable word, but we need to differentiate between its singular and
+  // plural forms.
+  const std::map<CommonFormat, CommonFormatInfo> m_common_format_infos{
+      {CommonFormat::Invalid, {0, CommonFormatInfo::Use::None, false}},
+      {CommonFormat::BC1, {64, CommonFormatInfo::Use::Texture, true}},
+      {CommonFormat::BC4, {64, CommonFormatInfo::Use::Texture, true}},
+      {CommonFormat::BC5, {128, CommonFormatInfo::Use::Texture, true}}};
+  // Common format of the texture.
+  CommonFormatInfo m_common_format_info;
 
   // Very incomplete list of formats.
-  const QList<FormatInfo> m_format_info_list{
+  // clang-format off
+  const std::map<quint32, FormatInfo> m_format_infos{
       // Invalid
-      {0x0, "GX2_SURFACE_FORMAT_INVALID", Format::Invalid, FormatInfo::Type::Invalid},
+      {0x0,     {CommonFormat::Invalid, "GX2_SURFACE_FORMAT_INVALID",   FormatInfo::Type::Invalid}},
       // Unsigned Normals
-      {0x31, "GX2_SURFACE_FORMAT_UNORM_BC1", Format::BC1, FormatInfo::Type::UNorm},
-      {0x34, "GX2_SURFACE_FORMAT_UNORM_BC4", Format::BC4, FormatInfo::Type::UNorm},
-      {0x35, "GX2_SURFACE_FORMAT_UNORM_BC5", Format::BC4, FormatInfo::Type::UNorm},
+      {0x31,    {CommonFormat::BC1,     "GX2_SURFACE_FORMAT_UNORM_BC1", FormatInfo::Type::UNorm}},
+      {0x34,    {CommonFormat::BC4,     "GX2_SURFACE_FORMAT_UNORM_BC4", FormatInfo::Type::UNorm}},
+      {0x35,    {CommonFormat::BC4,     "GX2_SURFACE_FORMAT_UNORM_BC5", FormatInfo::Type::UNorm}},
       // Signed Normals
-      {0x234, "GX2_SURFACE_FORMAT_SNORM_BC4", Format::BC4, FormatInfo::Type::SNorm},
-      {0x235, "GX2_SURFACE_FORMAT_SNORM_BC5", Format::BC5, FormatInfo::Type::SNorm},
+      {0x234,   {CommonFormat::BC4,     "GX2_SURFACE_FORMAT_SNORM_BC4", FormatInfo::Type::SNorm}},
+      {0x235,   {CommonFormat::BC5,     "GX2_SURFACE_FORMAT_SNORM_BC5", FormatInfo::Type::SNorm}},
       // SRGB
-      {0x431, "GX2_SURFACE_FORMAT_SRGB_BC1", Format::BC1, FormatInfo::Type::SRGB}};
+      {0x431,   {CommonFormat::BC1,     "GX2_SURFACE_FORMAT_SRGB_BC1",  FormatInfo::Type::SRGB}}};
+  // clang-format on
+  // Specific format of the texture.
+  FormatInfo m_format_info;
 
-  const QList<SharedTileModeInfo> m_shared_tile_mode_info_list{
-      {TileMode::Invalid, 0},
-      {TileMode::Linear, 0},
-      {TileMode::Micro, m_num_pipes*((m_num_banks >> 1) - 1)},
-      {TileMode::Macro, 1}};
+  // Instead of having a CommonTileModeInfo struct, only keep track of the rotations because they
+  // are the only shared feature.
+  // clang-format off
+  const std::map<CommonTileMode, quint32> m_common_tile_mode_rotations{
+      {CommonTileMode::Linear,  0},
+      {CommonTileMode::Micro,   m_num_pipes*((m_num_banks >> 1) - 1)},
+      {CommonTileMode::Macro,   1}};
+  // clang-format on
+  // Specific tile mode of the texture.
+  TileModeInfo m_tile_mode_info;
 
-  const QList<TileModeInfo> m_tile_mode_info_list{
+  // clang-format off
+  const std::map<quint32, TileModeInfo> m_tile_mode_infos{
       // Linear Tiled
-      {0x0, "GX2_TILE_MODE_DEFAULT", TileMode::Linear, TileModeInfo::Thickness::Thin, 0, false},
-      {0x1, "GX2_TILE_MODE_LINEAR_ALIGNED", TileMode::Linear, TileModeInfo::Thickness::Thin, 0,
-       false},
+      {0x0,     {CommonTileMode::Linear,    "GX2_TILE_MODE_DEFAULT",        TileModeInfo::Thickness::Thin,  0, false}},
+      {0x1,     {CommonTileMode::Linear,    "GX2_TILE_MODE_LINEAR_ALIGNED", TileModeInfo::Thickness::Thin,  0, false}},
       // Micro Tiled
-      {0x2, "GX2_TILE_MODE_1D_TILED_THIN1", TileMode::Micro, TileModeInfo::Thickness::Thin, 0,
-       false},
-      {0x3, "GX2_TILE_MODE_1D_TILED_THICK", TileMode::Micro, TileModeInfo::Thickness::Thick, 0,
-       false},
+      {0x2,     {CommonTileMode::Micro,     "GX2_TILE_MODE_1D_TILED_THIN1", TileModeInfo::Thickness::Thin,  0, false}},
+      {0x3,     {CommonTileMode::Micro,     "GX2_TILE_MODE_1D_TILED_THICK", TileModeInfo::Thickness::Thick, 0, false}},
       // Macro Tiled
-      {0x4, "GX2_TILE_MODE_2D_TILED_THIN1", TileMode::Macro, TileModeInfo::Thickness::Thin, 1,
-       false},
-      {0x5, "GX2_TILE_MODE_2D_TILED_THIN2", TileMode::Macro, TileModeInfo::Thickness::Thin, 2,
-       false},
-      {0x6, "GX2_TILE_MODE_2D_TILED_THIN4", TileMode::Macro, TileModeInfo::Thickness::Thin, 4,
-       false},
-      {0x7, "GX2_TILE_MODE_2D_TILED_THICK", TileMode::Macro, TileModeInfo::Thickness::Thick, 1,
-       false},
-      {0x8, "GX2_TILE_MODE_2B_TILED_THIN1", TileMode::Macro, TileModeInfo::Thickness::Thin, 1,
-       true},
-      {0x9, "GX2_TILE_MODE_2B_TILED_THIN2", TileMode::Macro, TileModeInfo::Thickness::Thin, 2,
-       true},
-      {0xA, "GX2_TILE_MODE_2B_TILED_THIN4", TileMode::Macro, TileModeInfo::Thickness::Thin, 4,
-       true},
-      {0xB, "GX2_TILE_MODE_2B_TILED_THICK", TileMode::Macro, TileModeInfo::Thickness::Thick, 1,
-       true},
-      {0xC, "GX2_TILE_MODE_3D_TILED_THIN1", TileMode::Macro, TileModeInfo::Thickness::Thin, 1,
-       false},
-      {0xD, "GX2_TILE_MODE_3D_TILED_THICK", TileMode::Macro, TileModeInfo::Thickness::Thick, 1,
-       false},
-      {0xE, "GX2_TILE_MODE_3B_TILED_THIN1", TileMode::Macro, TileModeInfo::Thickness::Thin, 1,
-       true},
-      {0xF, "GX2_TILE_MODE_3B_TILED_THICK", TileMode::Macro, TileModeInfo::Thickness::Thick, 1,
-       true}};
+      {0x4,     {CommonTileMode::Macro,     "GX2_TILE_MODE_2D_TILED_THIN1", TileModeInfo::Thickness::Thin,  1, false}},
+      {0x5,     {CommonTileMode::Macro,     "GX2_TILE_MODE_2D_TILED_THIN2", TileModeInfo::Thickness::Thin,  2, false}},
+      {0x6,     {CommonTileMode::Macro,     "GX2_TILE_MODE_2D_TILED_THIN4", TileModeInfo::Thickness::Thin,  4, false}},
+      {0x7,     {CommonTileMode::Macro,     "GX2_TILE_MODE_2D_TILED_THICK", TileModeInfo::Thickness::Thick, 1, false}},
+      {0x9,     {CommonTileMode::Macro,     "GX2_TILE_MODE_2B_TILED_THIN2", TileModeInfo::Thickness::Thin,  2, true}},
+      {0x8,     {CommonTileMode::Macro,     "GX2_TILE_MODE_2B_TILED_THIN1", TileModeInfo::Thickness::Thin,  1, true}},
+      {0xA,     {CommonTileMode::Macro,     "GX2_TILE_MODE_2B_TILED_THIN4", TileModeInfo::Thickness::Thin,  4, true}},
+      {0xB,     {CommonTileMode::Macro,     "GX2_TILE_MODE_2B_TILED_THICK", TileModeInfo::Thickness::Thick, 1, true}},
+      {0xC,     {CommonTileMode::Macro,     "GX2_TILE_MODE_3D_TILED_THIN1", TileModeInfo::Thickness::Thin,  1, false}},
+      {0xD,     {CommonTileMode::Macro,     "GX2_TILE_MODE_3D_TILED_THICK", TileModeInfo::Thickness::Thick, 1, false}},
+      {0xE,     {CommonTileMode::Macro,     "GX2_TILE_MODE_3B_TILED_THIN1", TileModeInfo::Thickness::Thin,  1, true}},
+      {0xF,     {CommonTileMode::Macro,     "GX2_TILE_MODE_3B_TILED_THICK", TileModeInfo::Thickness::Thick, 1, true}}};
+  // clang-format on
+  // Common rotation of the texture.
+  quint32 m_common_tile_mode_rotation;
 
   quint32 m_element_size = 0;
   quint32 m_num_samples;
@@ -224,7 +206,7 @@ private:
   const quint32 m_micro_tile_height = 8;
   const quint32 m_num_micro_tile_pixels = m_micro_tile_width * m_micro_tile_height;
 
-  MicroTileType m_micro_tile_type = MicroTileType();
+  MicroTileType m_micro_tile_type;
   quint64 m_num_micro_tile_bits = 0;
   quint64 m_num_micro_tile_bytes = 0;
   quint64 m_bytes_per_sample = 0;
@@ -250,11 +232,4 @@ private:
 
   quint32 m_pipe_swizzle = 0;
   quint32 m_bank_swizzle = 0;
-
-  FormatInfo m_format_info = FormatInfo();
-  // The index of the current format, in the list.
-  quint32 m_format_info_index = 0;
-  SharedFormatInfo m_shared_format_info = SharedFormatInfo();
-  TileModeInfo m_tile_mode_info = TileModeInfo();
-  SharedTileModeInfo m_shared_tile_mode_info = SharedTileModeInfo();
 };

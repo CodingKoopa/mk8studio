@@ -11,6 +11,7 @@
 #include "CustomStandardItem.h"
 #include "File.h"
 
+class CustomStandardItem;
 class Node : public QObject
 {
   Q_OBJECT

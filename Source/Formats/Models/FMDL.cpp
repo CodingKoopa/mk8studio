@@ -29,11 +29,9 @@ ResultCode FMDL::ReadHeader()
 ResultCode FMDL::ReadFVTXArray()
 {
   m_file->Seek(m_header.fvtx_array_offset);
-  m_fvtx_list.resize(m_header.fvtx_count);
   for (quint16 index = 0; index < m_header.fvtx_count; ++index)
   {
-    FVTX fvtx(m_file, m_file->Pos());
-    m_fvtx_list[index] = fvtx;
+    m_fvtx_list.append(FVTX(m_file, m_file->Pos()));
     // TODO: Have FVTX expose a const header size.
     m_file->Skip(0x20);
   }

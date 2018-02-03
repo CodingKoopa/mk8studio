@@ -49,7 +49,7 @@ public:
   ResultCode ReadFile();
   int WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mips,
                 quint32 element_size, GX2ImageBase::FormatInfo format_info,
-                GX2ImageBase::SharedFormatInfo shared_format_info);
+                GX2ImageBase::CommonFormatInfo shared_format_info);
 
   const QByteArray& GetImageData() const;
   void SetImageData(const QByteArray& image_data);

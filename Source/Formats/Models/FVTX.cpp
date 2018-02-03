@@ -35,22 +35,31 @@ ResultCode FVTX::ReadAttributes()
     m_file->Skip(1);
     m_attribute_list[attribute].buffer_offset = m_file->ReadU16();
     m_attribute_list[attribute].format = m_file->ReadU32();
+    try
+    {
+      m_attribute_format_name_list.append(
+          m_attribute_format_names.at(m_attribute_list[attribute].format));
+    }
+    catch (std::out_of_range)
+    {
+      return ResultCode::UnsupportedAttributeFormat;
+    }
   }
-  // Populate the attribute info lists;
+  // Populate the attribute info lists.
   for (quint8 attribute = 0; attribute < m_header.attribute_count; ++attribute)
   {
     m_file->Seek(m_attribute_list[attribute].name_offset);
     // TODO: Use string table.
     m_attribute_list[attribute].name = m_file->ReadStringASCII(3);
     // Default value.
-    m_attribute_list[attribute].name_info = m_attribute_name_info_list[0];
-    foreach (const FVTX::AttributeNameInfo& name_info, m_attribute_name_info_list)
+    try
     {
-      if (name_info.internal_name == m_attribute_list[attribute].name)
-      {
-        m_attribute_list[attribute].name_info = name_info;
-        break;
-      }
+      m_attribute_name_info_list.append(
+          m_attribute_name_infos.at(m_attribute_list[attribute].name));
+    }
+    catch (std::out_of_range)
+    {
+      return ResultCode::UnsupportedAttributeFormat;
     }
   }
 
@@ -67,7 +76,12 @@ void FVTX::SetHeader(const Header& header)
   m_header = header;
 }
 
-const QVector<FVTX::Attribute>& FVTX::GetAttributeList()
+const QVector<FVTX::Attribute>& FVTX::GetAttributeList() const
 {
   return m_attribute_list;
+}
+
+const QVector<FVTX::AttributeNameInfo>& FVTX::GetAttributeNameInfoList() const
+{
+  return m_attribute_name_info_list;
 }

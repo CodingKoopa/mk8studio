@@ -78,7 +78,7 @@ ResultCode DDS::ReadFile()
 // TODO: Add uncompressed support
 int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mips,
                    quint32 element_size, GX2ImageBase::FormatInfo format_info,
-                   GX2ImageBase::SharedFormatInfo shared_format_info)
+                   GX2ImageBase::CommonFormatInfo shared_format_info)
 {
   File dds_file(m_path);
   dds_file.SetByteOrder(QDataStream::LittleEndian);
@@ -143,18 +143,18 @@ int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mip
   // Four character code
   if (shared_format_info.compressed)
   {
-    switch (format_info.format)
+    switch (format_info.common_format)
     {
-    case GX2ImageBase::Format::BC1:
+    case GX2ImageBase::CommonFormat::BC1:
       m_header.pixel_format.four_cc = "DXT1";
       break;
-    case GX2ImageBase::Format::BC4:
+    case GX2ImageBase::CommonFormat::BC4:
       if (format_info.type == GX2ImageBase::FormatInfo::Type::UNorm)
         m_header.pixel_format.four_cc = "BC4U";
       else
         m_header.pixel_format.four_cc = "BC4S";
       break;
-    case GX2ImageBase::Format::BC5:
+    case GX2ImageBase::CommonFormat::BC5:
 
       if (format_info.type == GX2ImageBase::FormatInfo::Type::UNorm)
         m_header.pixel_format.four_cc = "BC5U";

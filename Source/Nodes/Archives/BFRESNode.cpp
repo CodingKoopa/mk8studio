@@ -140,17 +140,20 @@ ResultCode BFRESNode::LoadAttributeArea()
 
   // Endianess
   header_attributes_model->setItem(row, 0, new QStandardItem("Endianness"));
-  QStandardItemModel* endian_entries = new QStandardItemModel(2, 0);
-  QVector<BFRES::EndianInfo> endian_info_list = m_bfres.GetEndianInfoList();
-  for (qint32 row = 0; row < endian_info_list.size(); ++row)
-    endian_entries->setItem(row, 0, new QStandardItem(endian_info_list[row].name));
+  QStandardItemModel* endian_entries = new QStandardItemModel();
+  auto endian_names = m_bfres.GetEndianNames();
+  for (auto const& endian_name : endian_names)
+    endian_entries->appendRow(new QStandardItem(endian_name.second));
   m_delegate_group.combo_box_entries << endian_entries;
-  m_delegate_group.combo_box_selections
-      << m_bfres.GetEndianIndexFromInfo(m_bfres_header.endian_info);
   m_delegate_group.combo_box_delegates << row;
-  CustomStandardItem* endianness_item = new CustomStandardItem(m_bfres_header.endian_info.name);
-  endianness_item->SetFunction(
-      [this](QString value) { m_bfres_header.endian_info = m_bfres.GetEndianInfoFromName(value); });
+  m_delegate_group.combo_box_selections << std::distance(
+      endian_names.begin(), endian_names.find(static_cast<BFRES::Endianness>(m_bfres_header.bom)));
+  CustomStandardItem* endianness_item = new CustomStandardItem(m_bfres.GetEndianName());
+  endianness_item->SetFunction([this, endian_names](quint32 index) {
+    auto it =
+        next(endian_names.begin(), std::min(index, static_cast<quint32>(endian_names.size())));
+    m_bfres_header.bom = static_cast<quint16>(it->first);
+  });
   header_attributes_model->setItem(row, 1, endianness_item);
   ++row;
 
