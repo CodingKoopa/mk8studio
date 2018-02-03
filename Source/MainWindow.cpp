@@ -149,8 +149,11 @@ void MainWindow::UpdateStatus(ResultCode status, const QString& details)
     QMessageBox::critical(this, "Error",
                           "Invalid BFRES endianness. Must be either 0xFEFF or 0xFFFE.");
     break;
-  case ResultCode::UnsupportedFileFormat:
-    QMessageBox::critical(this, "Error", "Unsupported texture format.");
+  case ResultCode::UnsupportedTextureFormat:
+    QMessageBox::critical(this, "Error", "Unsupported FTEX texture format.");
+    break;
+  case ResultCode::UnsupportedAttributeFormat:
+    QMessageBox::critical(this, "Error", "Unsupported FVTX attribute format.");
     break;
   case ResultCode::ImportantUnsupportedFileFormat:
     QMessageBox::critical(this, "Error",

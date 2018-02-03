@@ -200,7 +200,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray* destination, 
 
   case CommonTileMode::Linear:
   default:
-    return ResultCode::UnsupportedFileFormat;
+    return ResultCode::UnsupportedTextureFormat;
   }
 
   destination->resize(m_base_header.data_length);
@@ -218,7 +218,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray* destination, 
         original_offset = ComputeSurfaceAddrFromCoordMacroTiled(x, y, 0, 0, 0, 0);
         break;
       default:
-        return ResultCode::UnsupportedFileFormat;
+        return ResultCode::UnsupportedTextureFormat;
       }
 
       qint32 new_offset = (y * width + x) * m_element_size;

@@ -1,9 +1,7 @@
 #include "Nodes/Models/FVTXNode.h"
 #include "Nodes/Models/FVTXAttributeNode.h"
 
-FVTXNode::FVTXNode(const FVTX& fvtx, QObject* parent) : Node(parent), m_fvtx(fvtx)
-{
-}
+FVTXNode::FVTXNode(const FVTX& fvtx, QObject* parent) : Node(parent), m_fvtx(fvtx) {}
 
 CustomStandardItem* FVTXNode::MakeItem()
 {
@@ -24,7 +22,7 @@ CustomStandardItem* FVTXNode::MakeItem()
     if (res != ResultCode::Success)
     {
       emit NewStatus(res);
-      return nullptr;
+      return new CustomStandardItem("Unknown");
     }
     else
       m_attribute_list = m_fvtx.GetAttributeList();
@@ -35,9 +33,11 @@ CustomStandardItem* FVTXNode::MakeItem()
   fvtx_item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
   CustomStandardItem* attribute_group_item = new CustomStandardItem("Attributes");
   fvtx_item->appendRow(attribute_group_item);
-  foreach (const FVTX::Attribute& attribute, m_attribute_list)
+  QVector<FVTX::AttributeNameInfo> attribute_name_info_list = m_fvtx.GetAttributeNameInfoList();
+  for (qint32 attribute = 0; attribute < m_attribute_list.size(); ++attribute)
   {
-    FVTXAttributeNode* fvtx_attribute_node = new FVTXAttributeNode(attribute, this);
+    FVTXAttributeNode* fvtx_attribute_node = new FVTXAttributeNode(
+        m_attribute_list[attribute], attribute_name_info_list[attribute].friendly_name, this);
     connect(fvtx_attribute_node, &FVTXAttributeNode::ConnectNode, this, &FVTXNode::ConnectNode);
     emit ConnectNode(fvtx_attribute_node);
     attribute_group_item->appendRow(fvtx_attribute_node->MakeItem());

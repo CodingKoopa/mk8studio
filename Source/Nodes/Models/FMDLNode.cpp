@@ -1,9 +1,7 @@
 #include "Nodes/Models/FMDLNode.h"
 #include "Nodes/Models/FVTXNode.h"
 
-FMDLNode::FMDLNode(const FMDL& fmdl, QObject* parent) : Node(parent), m_fmdl(fmdl)
-{
-}
+FMDLNode::FMDLNode(const FMDL& fmdl, QObject* parent) : Node(parent), m_fmdl(fmdl) {}
 
 CustomStandardItem* FMDLNode::MakeItem()
 {

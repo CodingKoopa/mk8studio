@@ -38,7 +38,6 @@ public:
   {
     enum class Use
     {
-      Unknown,
       Position,
       Normal,
       Tangent,
