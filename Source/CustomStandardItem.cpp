@@ -2,9 +2,7 @@
 
 #include "Nodes/Node.h"
 
-CustomStandardItem::CustomStandardItem(QString string) : QStandardItem(string)
-{
-}
+CustomStandardItem::CustomStandardItem(QString string) : QStandardItem(string) {}
 
 CustomStandardItem::~CustomStandardItem()
 {
@@ -15,11 +13,20 @@ CustomStandardItem::~CustomStandardItem()
 
 void CustomStandardItem::ExecuteFunction()
 {
-  if (m_function)
-    m_function(text());
+  if (m_function_type == FunctionType::Index && m_index_function)
+    m_index_function(index().row());
+  else if (m_function_type == FunctionType::Value && m_value_function)
+    m_value_function(text());
 }
 
-void CustomStandardItem::SetFunction(const std::function<void(QString)>& value)
+void CustomStandardItem::SetFunction(const std::function<void(quint32)>& function)
 {
-  m_function = value;
+  m_index_function = function;
+  m_function_type = FunctionType::Index;
+}
+
+void CustomStandardItem::SetFunction(const std::function<void(QString)>& function)
+{
+  m_value_function = function;
+  m_function_type = FunctionType::Value;
 }
