@@ -57,14 +57,17 @@ public:
   const Header& GetHeader() const;
   void SetHeader(const Header& header);
 
-  const QVector<FVTX::Attribute>& GetAttributeList() const;
+  static std::map<quint32, QString> GetAttributeFormatNames();
+  const QVector<QString>& GetAttributeFormatNameList() const;
 
   const QVector<AttributeNameInfo>& GetAttributeNameInfoList() const;
+
+  const QVector<FVTX::Attribute>& GetAttributeList() const;
 
 private:
   // TODO: add the rest.
   // clang-format off
-  const std::map<quint32, QString> m_attribute_format_names{
+  inline static const std::map<quint32, QString> m_attribute_format_names{
       // Unsigned Normals
       {0x0,     "GX2_ATTRIB_FORMAT_UNORM_8"},
       {0x4,     "GX2_ATTRIB_FORMAT_UNORM_8_8"},
@@ -81,6 +84,9 @@ private:
       {0x080D,  "GX2_ATTRIB_FORMAT_FLOAT_32_32"},
       {0x0811,  "GX2_ATTRIB_FORMAT_FLOAT_32_32_32"}};
   // clang-format on
+  // The "list" terminology here is chosen for a reason. The "names" suffixes indicate that the
+  // member variable contains the constant references, but this is a list of the real, computed
+  // info parsed from the attribute.
   QVector<QString> m_attribute_format_name_list;
 
   // clang-format off

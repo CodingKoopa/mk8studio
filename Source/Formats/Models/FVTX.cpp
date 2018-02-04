@@ -76,12 +76,22 @@ void FVTX::SetHeader(const Header& header)
   m_header = header;
 }
 
-const QVector<FVTX::Attribute>& FVTX::GetAttributeList() const
+std::map<quint32, QString> FVTX::GetAttributeFormatNames()
 {
-  return m_attribute_list;
+  return m_attribute_format_names;
+}
+
+const QVector<QString>& FVTX::GetAttributeFormatNameList() const
+{
+  return m_attribute_format_name_list;
 }
 
 const QVector<FVTX::AttributeNameInfo>& FVTX::GetAttributeNameInfoList() const
 {
   return m_attribute_name_info_list;
+}
+
+const QVector<FVTX::Attribute>& FVTX::GetAttributeList() const
+{
+  return m_attribute_list;
 }

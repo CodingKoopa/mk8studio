@@ -33,11 +33,13 @@ CustomStandardItem* FVTXNode::MakeItem()
   fvtx_item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
   CustomStandardItem* attribute_group_item = new CustomStandardItem("Attributes");
   fvtx_item->appendRow(attribute_group_item);
+  QVector<QString> attribute_format_name_list = m_fvtx.GetAttributeFormatNameList();
   QVector<FVTX::AttributeNameInfo> attribute_name_info_list = m_fvtx.GetAttributeNameInfoList();
   for (qint32 attribute = 0; attribute < m_attribute_list.size(); ++attribute)
   {
-    FVTXAttributeNode* fvtx_attribute_node = new FVTXAttributeNode(
-        m_attribute_list[attribute], attribute_name_info_list[attribute].friendly_name, this);
+    FVTXAttributeNode* fvtx_attribute_node =
+        new FVTXAttributeNode(m_attribute_list[attribute], attribute_format_name_list[attribute],
+                              attribute_name_info_list[attribute].friendly_name, this);
     connect(fvtx_attribute_node, &FVTXAttributeNode::ConnectNode, this, &FVTXNode::ConnectNode);
     emit ConnectNode(fvtx_attribute_node);
     attribute_group_item->appendRow(fvtx_attribute_node->MakeItem());

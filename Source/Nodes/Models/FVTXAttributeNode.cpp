@@ -2,8 +2,10 @@
 #include "CustomStandardItem.h"
 
 FVTXAttributeNode::FVTXAttributeNode(const FVTX::Attribute& attribute,
-                                     QString attribute_friendly_name, QObject* parent)
-    : Node(parent), m_attribute(attribute), m_attribute_friendly_name(attribute_friendly_name)
+                                     QString attribute_format_name, QString attribute_friendly_name,
+                                     QObject* parent)
+    : Node(parent), m_attribute(attribute), m_attribute_format_name(attribute_format_name),
+      m_attribute_friendly_name(attribute_friendly_name)
 {
 }
 
@@ -45,25 +47,23 @@ ResultCode FVTXAttributeNode::LoadAttributeArea()
       row, 1, new QStandardItem("0x" + QString::number(m_attribute.buffer_offset, 16)));
   ++row;
 
-  // TODO: Format
-  // Texture Format
-  //  header_attributes_model->setItem(row, 0, new QStandardItem("Format"));
-  //  QList<FTEX::FormatInfo> format_info_list = m_ftex.GetFormatInfoList();
-  //  QStandardItemModel* format_combo_box_entries = new QStandardItemModel(format_info_list.size(),
-  //  0); for (int format = 0; format < format_info_list.size(); ++format)
-  //    format_combo_box_entries->setItem(format, new QStandardItem(format_info_list[format].name));
-  //  m_delegate_group.combo_box_entries << format_combo_box_entries;
-  //  m_delegate_group.combo_box_delegates << row;
-  //  m_delegate_group.combo_box_selections << m_ftex.GetFormatInfoIndex();
-  //  CustomStandardItem* format_item = new CustomStandardItem(m_ftex.GetFormatInfo().name);
-  //  format_item->SetFunction(
-  //      [this](QString text) { m_ftex_header.format = m_ftex.GetFormatIDFromName(text); });
-  //  header_attributes_model->setItem(row, 1, format_item);
-  //  ++row;
-
-  // Friendly Name
-  header_attributes_model->setItem(row, 0, new QStandardItem("Friendly Name"));
-  header_attributes_model->setItem(row, 1, new QStandardItem());
+  // Format
+  header_attributes_model->setItem(row, 0, new QStandardItem("Format"));
+  auto format_names = FVTX::GetAttributeFormatNames();
+  QStandardItemModel* format_combo_box_entries = new QStandardItemModel();
+  for (auto const& format_name : format_names)
+    format_combo_box_entries->appendRow(new QStandardItem(format_name.second));
+  m_delegate_group.combo_box_entries << format_combo_box_entries;
+  m_delegate_group.combo_box_delegates << row;
+  m_delegate_group.combo_box_selections
+      << std::distance(format_names.begin(), format_names.find(m_attribute.format));
+  CustomStandardItem* format_item = new CustomStandardItem(m_attribute_format_name);
+  format_item->SetFunction([this, format_names](quint32 index) {
+    auto it =
+        next(format_names.begin(), std::min(index, static_cast<quint32>(format_names.size())));
+    m_attribute.format = it->first;
+  });
+  header_attributes_model->setItem(row, 1, format_item);
   ++row;
 
   // Internal Name
@@ -72,6 +72,11 @@ ResultCode FVTXAttributeNode::LoadAttributeArea()
   magic_item->SetFunction([this](QString text) { m_attribute.name = text; });
   header_attributes_model->setItem(row, 1, magic_item);
   m_delegate_group.line_edit_delegates << row;
+  ++row;
+
+  // Friendly Name
+  header_attributes_model->setItem(row, 0, new QStandardItem("Friendly Name"));
+  header_attributes_model->setItem(row, 1, new QStandardItem(m_attribute_friendly_name));
   ++row;
 
   header_attributes_model->setRowCount(row);
@@ -93,6 +98,4 @@ void FVTXAttributeNode::HandleAttributeItemChange(QStandardItem* item)
   CustomStandardItem* custom_item = dynamic_cast<CustomStandardItem*>(item);
   if (custom_item)
     custom_item->ExecuteFunction();
-
-  // m_attribute.SetHeader(m_fmdl_header);
 }
