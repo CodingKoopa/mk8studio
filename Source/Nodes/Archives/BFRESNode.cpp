@@ -11,7 +11,6 @@
 #include "Common.h"
 #include "CustomDelegate.h"
 #include "CustomStandardItem.h"
-#include "ImageView.h"
 #include "Nodes/Archives/BFRESGroupNode.h"
 
 BFRESNode::BFRESNode(const BFRES& bfres, QObject* parent) : Node(parent), m_bfres(bfres) {}

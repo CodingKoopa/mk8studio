@@ -9,7 +9,6 @@
 #include "CustomDelegate.h"
 #include "CustomStandardItem.h"
 #include "Formats/Textures/FTEX.h"
-#include "ImageView.h"
 #include "Nodes/Node.h"
 
 class FTEXNode : public Node
