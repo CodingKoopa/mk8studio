@@ -13,7 +13,6 @@ TEMPLATE = app
 SOURCES +=\
     MainWindow.cpp \
     Main.cpp \
-    ImageView.cpp \
     CustomDelegate.cpp \
     Nodes/Node.cpp \
     IODialog.cpp \
@@ -36,7 +35,6 @@ SOURCES +=\
 HEADERS  += \
     Common.h \
     CustomDelegate.h \
-    ImageView.h \
     MainWindow.h \
     Nodes/Node.h \
     Formats/FormatBase.h \
