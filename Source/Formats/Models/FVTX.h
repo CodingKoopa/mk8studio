@@ -10,6 +10,7 @@ public:
   FVTX(File* file = nullptr, quint32 start_offset = 0);
   ResultCode ReadHeader();
   ResultCode ReadAttributes();
+  ResultCode ReadBuffers();
 
   struct Header
   {
@@ -54,6 +55,17 @@ public:
     QString friendly_name;
   };
 
+  struct Buffer
+  {
+    quint32 data_pointer_runtime;
+    quint32 size;
+    quint32 buffer_handle_runtime;
+    quint16 stride;
+    quint16 buffering_count;
+    quint32 context_pointer_runtime;
+    qint32 data_offset;
+  };
+
   const Header& GetHeader() const;
   void SetHeader(const Header& header);
 
@@ -62,7 +74,8 @@ public:
 
   const QVector<AttributeNameInfo>& GetAttributeNameInfoList() const;
 
-  const QVector<FVTX::Attribute>& GetAttributeList() const;
+  const QVector<Attribute>& GetAttributeList() const;
+  const QVector<Buffer>& GetBufferList() const;
 
 private:
   // TODO: add the rest.
@@ -110,4 +123,5 @@ private:
   Header m_header;
 
   QVector<Attribute> m_attribute_list;
+  QVector<Buffer> m_buffer_list;
 };

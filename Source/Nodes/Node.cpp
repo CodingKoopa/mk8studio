@@ -9,12 +9,21 @@
 #include "Nodes/Archives/BFRESNode.h"
 #include "Nodes/Models/FMDLNode.h"
 #include "Nodes/Models/FVTXAttributeNode.h"
+#include "Nodes/Models/FVTXBufferNode.h"
 #include "Nodes/Models/FVTXNode.h"
 #include "Nodes/Textures/FTEXNode.h"
 
 Node::Node(QObject* parent)
     : QObject(parent), m_tree_view(nullptr), m_main_widget(nullptr), m_context_menu(nullptr)
 {
+}
+
+CustomStandardItem* Node::MakeLabelItem(QString label)
+{
+  CustomStandardItem* attribute_item = new CustomStandardItem;
+  attribute_item->setData(label, Qt::DisplayRole);
+  attribute_item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
+  return attribute_item;
 }
 
 QScrollArea* Node::MakeAttributeSection(QStandardItemModel* table_view_layout)
@@ -71,6 +80,9 @@ void Node::HandleFileTreeClick(QModelIndex index)
 
   else if (FVTXAttributeNode* fvtx_attribute_node = dynamic_cast<FVTXAttributeNode*>(upcast))
     fvtx_attribute_node->LoadAttributeArea();
+
+  else if (FVTXBufferNode* fvtx_buffer_node = dynamic_cast<FVTXBufferNode*>(upcast))
+    fvtx_buffer_node->LoadAttributeArea();
 
   // TODO: dunno if there's any way to not have to specify a type?
   else if (BFRESGroupNode<FMDL>* bfres_group_node = dynamic_cast<BFRESGroupNode<FMDL>*>(upcast))

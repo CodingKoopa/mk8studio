@@ -66,6 +66,25 @@ ResultCode FVTX::ReadAttributes()
   return ResultCode::Success;
 }
 
+ResultCode FVTX::ReadBuffers()
+{
+  m_buffer_list.resize(m_header.buffer_count);
+  m_file->Seek(m_header.buffer_array_offset);
+  for (quint8 buffer = 0; buffer < m_header.buffer_count; ++buffer)
+  {
+    m_buffer_list[buffer].data_pointer_runtime = m_file->ReadU32();
+    m_buffer_list[buffer].size = m_file->ReadU32();
+    m_buffer_list[buffer].buffer_handle_runtime = m_file->ReadU32();
+    m_buffer_list[buffer].stride = m_file->ReadU16();
+    m_buffer_list[buffer].buffering_count = m_file->ReadU16();
+    m_buffer_list[buffer].context_pointer_runtime = m_file->ReadU32();
+    m_buffer_list[buffer].data_offset = m_file->ReadS32RelativeOffset();
+  };
+  // TODO: Check number of bytes read.
+
+  return ResultCode::Success;
+}
+
 const FVTX::Header& FVTX::GetHeader() const
 {
   return m_header;
@@ -94,4 +113,9 @@ const QVector<FVTX::AttributeNameInfo>& FVTX::GetAttributeNameInfoList() const
 const QVector<FVTX::Attribute>& FVTX::GetAttributeList() const
 {
   return m_attribute_list;
+}
+
+const QVector<FVTX::Buffer>& FVTX::GetBufferList() const
+{
+  return m_buffer_list;
 }

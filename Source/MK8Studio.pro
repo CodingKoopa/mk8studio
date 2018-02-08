@@ -30,7 +30,8 @@ SOURCES +=\
     Formats/Models/FVTX.cpp \
     Nodes/Models/FVTXNode.cpp \
     Nodes/Models/FVTXAttributeNode.cpp \
-    Nodes/Archives/BFRESGroupNode.cpp
+    Nodes/Archives/BFRESGroupNode.cpp \
+    Nodes/Models/FVTXBufferNode.cpp
 
 HEADERS  += \
     Common.h \
@@ -53,7 +54,8 @@ HEADERS  += \
     Formats/Models/FVTX.h \
     Nodes/Models/FVTXNode.h \
     Nodes/Models/FVTXAttributeNode.h \
-    Formats/Common/ResourceDictionary.h
+    Formats/Common/ResourceDictionary.h \
+    Nodes/Models/FVTXBufferNode.h
 
 FORMS += \
     MainWindow.ui \

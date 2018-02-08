@@ -11,11 +11,7 @@ FVTXAttributeNode::FVTXAttributeNode(const FVTX::Attribute& attribute,
 
 CustomStandardItem* FVTXAttributeNode::MakeItem()
 {
-  // The header has, by design, already been read by the FVTX class.
-  CustomStandardItem* attribute_item = new CustomStandardItem;
-  attribute_item->setData(m_attribute_friendly_name, Qt::DisplayRole);
-  attribute_item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
-  return attribute_item;
+  return MakeLabelItem(m_attribute_friendly_name);
 }
 
 ResultCode FVTXAttributeNode::LoadAttributeArea()
@@ -98,4 +94,6 @@ void FVTXAttributeNode::HandleAttributeItemChange(QStandardItem* item)
   CustomStandardItem* custom_item = dynamic_cast<CustomStandardItem*>(item);
   if (custom_item)
     custom_item->ExecuteFunction();
+
+  // TODO: See #7.
 }

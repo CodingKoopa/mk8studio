@@ -1,5 +1,6 @@
 #include "Nodes/Models/FVTXNode.h"
 #include "Nodes/Models/FVTXAttributeNode.h"
+#include "Nodes/Models/FVTXBufferNode.h"
 
 FVTXNode::FVTXNode(const FVTX& fvtx, QObject* parent) : Node(parent), m_fvtx(fvtx) {}
 
@@ -27,6 +28,17 @@ CustomStandardItem* FVTXNode::MakeItem()
     else
       m_attribute_list = m_fvtx.GetAttributeList();
   }
+  if (!m_buffers_loaded)
+  {
+    ResultCode res = m_fvtx.ReadBuffers();
+    if (res != ResultCode::Success)
+    {
+      emit NewStatus(res);
+      return new CustomStandardItem("Unknown");
+    }
+    else
+      m_buffer_list = m_fvtx.GetBufferList();
+  }
 
   CustomStandardItem* fvtx_item = new CustomStandardItem;
   fvtx_item->setData("FVTX " + QString::number(m_fvtx_header.section_index), Qt::DisplayRole);
@@ -43,6 +55,15 @@ CustomStandardItem* FVTXNode::MakeItem()
     connect(fvtx_attribute_node, &FVTXAttributeNode::ConnectNode, this, &FVTXNode::ConnectNode);
     emit ConnectNode(fvtx_attribute_node);
     attribute_group_item->appendRow(fvtx_attribute_node->MakeItem());
+  }
+  CustomStandardItem* buffer_group_item = new CustomStandardItem("Buffers");
+  fvtx_item->appendRow(buffer_group_item);
+  for (qint32 buffer = 0; buffer < m_buffer_list.size(); ++buffer)
+  {
+    FVTXBufferNode* fvtx_buffer_node = new FVTXBufferNode(m_buffer_list[buffer], this);
+    connect(fvtx_buffer_node, &FVTXBufferNode::ConnectNode, this, &FVTXNode::ConnectNode);
+    emit ConnectNode(fvtx_buffer_node);
+    buffer_group_item->appendRow(fvtx_buffer_node->MakeItem());
   }
   return fvtx_item;
 }

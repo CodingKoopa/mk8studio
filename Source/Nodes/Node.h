@@ -35,6 +35,8 @@ protected:
   QWidget* m_main_widget;
   QMenu* m_context_menu;
 
+  // Helper function for MakeItem(). TODO: Better name for this.
+  CustomStandardItem* MakeLabelItem(QString label);
   QScrollArea* MakeAttributeSection(QStandardItemModel* table_view_layout);
 
 signals:
