@@ -68,7 +68,7 @@ public:
     m_node_list.resize(m_header.num_nodes + 1);
     for (qint32 node = 0; node < m_header.num_nodes + 1; ++node)
     {
-      m_file->Seek(m_start_offset + m_header_size + (m_node_size * node));
+      m_file->Seek(m_start_offset + HEADER_SIZE + (NODE_SIZE * node));
 
       // The nodes form a Radix Tree, but it's 100 times easier to read them as a normal list now,
       // and fix it up later when saving.
@@ -95,8 +95,8 @@ public:
   const QVector<Node>& GetNodeList() const { return m_node_list; }
 
 private:
-  const quint32 m_header_size = 0x08;
-  const quint32 m_node_size = 0x10;
+  static constexpr quint32 HEADER_SIZE = 0x08;
+  static constexpr quint32 NODE_SIZE = 0x10;
 
   Header m_header;
   QVector<Node> m_node_list;

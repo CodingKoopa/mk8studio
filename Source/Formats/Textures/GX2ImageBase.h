@@ -127,16 +127,6 @@ private:
 
   quint32 ComputeSurfaceBankSwappedWidth(quint32 m_pitch);
 
-  QByteArray m_deswizzled_image_data;
-
-  enum class MicroTileType
-  {
-    Displayable = 0x0,
-    NonDisplayable = 0x1,
-    DepthSampleOrder = 0x2,
-    ThickTiliing = 0x3,
-  };
-
   // "information" is an uncountable word, but we need to differentiate between its singular and
   // plural forms.
   static const inline std::map<CommonFormat, CommonFormatInfo> m_common_format_infos{
@@ -144,8 +134,6 @@ private:
       {CommonFormat::BC1, {64, CommonFormatInfo::Use::Texture, true}},
       {CommonFormat::BC4, {64, CommonFormatInfo::Use::Texture, true}},
       {CommonFormat::BC5, {128, CommonFormatInfo::Use::Texture, true}}};
-  // Common format of the texture.
-  CommonFormatInfo m_common_format_info;
 
   // Very incomplete list of formats.
   // clang-format off
@@ -162,19 +150,15 @@ private:
       // SRGB
       {0x431,   {CommonFormat::BC1,     "GX2_SURFACE_FORMAT_SRGB_BC1",  FormatInfo::Type::SRGB}}};
   // clang-format on
-  // Specific format of the texture.
-  FormatInfo m_format_info;
 
   // Instead of having a CommonTileModeInfo struct, only keep track of the rotations because they
   // are the only shared feature.
   // clang-format off
   const std::map<CommonTileMode, quint32> m_common_tile_mode_rotations{
       {CommonTileMode::Linear,  0},
-      {CommonTileMode::Micro,   m_num_pipes*((m_num_banks >> 1) - 1)},
+      {CommonTileMode::Micro,   NUM_PIPES*((NUM_BANKS >> 1) - 1)},
       {CommonTileMode::Macro,   1}};
   // clang-format on
-  // Specific tile mode of the texture.
-  TileModeInfo m_tile_mode_info;
 
   // clang-format off
   static const inline std::map<quint32, TileModeInfo> m_tile_mode_infos{
@@ -198,41 +182,60 @@ private:
       {0xE,     {CommonTileMode::Macro,     "GX2_TILE_MODE_3B_TILED_THIN1", TileModeInfo::Thickness::Thin,  1, true}},
       {0xF,     {CommonTileMode::Macro,     "GX2_TILE_MODE_3B_TILED_THICK", TileModeInfo::Thickness::Thick, 1, true}}};
   // clang-format on
+
+  QByteArray m_deswizzled_image_data;
+
+  enum class MicroTileType
+  {
+    Displayable = 0x0,
+    NonDisplayable = 0x1,
+    DepthSampleOrder = 0x2,
+    ThickTiliing = 0x3,
+  };
+
+  // Micro Tiling Info
+  static constexpr quint32 MICRO_TILE_WIDTH = 8;
+  static constexpr quint32 MICRO_TILE_HEIGHT = 8;
+  static constexpr quint32 NUM_MICRO_TILE_PIXELS = MICRO_TILE_WIDTH * MICRO_TILE_HEIGHT;
+
+  static constexpr quint32 NUM_BANKS = 4;
+  static constexpr quint32 NUM_BANK_BITS = 2;
+  static constexpr quint32 NUM_PIPES = 2;
+  static constexpr quint32 NUM_PIPE_BITS = 1;
+  static constexpr quint32 NUM_LOW_OFFSET_BITS = 8;
+
+  static constexpr quint32 SPLIT_SIZE = 2048;
+  static constexpr quint32 SWAP_SIZE = 256;
+  static constexpr quint32 ROW_SIZE = 2048;
+  static constexpr quint32 PIPE_INTERLEAVE_BYTES = 256;
+
+  // Common format of the texture.
+  CommonFormatInfo m_common_format_info;
+
+  // Specific format of the texture.
+  FormatInfo m_format_info;
+
+  // Specific tile mode of the texture.
+  TileModeInfo m_tile_mode_info;
+
   // Common rotation of the texture.
   quint32 m_common_tile_mode_rotation;
 
-  quint32 m_element_size = 0;
+  quint32 m_element_size;
   quint32 m_num_samples;
 
-  // Micro Tiling Info
-  const quint32 m_micro_tile_width = 8;
-  const quint32 m_micro_tile_height = 8;
-  const quint32 m_num_micro_tile_pixels = m_micro_tile_width * m_micro_tile_height;
-
   MicroTileType m_micro_tile_type;
-  quint64 m_num_micro_tile_bits = 0;
-  quint64 m_num_micro_tile_bytes = 0;
-  quint64 m_bytes_per_sample = 0;
+  quint64 m_num_micro_tile_bits;
+  quint64 m_num_micro_tile_bytes;
+  quint64 m_bytes_per_sample;
 
-  // Macro Tiling info
-  const quint32 m_num_banks = 4;
-  const quint32 m_bank_bit_count = 2;
-  const quint32 m_num_pipes = 2;
-  const quint32 m_pipe_bit_count = 1;
-  const quint32 m_low_offset_bit_count = 8;
+  quint64 m_macro_tile_pitch;
+  quint64 m_macro_tile_height;
+  quint64 m_macro_tiles_per_row;
+  quint64 m_num_macro_tile_bytes;
 
-  const quint32 m_split_size = 2048;
-  const quint32 m_swap_size = 256;
-  const quint32 m_row_size = 2048;
-  const quint32 m_pipe_interleave_bytes = 256;
+  quint64 m_num_slice_bytes;
 
-  quint64 m_macro_tile_pitch = 0;
-  quint64 m_macro_tile_height = 0;
-  quint64 m_macro_tiles_per_row = 0;
-  quint64 m_num_macro_tile_bytes = 0;
-
-  quint64 m_num_slice_bytes = 0;
-
-  quint32 m_pipe_swizzle = 0;
-  quint32 m_bank_swizzle = 0;
+  quint32 m_pipe_swizzle;
+  quint32 m_bank_swizzle;
 };

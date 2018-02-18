@@ -109,8 +109,8 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray* destination, 
     // Calculate the size of the macro tiles, determined by the number of pipes/banks, and the
     // aspect ratio.
 
-    m_macro_tile_pitch = (m_num_banks * 8) / m_tile_mode_info.aspect_ratio;
-    m_macro_tile_height = (m_num_pipes * 8) * m_tile_mode_info.aspect_ratio;
+    m_macro_tile_pitch = (NUM_BANKS * 8) / m_tile_mode_info.aspect_ratio;
+    m_macro_tile_height = (NUM_PIPES * 8) * m_tile_mode_info.aspect_ratio;
 
     // Physical width of a row of the whole texture /
     // Physical width of a row in one macro tile =
@@ -189,7 +189,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray* destination, 
 
     // Number of bits in all samples of a micro tile including thickness -> Bytes =
     // Number of bytes in one micro tile.
-    m_num_micro_tile_bits = m_num_micro_tile_pixels * m_common_format_info.bpp *
+    m_num_micro_tile_bits = NUM_MICRO_TILE_PIXELS * m_common_format_info.bpp *
                             static_cast<quint32>(m_tile_mode_info.thickness) * m_num_samples;
 
     // Number of bits in one micro tile /
@@ -323,9 +323,9 @@ quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y
   // If there's more than one sample, and one micro tile can't fit in one split.
   // TODO: some of this might be able to be moved to readimagefromdata?
   // TODO: This is currently undocumented because I have no AA or thick textures to work off of.
-  if (num_samples > 1 && m_num_micro_tile_bytes > static_cast<quint64>(m_split_size))
+  if (num_samples > 1 && m_num_micro_tile_bytes > static_cast<quint64>(SPLIT_SIZE))
   {
-    samples_per_slice = m_split_size / m_bytes_per_sample;
+    samples_per_slice = SPLIT_SIZE / m_bytes_per_sample;
     num_sample_splits = num_samples / samples_per_slice;
     // TODO: Could this be written directly to m_num_samples?
     num_samples = static_cast<quint32>(samples_per_slice);
@@ -354,8 +354,8 @@ quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y
 
   // The Wii U has 4 RAM chips, here we select a seemingly "random" one using an
   // algorithm to generate one from the coordinates.
-  quint32 bank_bit_0 = Bit((y / (16 * m_num_pipes)) ^ x_3);
-  quint32 bank_bit_1 = Bit((y / (8 * m_num_pipes)) ^ x_4);
+  quint32 bank_bit_0 = Bit((y / (16 * NUM_PIPES)) ^ x_3);
+  quint32 bank_bit_1 = Bit((y / (8 * NUM_PIPES)) ^ x_4);
   quint32 bank = MakeByte(bank_bit_0, bank_bit_1);
 
   // Each of the Wii U's RAM chips has 2 channels, here we select a seemingly
@@ -369,7 +369,7 @@ quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y
   // Shifted bank index |
   // Random pipe index =
   // Three bits containing the random bank and pipe.
-  quint64 bank_pipe = (bank << m_pipe_bit_count) | pipe;
+  quint64 bank_pipe = (bank << NUM_PIPE_BITS) | pipe;
 
   // Number of pipes *
   // Bank index specified by texture =
@@ -378,7 +378,7 @@ quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y
   // Shifted specified bank index +
   // Specified pipe index =
   // Three bits containing the bank and pipe specified by the texture.
-  quint64 swizzle = (m_bank_swizzle << m_pipe_bit_count) | m_pipe_swizzle;
+  quint64 swizzle = (m_bank_swizzle << NUM_PIPE_BITS) | m_pipe_swizzle;
 
   // The current slice the pixel is in, for 3D textures.
   quint64 sliceIn = slice;
@@ -387,11 +387,11 @@ quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y
     sliceIn /= static_cast<quint32>(m_tile_mode_info.thickness);
 
   // Algorithm to recalculate bank and pipe?
-  bank_pipe ^= (sample_slice * ((m_num_banks >> 1) + 1)) << m_pipe_bit_count ^
+  bank_pipe ^= (sample_slice * ((NUM_BANKS >> 1) + 1)) << NUM_PIPE_BITS ^
                (swizzle + sliceIn * m_common_tile_mode_rotation);
-  bank_pipe %= m_num_pipes * m_num_banks;
-  pipe = bank_pipe % m_num_pipes;
-  bank = bank_pipe / m_num_pipes;
+  bank_pipe %= NUM_PIPES * NUM_BANKS;
+  pipe = bank_pipe % NUM_PIPES;
+  bank = bank_pipe / NUM_PIPES;
 
   quint32 slice_offset = m_num_slice_bytes * ((sample_slice + num_sample_splits * slice) /
                                               static_cast<quint32>(m_tile_mode_info.thickness));
@@ -416,12 +416,12 @@ quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y
     static const quint32 bankSwapOrder[] = {0, 1, 3, 2, 6, 7, 5, 4, 0, 0};
     quint64 bank_swap_width = ComputeSurfaceBankSwappedWidth(m_base_header.pitch);
     quint64 swap_index = m_macro_tile_pitch * macro_tile_index_x / bank_swap_width;
-    quint64 bank_mask = m_num_banks - 1;
+    quint64 bank_mask = NUM_BANKS - 1;
     bank ^= bankSwapOrder[swap_index & bank_mask];
   }
   // Calculate final offset
   // Get mask targeting every group bit.
-  quint64 group_mask = InclusiveBitMask(m_low_offset_bit_count);
+  quint64 group_mask = InclusiveBitMask(NUM_LOW_OFFSET_BITS);
   // Offset of the macro tile +
   // Offset of the slice relative to the beginning of the macro tile =
   // Absolute offset of the slice.
@@ -438,15 +438,15 @@ quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y
   // Shifted absolute offset of the slice +
   // Offset of the pixel.
   quint64 total_offset =
-      elem_offset + ((macro_tile_offset + slice_offset) >> (m_bank_bit_count + m_pipe_bit_count));
+      elem_offset + ((macro_tile_offset + slice_offset) >> (NUM_BANK_BITS + NUM_PIPE_BITS));
 
   // Get the part of the pixel offset left of the pipe and bank.
-  quint64 offset_high = (total_offset & ~group_mask) << (m_bank_bit_count + m_pipe_bit_count);
+  quint64 offset_high = (total_offset & ~group_mask) << (NUM_BANK_BITS + NUM_PIPE_BITS);
   // Get the part of the pixel offset right of the pipe and bank.
   quint64 offset_low = total_offset & group_mask;
   // Get the actual pipe and bank.
-  quint64 bank_bits = bank << (m_pipe_bit_count + m_low_offset_bit_count);
-  quint64 pipe_bits = pipe << m_low_offset_bit_count;
+  quint64 bank_bits = bank << (NUM_PIPE_BITS + NUM_LOW_OFFSET_BITS);
+  quint64 pipe_bits = pipe << NUM_LOW_OFFSET_BITS;
   // Put it all together.
   quint64 offset = bank_bits | pipe_bits | offset_low | offset_high;
 
@@ -561,9 +561,9 @@ quint32 GX2ImageBase::ComputeSurfaceBankSwappedWidth(quint32 pitch)
   quint32 num_samples = m_num_samples;
   // TODO: Same as m_bytes_per_sample?
   quint32 bytes_per_sample = 8 * m_common_format_info.bpp;
-  quint32 samples_per_tile = m_split_size / bytes_per_sample;
+  quint32 samples_per_tile = SPLIT_SIZE / bytes_per_sample;
 
-  if (m_split_size / m_bytes_per_sample)
+  if (SPLIT_SIZE / m_bytes_per_sample)
   {
     slices_per_tile = qMax<uint32_t>(1u, num_samples / samples_per_tile);
   }
@@ -575,12 +575,12 @@ quint32 GX2ImageBase::ComputeSurfaceBankSwappedWidth(quint32 pitch)
 
   if (m_tile_mode_info.thickness == TileModeInfo::Thickness::Thick)
   {
-    auto swapTiles = qMax<uint32_t>(1u, (m_swap_size >> 1) / m_common_format_info.bpp);
-    quint64 swapWidth = swapTiles * 8 * m_num_banks;
-    auto heightBytes = num_samples * m_tile_mode_info.aspect_ratio * m_num_pipes *
+    auto swapTiles = qMax<uint32_t>(1u, (SWAP_SIZE >> 1) / m_common_format_info.bpp);
+    quint64 swapWidth = swapTiles * 8 * NUM_BANKS;
+    auto heightBytes = num_samples * m_tile_mode_info.aspect_ratio * NUM_PIPES *
                        m_common_format_info.bpp / slices_per_tile;
-    quint64 swapMax = m_num_pipes * m_num_banks * m_row_size / heightBytes;
-    quint64 swapMin = m_pipe_interleave_bytes * 8 * m_num_banks / bytes_per_tile_slice;
+    quint64 swapMax = NUM_PIPES * NUM_BANKS * ROW_SIZE / heightBytes;
+    quint64 swapMin = PIPE_INTERLEAVE_BYTES * 8 * NUM_BANKS / bytes_per_tile_slice;
 
     bank_swap_width = qMin(swapMax, qMax(swapMin, swapWidth));
 

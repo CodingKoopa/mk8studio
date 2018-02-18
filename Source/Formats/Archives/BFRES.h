@@ -84,6 +84,7 @@ public:
 
 private:
   static constexpr quint32 HEADER_SIZE = 0x6C;
+  static constexpr quint32 NUM_GROUPS = 12;
 
   inline static const std::map<Endianness, QString> m_endian_names{
       {Endianness::Little, "Little Endian"}, {Endianness::Big, "Big Endian"}};
@@ -93,6 +94,4 @@ private:
 
   ResourceDictionary<FMDL> m_fmdl_dictionary;
   ResourceDictionary<FTEX> m_ftex_dictionary;
-
-  const quint32 m_num_groups = 12;
 };
