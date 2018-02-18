@@ -4,11 +4,9 @@
 
 #include "Formats/Textures/GX2ImageBase.h"
 
-FTEX::FTEX(File* file, quint64 start_offset) : m_file(file), m_start_offset(start_offset) {}
+FTEX::FTEX(File* file, quint64 start_offset) : GX2ImageBase(file, start_offset, HEADER_SIZE) {}
 
-FTEX::FTEX(const FTEX& other)
-    : GX2ImageBase(other), m_file(other.m_file), m_start_offset(other.m_start_offset),
-      m_header(other.m_header)
+FTEX::FTEX(const FTEX& other) : GX2ImageBase(other)
 {
   DeepCopyRawImageDataBuffer(other);
 }
@@ -77,8 +75,9 @@ ResultCode FTEX::ReadHeader()
       m_header.mipmap_offsets[i] += m_header.mipmap_section_offset;
   }
 
-  if (m_file->Pos() - m_start_offset != 0xC0)
-    return ResultCode::IncorrectHeaderSize;
+  ResultCode res = CheckHeaderSize(m_start_offset);
+  if (res != ResultCode::Success)
+    return res;
 
   m_base_header = static_cast<ImageHeaderBase>(m_header);
 

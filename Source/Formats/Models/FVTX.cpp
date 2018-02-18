@@ -1,10 +1,11 @@
 #include "Formats/Models/FVTX.h"
 
-FVTX::FVTX(File* file, quint32 start_offset) : FormatBase(file, start_offset) {}
+FVTX::FVTX(File* file, quint32 start_offset) : FormatBase(file, start_offset, HEADER_SIZE) {}
 
 ResultCode FVTX::ReadHeader()
 {
   m_file->Seek(m_start_offset);
+  const quint32 start_pos = m_file->Pos();
   m_header.magic = m_file->ReadStringASCII(4);
   m_header.attribute_count = m_file->Read8();
   m_header.buffer_count = m_file->Read8();
@@ -17,10 +18,7 @@ ResultCode FVTX::ReadHeader()
   m_header.buffer_array_offset = m_file->ReadS32RelativeOffset();
   m_header.user_pointer_runtime = m_file->ReadU32();
 
-  if (m_file->Pos() - m_start_offset != 0x20)
-    return ResultCode::IncorrectHeaderSize;
-
-  return ResultCode::Success;
+  return CheckHeaderSize(start_pos);
 }
 
 ResultCode FVTX::ReadAttributes()
@@ -45,13 +43,17 @@ ResultCode FVTX::ReadAttributes()
       return ResultCode::UnsupportedAttributeFormat;
     }
   }
+  ResultCode ret = CheckHeaderSize(m_header.attribute_array_offset,
+                                   ATTRIBUTE_HEADER_SIZE * m_header.attribute_count);
+  if (ret != ResultCode::Success)
+    return ret;
+
   // Populate the attribute info lists.
   for (quint8 attribute = 0; attribute < m_header.attribute_count; ++attribute)
   {
     m_file->Seek(m_attribute_list[attribute].name_offset);
     // TODO: Use string table.
     m_attribute_list[attribute].name = m_file->ReadStringASCII(3);
-    // Default value.
     try
     {
       m_attribute_name_info_list.append(
@@ -80,7 +82,10 @@ ResultCode FVTX::ReadBuffers()
     m_buffer_list[buffer].context_pointer_runtime = m_file->ReadU32();
     m_buffer_list[buffer].data_offset = m_file->ReadS32RelativeOffset();
   };
-  // TODO: Check number of bytes read.
+  ResultCode ret =
+      CheckHeaderSize(m_header.buffer_array_offset, BUFFER_HEADER_SIZE * m_header.buffer_count);
+  if (ret != ResultCode::Success)
+    return ret;
 
   return ResultCode::Success;
 }

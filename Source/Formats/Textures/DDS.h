@@ -12,9 +12,6 @@ public:
   DDS() = default;
   ~DDS();
 
-  DDS(const DDS&) = delete;
-  DDS& operator=(const DDS&) = delete;
-
   struct PixelFormat
   {
     quint32 format_size;

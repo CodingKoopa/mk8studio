@@ -39,6 +39,8 @@ public:
   void SetFVTXList(const QVector<FVTX>& GetFVTXList);
 
 private:
+  static constexpr quint32 HEADER_SIZE = 0x30;
+
   Header m_header;
 
   QVector<FVTX> m_fvtx_list;

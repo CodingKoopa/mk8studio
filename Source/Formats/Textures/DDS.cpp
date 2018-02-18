@@ -72,6 +72,8 @@ ResultCode DDS::ReadFile()
   dds_file.ReadBytes(image_data_size, m_image_data_buffer);
   m_image_data.setRawData(m_image_data_buffer, image_data_size);
 
+  // TODO: Verify number of bytes read.
+
   return ResultCode::Success;
 }
 
@@ -204,6 +206,7 @@ int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mip
 
   // Image data
   int image_data_bytes_written = dds_file.WriteBytes(m_image_data.data(), m_image_data.size());
+  // TODO: Verify number of bytes written.
 
   dds_file.Save();
   return image_data_bytes_written;

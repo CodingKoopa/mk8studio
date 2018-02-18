@@ -79,12 +79,14 @@ public:
   const ResourceDictionary<FTEX>& GetFTEXDictionary() const;
   void SetFTEXDictionary(const ResourceDictionary<FTEX>& dictionary);
 
-  const std::map<Endianness, QString>& GetEndianNames() const;
+  static std::map<Endianness, QString> GetEndianNames();
   const QString& GetEndianName() const;
 
 private:
-  const std::map<Endianness, QString> m_endian_names{{Endianness::Little, "Little Endian"},
-                                                     {Endianness::Big, "Big Endian"}};
+  static constexpr quint32 HEADER_SIZE = 0x6C;
+
+  inline static const std::map<Endianness, QString> m_endian_names{
+      {Endianness::Little, "Little Endian"}, {Endianness::Big, "Big Endian"}};
   QString m_endian_name;
 
   Header m_header;

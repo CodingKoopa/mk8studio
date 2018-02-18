@@ -31,10 +31,20 @@ void FormatBase::SetPath(const QString& path)
   m_path = path;
 }
 
+quint32 FormatBase::GetHeaderSize() const
+{
+  return m_header_size;
+}
+
 ResultCode FormatBase::CheckHeaderSize(quint32 start_pos, quint32 header_size)
 {
   if (!header_size)
-    header_size = m_header_size;
+  {
+    if (m_header_size)
+      header_size = m_header_size;
+    else
+      return ResultCode::IncorrectHeaderSize;
+  }
 
   if (m_file->Pos() - start_pos != header_size)
     return ResultCode::IncorrectHeaderSize;

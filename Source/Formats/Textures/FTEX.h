@@ -64,16 +64,15 @@ public:
 private:
   void DeepCopyRawImageDataBuffer(const FTEX& other);
 
-  File* m_file = nullptr;
-  quint64 m_start_offset = 0;
+  static constexpr quint32 HEADER_SIZE = 0xC0;
+
+  const inline static QVector<QString> m_component_name_list{"Texture Red Values",
+                                                             "Texture Green Values",
+                                                             "Texture Blue Values",
+                                                             "Texture Alpha Values",
+                                                             "Always 0",
+                                                             "Always 1"};
+
   Header m_header = Header();
   char* m_raw_image_data_buffer = nullptr;
-
-  // TODO: Make a ComponentInfo list when the Info base class becomes a thing.
-  QVector<QString> m_component_name_list{"Texture Red Values",
-                                         "Texture Green Values",
-                                         "Texture Blue Values",
-                                         "Texture Alpha Values",
-                                         "Always 0",
-                                         "Always 1"};
 };

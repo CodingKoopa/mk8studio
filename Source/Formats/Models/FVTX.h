@@ -78,6 +78,10 @@ public:
   const QVector<Buffer>& GetBufferList() const;
 
 private:
+  static constexpr quint32 HEADER_SIZE = 0x20;
+  static constexpr quint32 ATTRIBUTE_HEADER_SIZE = 0x0C;
+  static constexpr quint32 BUFFER_HEADER_SIZE = 0x18;
+
   // TODO: add the rest.
   // clang-format off
   inline static const std::map<quint32, QString> m_attribute_format_names{
@@ -97,13 +101,9 @@ private:
       {0x080D,  "GX2_ATTRIB_FORMAT_FLOAT_32_32"},
       {0x0811,  "GX2_ATTRIB_FORMAT_FLOAT_32_32_32"}};
   // clang-format on
-  // The "list" terminology here is chosen for a reason. The "names" suffixes indicate that the
-  // member variable contains the constant references, but this is a list of the real, computed
-  // info parsed from the attribute.
-  QVector<QString> m_attribute_format_name_list;
 
   // clang-format off
-  const std::map<QString, AttributeNameInfo> m_attribute_name_infos{
+  inline static const std::map<QString, AttributeNameInfo> m_attribute_name_infos{
       {"_p0", {AttributeNameInfo::Use::Position,    "Position"}},
       {"_n0", {AttributeNameInfo::Use::Normal,      "Normal"}},
       {"_t0", {AttributeNameInfo::Use::Tangent,     "Tangent"}},
@@ -118,6 +118,11 @@ private:
       {"_c1", {AttributeNameInfo::Use::Color1,      "Color 1"}},
   };
   // clang-format on
+
+  // The "list" terminology here is chosen for a reason. The "names" suffixes indicate that the
+  // member variable contains the constant references, but this is a list of the real, computed
+  // info parsed from the attribute.
+  QVector<QString> m_attribute_format_name_list;
   QVector<AttributeNameInfo> m_attribute_name_info_list;
 
   Header m_header;

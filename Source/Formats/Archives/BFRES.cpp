@@ -1,6 +1,6 @@
 #include "Formats/Archives/BFRES.h"
 
-BFRES::BFRES(File* file, quint32 start_offset) : FormatBase(file, start_offset, 0x6C) {}
+BFRES::BFRES(File* file, quint32 start_offset) : FormatBase(file, start_offset, HEADER_SIZE) {}
 
 BFRES::BFRES(const BFRES& other)
     : FormatBase(other), m_header(other.m_header), m_fmdl_dictionary(other.m_fmdl_dictionary)
@@ -104,7 +104,7 @@ void BFRES::SetFTEXDictionary(const ResourceDictionary<FTEX>& dictionary)
   m_ftex_dictionary = dictionary;
 }
 
-const std::map<BFRES::Endianness, QString>& BFRES::GetEndianNames() const
+std::map<BFRES::Endianness, QString> BFRES::GetEndianNames()
 {
   return m_endian_names;
 }

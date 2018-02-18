@@ -18,6 +18,8 @@ public:
   const QString& GetPath() const;
   void SetPath(const QString& path);
 
+  quint32 GetHeaderSize() const;
+
 protected:
   ResultCode CheckHeaderSize(quint32 start_pos, quint32 header_size = 0);
 

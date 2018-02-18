@@ -8,6 +8,9 @@
 class GX2ImageBase : public FormatBase
 {
 public:
+  // Parameter passthrough.
+  GX2ImageBase(File* file = nullptr, quint32 start_offset = 0, quint32 header_size = 0);
+
   // Common kinds of formats.
   enum class CommonFormat
   {
@@ -102,8 +105,8 @@ public:
   ResultCode ImportDDS(QString path);
   ResultCode ExportToDDS(QString path);
 
-  const std::map<quint32, FormatInfo> GetFormatInfos() const;
-  const std::map<quint32, TileModeInfo>& GetTileModeInfos() const;
+  static std::map<quint32, FormatInfo> GetFormatInfos();
+  static std::map<quint32, TileModeInfo> GetTileModeInfos();
 
   const FormatInfo& GetFormatInfo() const;
   const TileModeInfo& GetTileModeInfo() const;
@@ -136,7 +139,7 @@ private:
 
   // "information" is an uncountable word, but we need to differentiate between its singular and
   // plural forms.
-  const std::map<CommonFormat, CommonFormatInfo> m_common_format_infos{
+  static const inline std::map<CommonFormat, CommonFormatInfo> m_common_format_infos{
       {CommonFormat::Invalid, {0, CommonFormatInfo::Use::None, false}},
       {CommonFormat::BC1, {64, CommonFormatInfo::Use::Texture, true}},
       {CommonFormat::BC4, {64, CommonFormatInfo::Use::Texture, true}},
@@ -146,7 +149,7 @@ private:
 
   // Very incomplete list of formats.
   // clang-format off
-  const std::map<quint32, FormatInfo> m_format_infos{
+  static const inline std::map<quint32, FormatInfo> m_format_infos{
       // Invalid
       {0x0,     {CommonFormat::Invalid, "GX2_SURFACE_FORMAT_INVALID",   FormatInfo::Type::Invalid}},
       // Unsigned Normals
@@ -174,7 +177,7 @@ private:
   TileModeInfo m_tile_mode_info;
 
   // clang-format off
-  const std::map<quint32, TileModeInfo> m_tile_mode_infos{
+  static const inline std::map<quint32, TileModeInfo> m_tile_mode_infos{
       // Linear Tiled
       {0x0,     {CommonTileMode::Linear,    "GX2_TILE_MODE_DEFAULT",        TileModeInfo::Thickness::Thin,  0, false}},
       {0x1,     {CommonTileMode::Linear,    "GX2_TILE_MODE_LINEAR_ALIGNED", TileModeInfo::Thickness::Thin,  0, false}},

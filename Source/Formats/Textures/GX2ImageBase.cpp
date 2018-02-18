@@ -2,6 +2,11 @@
 
 #include "Formats/Textures/DDS.h"
 
+GX2ImageBase::GX2ImageBase(File* file, quint32 start_offset, quint32 header_size)
+    : FormatBase(file, start_offset, header_size)
+{
+}
+
 ResultCode GX2ImageBase::SetupInfo()
 {
   try
@@ -52,12 +57,12 @@ ResultCode GX2ImageBase::ExportToDDS(QString path)
     return ResultCode::Success;
 }
 
-const std::map<quint32, GX2ImageBase::FormatInfo> GX2ImageBase::GetFormatInfos() const
+std::map<quint32, GX2ImageBase::FormatInfo> GX2ImageBase::GetFormatInfos()
 {
   return m_format_infos;
 }
 
-const std::map<quint32, GX2ImageBase::TileModeInfo>& GX2ImageBase::GetTileModeInfos() const
+std::map<quint32, GX2ImageBase::TileModeInfo> GX2ImageBase::GetTileModeInfos()
 {
   return m_tile_mode_infos;
 }
