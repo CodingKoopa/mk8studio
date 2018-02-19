@@ -74,8 +74,7 @@ void MainWindow::OpenFile(const QString& path)
     return;
   }
 
-  BFRES bfres(m_file);
-  m_current_file_node = new BFRESNode(bfres, this);
+  m_current_file_node = new BFRESNode(std::make_shared<BFRES>(m_file), this);
 
   // Make the connections for the BFRES node and any children.
   connect(m_current_file_node, &Node::ConnectNode, this, &MainWindow::MakeNodeConnections);

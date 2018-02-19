@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "Common.h"
 #include "File.h"
 #include "Formats/FormatBase.h"
@@ -35,13 +37,13 @@ public:
   const Header& GetHeader() const;
   void SetHeader(const Header& header);
 
-  const QVector<FVTX>& GetFVTXList() const;
-  void SetFVTXList(const QVector<FVTX>& GetFVTXList);
+  typedef std::shared_ptr<std::vector<std::shared_ptr<FVTX>>> FVTXList;
+  FVTXList GetFVTXList() const;
 
 private:
   static constexpr quint32 HEADER_SIZE = 0x30;
 
   Header m_header;
 
-  QVector<FVTX> m_fvtx_list;
+  FVTXList m_fvtx_list;
 };

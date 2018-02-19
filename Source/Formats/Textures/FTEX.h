@@ -8,10 +8,9 @@
 class FTEX : public GX2ImageBase
 {
 public:
-  FTEX() = default;
   FTEX(File* file, quint64 start_offset);
-  FTEX(const FTEX& other);
-  FTEX& operator=(const FTEX& other);
+  FTEX(const FTEX&) = delete;
+  FTEX& operator=(const FTEX&) = delete;
   ~FTEX();
 
   ResultCode ReadHeader();
@@ -62,8 +61,6 @@ public:
   };
 
 private:
-  void DeepCopyRawImageDataBuffer(const FTEX& other);
-
   static constexpr quint32 HEADER_SIZE = 0xC0;
 
   const inline static QVector<QString> m_component_name_list{"Texture Red Values",

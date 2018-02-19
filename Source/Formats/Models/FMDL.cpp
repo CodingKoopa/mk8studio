@@ -1,6 +1,10 @@
 #include "Formats/Models/FMDL.h"
 
-FMDL::FMDL(File* file, quint32 start_offset) : FormatBase(file, start_offset, HEADER_SIZE) {}
+FMDL::FMDL(File* file, quint32 start_offset)
+    : FormatBase(file, start_offset, HEADER_SIZE),
+      m_fvtx_list(std::make_shared<std::vector<std::shared_ptr<FVTX>>>())
+{
+}
 
 ResultCode FMDL::ReadHeader()
 {
@@ -26,12 +30,14 @@ ResultCode FMDL::ReadHeader()
 
 ResultCode FMDL::ReadFVTXArray()
 {
+  m_fvtx_list->clear();
+
   m_file->Seek(m_header.fvtx_array_offset);
   for (quint16 index = 0; index < m_header.fvtx_count; ++index)
   {
-    FVTX fvtx(m_file, m_file->Pos());
-    m_file->Skip(fvtx.GetHeaderSize());
-    m_fvtx_list.append(std::move(fvtx));
+    std::shared_ptr<FVTX> fvtx = std::make_shared<FVTX>(m_file, m_file->Pos());
+    m_file->Skip(fvtx->GetHeaderSize());
+    m_fvtx_list->push_back(std::move(fvtx));
   }
   return ResultCode::Success;
 }
@@ -46,12 +52,7 @@ void FMDL::SetHeader(const Header& header)
   m_header = header;
 }
 
-const QVector<FVTX>& FMDL::GetFVTXList() const
+FMDL::FVTXList FMDL::GetFVTXList() const
 {
   return m_fvtx_list;
-}
-
-void FMDL::SetFVTXList(const QVector<FVTX>& fvtx_list)
-{
-  m_fvtx_list = fvtx_list;
 }

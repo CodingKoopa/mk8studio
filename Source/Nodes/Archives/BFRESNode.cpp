@@ -13,19 +13,21 @@
 #include "CustomStandardItem.h"
 #include "Nodes/Archives/BFRESGroupNode.h"
 
-BFRESNode::BFRESNode(const BFRES& bfres, QObject* parent) : Node(parent), m_bfres(bfres) {}
+BFRESNode::BFRESNode(std::shared_ptr<BFRES> bfres, QObject* parent) : Node(parent), m_bfres(bfres)
+{
+}
 
 ResultCode BFRESNode::LoadFileTreeArea()
 {
   emit NewStatus(ResultCode::UpdateStatusBar, "Loading file tree...");
 
-  ResultCode res = m_bfres.ReadHeader();
+  ResultCode res = m_bfres->ReadHeader();
   if (res != ResultCode::Success)
   {
     NewStatus(res);
     return res;
   }
-  m_bfres_header = m_bfres.GetHeader();
+  m_bfres_header = m_bfres->GetHeader();
 
   QStandardItemModel* file_tree_model = new QStandardItemModel(0, 1);
 
@@ -64,17 +66,17 @@ CustomStandardItem* BFRESNode::MakeItem()
   // Store the current instance in a QVariant as an upcasted Node pointer.
   // Will be downcasted back to a BFRES Group Node later.
   bfres_item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
-  m_bfres.ReadDictionaries();
+  m_bfres->ReadDictionaries();
 
   // Allocate a new Node derived object.
   BFRESGroupNode<FMDL>* fmdl_group_node =
-      new BFRESGroupNode<FMDL>(m_bfres.GetFMDLDictionary(), this);
+      new BFRESGroupNode<FMDL>(m_bfres->GetFMDLDictionary(), this);
   connect(fmdl_group_node, &BFRESGroupNode<FMDL>::ConnectNode, this, &BFRESNode::ConnectNode);
   emit ConnectNode(fmdl_group_node);
   bfres_item->appendRow(fmdl_group_node->MakeItem());
 
   BFRESGroupNode<FTEX>* ftex_group_node =
-      new BFRESGroupNode<FTEX>(m_bfres.GetFTEXDictionary(), this);
+      new BFRESGroupNode<FTEX>(m_bfres->GetFTEXDictionary(), this);
   connect(ftex_group_node, &BFRESGroupNode<FTEX>::ConnectNode, this, &BFRESNode::ConnectNode);
   emit ConnectNode(ftex_group_node);
   bfres_item->appendRow(ftex_group_node->MakeItem());
@@ -140,14 +142,14 @@ ResultCode BFRESNode::LoadAttributeArea()
   // Endianess
   header_attributes_model->setItem(row, 0, new QStandardItem("Endianness"));
   QStandardItemModel* endian_entries = new QStandardItemModel();
-  auto endian_names = m_bfres.GetEndianNames();
+  auto endian_names = m_bfres->GetEndianNames();
   for (auto const& endian_name : endian_names)
     endian_entries->appendRow(new QStandardItem(endian_name.second));
   m_delegate_group.combo_box_entries << endian_entries;
   m_delegate_group.combo_box_delegates << row;
   m_delegate_group.combo_box_selections << std::distance(
       endian_names.begin(), endian_names.find(static_cast<BFRES::Endianness>(m_bfres_header.bom)));
-  CustomStandardItem* endianness_item = new CustomStandardItem(m_bfres.GetEndianName());
+  CustomStandardItem* endianness_item = new CustomStandardItem(m_bfres->GetEndianName());
   endianness_item->SetFunction([this, endian_names](quint32 index) {
     auto it =
         next(endian_names.begin(), std::min(index, static_cast<quint32>(endian_names.size())));
@@ -243,5 +245,5 @@ void BFRESNode::HandleAttributeItemChange(QStandardItem* item)
   if (custom_item)
     custom_item->ExecuteFunction();
 
-  m_bfres.SetHeader(m_bfres_header);
+  m_bfres->SetHeader(m_bfres_header);
 }

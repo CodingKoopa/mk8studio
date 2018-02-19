@@ -6,20 +6,6 @@
 
 FTEX::FTEX(File* file, quint64 start_offset) : GX2ImageBase(file, start_offset, HEADER_SIZE) {}
 
-FTEX::FTEX(const FTEX& other) : GX2ImageBase(other)
-{
-  DeepCopyRawImageDataBuffer(other);
-}
-
-FTEX& FTEX::operator=(const FTEX& other)
-{
-  m_file = other.m_file;
-  m_start_offset = other.m_start_offset;
-  m_header = other.m_header;
-  DeepCopyRawImageDataBuffer(other);
-  return *this;
-}
-
 FTEX::~FTEX()
 {
   if (m_raw_image_data_buffer)
@@ -151,13 +137,4 @@ void FTEX::SetHeader(const FTEX::Header& ftex_header)
 {
   m_header = ftex_header;
   m_base_header = static_cast<ImageHeaderBase>(m_header);
-}
-
-void FTEX::DeepCopyRawImageDataBuffer(const FTEX& other)
-{
-  if (m_raw_image_data_buffer)
-    delete m_raw_image_data_buffer;
-  m_raw_image_data_buffer = new char[sizeof(other.m_raw_image_data_buffer)];
-  if (other.m_raw_image_data_buffer)
-    *m_raw_image_data_buffer = *other.m_raw_image_data_buffer;
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include <QComboBox>
 #include <QGroupBox>
 #include <QScrollArea>
@@ -15,13 +17,13 @@ class FTEXNode : public Node
 {
   Q_OBJECT
 public:
-  explicit FTEXNode(const FTEX& ftex, QObject* parent = 0);
+  explicit FTEXNode(std::shared_ptr<FTEX> ftex, QObject* parent = 0);
   CustomStandardItem* MakeItem() override;
   ResultCode LoadAttributeArea() override;
   ResultCode LoadMainWidget() override;
 
 private:
-  FTEX m_ftex;
+  std::shared_ptr<FTEX> m_ftex;
   FTEX::Header m_ftex_header;
 
   // Unlike the other section containers for other nodes, this one is reused for the injection

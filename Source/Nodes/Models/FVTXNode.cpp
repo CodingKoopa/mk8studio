@@ -2,42 +2,42 @@
 #include "Nodes/Models/FVTXAttributeNode.h"
 #include "Nodes/Models/FVTXBufferNode.h"
 
-FVTXNode::FVTXNode(const FVTX& fvtx, QObject* parent) : Node(parent), m_fvtx(fvtx) {}
+FVTXNode::FVTXNode(std::shared_ptr<FVTX> fvtx, QObject* parent) : Node(parent), m_fvtx(fvtx) {}
 
 CustomStandardItem* FVTXNode::MakeItem()
 {
   if (!m_header_loaded)
   {
-    ResultCode res = m_fvtx.ReadHeader();
+    ResultCode res = m_fvtx->ReadHeader();
     if (res != ResultCode::Success)
     {
       emit NewStatus(res);
       return nullptr;
     }
     else
-      m_fvtx_header = m_fvtx.GetHeader();
+      m_fvtx_header = m_fvtx->GetHeader();
   }
   if (!m_attributes_loaded)
   {
-    ResultCode res = m_fvtx.ReadAttributes();
+    ResultCode res = m_fvtx->ReadAttributes();
     if (res != ResultCode::Success)
     {
       emit NewStatus(res);
       return new CustomStandardItem("Unknown");
     }
     else
-      m_attribute_list = m_fvtx.GetAttributeList();
+      m_attribute_list = m_fvtx->GetAttributeList();
   }
   if (!m_buffers_loaded)
   {
-    ResultCode res = m_fvtx.ReadBuffers();
+    ResultCode res = m_fvtx->ReadBuffers();
     if (res != ResultCode::Success)
     {
       emit NewStatus(res);
       return new CustomStandardItem("Unknown");
     }
     else
-      m_buffer_list = m_fvtx.GetBufferList();
+      m_buffer_list = m_fvtx->GetBufferList();
   }
 
   CustomStandardItem* fvtx_item = new CustomStandardItem;
@@ -45,8 +45,8 @@ CustomStandardItem* FVTXNode::MakeItem()
   fvtx_item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
   CustomStandardItem* attribute_group_item = new CustomStandardItem("Attributes");
   fvtx_item->appendRow(attribute_group_item);
-  QVector<QString> attribute_format_name_list = m_fvtx.GetAttributeFormatNameList();
-  QVector<FVTX::AttributeNameInfo> attribute_name_info_list = m_fvtx.GetAttributeNameInfoList();
+  QVector<QString> attribute_format_name_list = m_fvtx->GetAttributeFormatNameList();
+  QVector<FVTX::AttributeNameInfo> attribute_name_info_list = m_fvtx->GetAttributeNameInfoList();
   for (qint32 attribute = 0; attribute < m_attribute_list.size(); ++attribute)
   {
     FVTXAttributeNode* fvtx_attribute_node =
@@ -72,14 +72,14 @@ ResultCode FVTXNode::LoadAttributeArea()
 {
   if (!m_header_loaded)
   {
-    ResultCode res = m_fvtx.ReadHeader();
+    ResultCode res = m_fvtx->ReadHeader();
     if (res != ResultCode::Success)
     {
       emit NewStatus(res);
       return ResultCode::Success;
     }
     else
-      m_fvtx_header = m_fvtx.GetHeader();
+      m_fvtx_header = m_fvtx->GetHeader();
   }
 
   quint32 row = 0;
@@ -192,5 +192,5 @@ void FVTXNode::HandleAttributeItemChange(QStandardItem* item)
   if (custom_item)
     custom_item->ExecuteFunction();
 
-  m_fvtx.SetHeader(m_fvtx_header);
+  m_fvtx->SetHeader(m_fvtx_header);
 }

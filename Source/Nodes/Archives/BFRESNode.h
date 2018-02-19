@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <memory>
+
 #include <QScrollArea>
 #include <QStandardItem>
 #include <QTableView>
@@ -15,13 +17,13 @@ class BFRESNode : public Node
 {
   Q_OBJECT
 public:
-  explicit BFRESNode(const BFRES& bfres, QObject* parent = 0);
+  explicit BFRESNode(std::shared_ptr<BFRES> bfres, QObject* parent = 0);
   ResultCode LoadFileTreeArea() override;
   CustomStandardItem* MakeItem() override;
   ResultCode LoadAttributeArea() override;
 
 private:
-  BFRES m_bfres;
+  std::shared_ptr<BFRES> m_bfres;
   BFRES::Header m_bfres_header = BFRES::Header();
 
 private slots:

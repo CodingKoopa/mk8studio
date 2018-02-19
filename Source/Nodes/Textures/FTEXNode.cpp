@@ -13,7 +13,7 @@
 #include "Common.h"
 #include "IODialog.h"
 
-FTEXNode::FTEXNode(const FTEX& ftex, QObject* parent) : Node(parent), m_ftex(ftex)
+FTEXNode::FTEXNode(std::shared_ptr<FTEX> ftex, QObject* parent) : Node(parent), m_ftex(ftex)
 {
   m_context_menu = new QMenu;
 
@@ -29,7 +29,7 @@ FTEXNode::FTEXNode(const FTEX& ftex, QObject* parent) : Node(parent), m_ftex(fte
 CustomStandardItem* FTEXNode::MakeItem()
 {
   CustomStandardItem* item = new CustomStandardItem;
-  item->setData(m_ftex.GetName() + " (FTEX)", Qt::DisplayRole);
+  item->setData(m_ftex->GetName() + " (FTEX)", Qt::DisplayRole);
   item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
   return item;
 }
@@ -38,14 +38,14 @@ ResultCode FTEXNode::LoadAttributeArea()
 {
   if (!m_header_loaded)
   {
-    ResultCode res = m_ftex.ReadHeader();
+    ResultCode res = m_ftex->ReadHeader();
     if (res != ResultCode::Success)
     {
       emit NewStatus(res);
       return res;
     }
     else
-      m_ftex_header = m_ftex.GetHeader();
+      m_ftex_header = m_ftex->GetHeader();
   }
 
   quint32 row = 0;
@@ -57,7 +57,7 @@ ResultCode FTEXNode::LoadAttributeArea()
   // Header Offset
   header_attributes_model->setItem(row, 0, new QStandardItem("Header Offset"));
   header_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(m_ftex.GetStart(), 16)));
+      row, 1, new QStandardItem("0x" + QString::number(m_ftex->GetStart(), 16)));
   ++row;
 
   // Magic
@@ -108,7 +108,7 @@ ResultCode FTEXNode::LoadAttributeArea()
 
   // Texture Format
   header_attributes_model->setItem(row, 0, new QStandardItem("Format"));
-  auto format_infos = m_ftex.GetFormatInfos();
+  auto format_infos = m_ftex->GetFormatInfos();
   QStandardItemModel* format_combo_box_entries = new QStandardItemModel();
   for (auto const& format_info : format_infos)
     format_combo_box_entries->appendRow(new QStandardItem(format_info.second.name));
@@ -116,7 +116,7 @@ ResultCode FTEXNode::LoadAttributeArea()
   m_delegate_group.combo_box_delegates << row;
   m_delegate_group.combo_box_selections
       << std::distance(format_infos.begin(), format_infos.find(m_ftex_header.format));
-  CustomStandardItem* format_item = new CustomStandardItem(m_ftex.GetFormatInfo().name);
+  CustomStandardItem* format_item = new CustomStandardItem(m_ftex->GetFormatInfo().name);
   // Here, index is the index of the overall map, and NOT a key.
   format_item->SetFunction([this, format_infos](quint32 index) {
     auto it =
@@ -164,7 +164,7 @@ ResultCode FTEXNode::LoadAttributeArea()
 
   // Tile Mode
   header_attributes_model->setItem(row, 0, new QStandardItem("Tile Mode"));
-  auto tile_mode_infos = m_ftex.GetTileModeInfos();
+  auto tile_mode_infos = m_ftex->GetTileModeInfos();
   QStandardItemModel* tiling_combo_box_entries = new QStandardItemModel();
   for (auto const& tile_mode_info : tile_mode_infos)
     tiling_combo_box_entries->appendRow(new QStandardItem(tile_mode_info.second.name));
@@ -172,7 +172,7 @@ ResultCode FTEXNode::LoadAttributeArea()
   m_delegate_group.combo_box_delegates << row;
   // The tile mode corresponds with the index because they're consecutive.
   m_delegate_group.combo_box_selections << m_ftex_header.tile_mode;
-  CustomStandardItem* tile_mode_item = new CustomStandardItem(m_ftex.GetTileModeInfo().name);
+  CustomStandardItem* tile_mode_item = new CustomStandardItem(m_ftex->GetTileModeInfo().name);
   tile_mode_item->SetFunction(
       [this](quint32 index) { m_ftex_header.tile_mode = static_cast<quint32>(index); });
   header_attributes_model->setItem(row, 1, tile_mode_item);
@@ -234,7 +234,7 @@ ResultCode FTEXNode::LoadAttributeArea()
   m_delegate_group.spin_box_delegates << row;
   ++row;
 
-  QVector<QString> component_name_list = m_ftex.GetComponentNameList();
+  QVector<QString> component_name_list = m_ftex->GetComponentNameList();
   QStandardItemModel* component_selector_combo_box_entries = new QStandardItemModel();
   component_selector_combo_box_entries->appendRow(new QStandardItem(component_name_list[0]));
   component_selector_combo_box_entries->appendRow(new QStandardItem(component_name_list[1]));
@@ -251,7 +251,7 @@ ResultCode FTEXNode::LoadAttributeArea()
   CustomStandardItem* red_channel_component_item =
       new CustomStandardItem(component_name_list[m_ftex_header.red_channel_component]);
   red_channel_component_item->SetFunction([this](QString text) {
-    m_ftex_header.red_channel_component = m_ftex.GetComponentIDFromName(text);
+    m_ftex_header.red_channel_component = m_ftex->GetComponentIDFromName(text);
   });
   header_attributes_model->setItem(row, 1, red_channel_component_item);
   ++row;
@@ -264,7 +264,7 @@ ResultCode FTEXNode::LoadAttributeArea()
   CustomStandardItem* green_channel_component_item =
       new CustomStandardItem(component_name_list[m_ftex_header.green_channel_component]);
   green_channel_component_item->SetFunction([this](QString text) {
-    m_ftex_header.green_channel_component = m_ftex.GetComponentIDFromName(text);
+    m_ftex_header.green_channel_component = m_ftex->GetComponentIDFromName(text);
   });
   header_attributes_model->setItem(row, 1, green_channel_component_item);
   ++row;
@@ -277,7 +277,7 @@ ResultCode FTEXNode::LoadAttributeArea()
   CustomStandardItem* blue_channel_component_item =
       new CustomStandardItem(component_name_list[m_ftex_header.blue_channel_component]);
   blue_channel_component_item->SetFunction([this](QString text) {
-    m_ftex_header.blue_channel_component = m_ftex.GetComponentIDFromName(text);
+    m_ftex_header.blue_channel_component = m_ftex->GetComponentIDFromName(text);
   });
   header_attributes_model->setItem(row, 1, blue_channel_component_item);
   ++row;
@@ -290,7 +290,7 @@ ResultCode FTEXNode::LoadAttributeArea()
   CustomStandardItem* alpha_channel_component_item =
       new CustomStandardItem(component_name_list[m_ftex_header.alpha_channel_component]);
   alpha_channel_component_item->SetFunction([this](QString text) {
-    m_ftex_header.alpha_channel_component = m_ftex.GetComponentIDFromName(text);
+    m_ftex_header.alpha_channel_component = m_ftex->GetComponentIDFromName(text);
   });
   header_attributes_model->setItem(row, 1, alpha_channel_component_item);
   ++row;
@@ -384,9 +384,9 @@ ResultCode FTEXNode::LoadMainWidget()
 {
   ResultCode res;
   if (!m_header_loaded)
-    res = m_ftex.ReadHeader();
+    res = m_ftex->ReadHeader();
   if (!m_image_loaded && res != ResultCode::Success)
-    res = m_ftex.ReadImage();
+    res = m_ftex->ReadImage();
   if (res != ResultCode::Success)
   {
     emit NewStatus(res);
@@ -407,8 +407,8 @@ void FTEXNode::HandleAttributeItemChange(QStandardItem* item)
   if (custom_item)
     custom_item->ExecuteFunction();
 
-  m_ftex.SetHeader(m_ftex_header);
-  m_ftex.SetupInfo();
+  m_ftex->SetHeader(m_ftex_header);
+  m_ftex->SetupInfo();
 }
 
 void FTEXNode::HandleExportActionClick()
@@ -431,7 +431,7 @@ void FTEXNode::HandleExportActionClick()
   if (!last_path.isEmpty())
   {
     QFileInfo file_info = last_path;
-    m_path_line_edit->setText(file_info.dir().path() + QDir::separator() + m_ftex.GetName() + '.' +
+    m_path_line_edit->setText(file_info.dir().path() + QDir::separator() + m_ftex->GetName() + '.' +
                               file_info.suffix());
   }
   settings.endGroup();
@@ -467,11 +467,11 @@ void FTEXNode::HandleExportButtonClick()
   settings.setValue("last_ftex_export_path", m_path_line_edit->text());
   settings.endGroup();
   if (!m_header_loaded)
-    m_ftex.ReadHeader();
+    m_ftex->ReadHeader();
   if (!m_image_loaded)
-    m_ftex.ReadImage();
+    m_ftex->ReadImage();
   if (m_format_combo_box->currentText() == "DDS")
-    m_ftex.ExportToDDS(m_path_line_edit->text());
+    m_ftex->ExportToDDS(m_path_line_edit->text());
 }
 
 void FTEXNode::HandleInjectActionClick()
@@ -521,6 +521,6 @@ void FTEXNode::HandleInjectActionClick()
 void FTEXNode::HandleInjectButtonClick()
 {
   QSettings settings;
-  m_ftex.ImportDDS(m_path_line_edit->text());
-  m_ftex.InjectImage();
+  m_ftex->ImportDDS(m_path_line_edit->text());
+  m_ftex->InjectImage();
 }

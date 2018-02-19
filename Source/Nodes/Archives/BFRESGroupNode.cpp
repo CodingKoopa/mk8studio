@@ -76,11 +76,6 @@ CustomStandardItem* BFRESGroupNode<FMDL>::MakeGroupDependentItem()
   for (quint32 row = 1; row < m_dictionary.Size(); ++row)
   {
     FMDLNode* fmdl_node = new FMDLNode(m_dictionary[row].value, this);
-    // Sync the FMDL object.
-    connect(fmdl_node, &FMDLNode::NewFMDL, this, [this, row](const FMDL& fmdl) {
-      m_dictionary[row].value = fmdl;
-      emit NewDictionary(m_dictionary);
-    });
     connect(fmdl_node, &FMDLNode::ConnectNode, this, &BFRESGroupNode::ConnectNode);
     emit ConnectNode(fmdl_node);
     group_node->appendRow(fmdl_node->MakeItem());

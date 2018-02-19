@@ -10,6 +10,8 @@ class DDS : public FormatBase
 {
 public:
   DDS() = default;
+  DDS(const DDS&) = delete;
+  DDS& operator=(const DDS&) = delete;
   ~DDS();
 
   struct PixelFormat

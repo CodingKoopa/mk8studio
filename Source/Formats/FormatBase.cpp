@@ -5,12 +5,6 @@ FormatBase::FormatBase(File* file, quint32 start_offset, quint32 header_size)
 {
 }
 
-FormatBase::FormatBase(const FormatBase& other)
-    : m_file(other.m_file), m_start_offset(other.m_start_offset),
-      m_header_size(other.m_header_size), m_name(other.m_name), m_path(other.m_path)
-{
-}
-
 const QString& FormatBase::GetName() const
 {
   return m_name;

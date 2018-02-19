@@ -10,7 +10,8 @@ class FormatBase
   // When saving is implemented, this class will be more useful.
 public:
   FormatBase(File* file = nullptr, quint32 start_offset = 0, quint32 header_size = 0);
-  FormatBase(const FormatBase& other);
+  FormatBase(const FormatBase&) = delete;
+  FormatBase& operator=(const FormatBase&) = delete;
 
   const QString& GetName() const;
   void SetName(const QString& name);

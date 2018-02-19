@@ -2,21 +2,6 @@
 
 BFRES::BFRES(File* file, quint32 start_offset) : FormatBase(file, start_offset, HEADER_SIZE) {}
 
-BFRES::BFRES(const BFRES& other)
-    : FormatBase(other), m_header(other.m_header), m_fmdl_dictionary(other.m_fmdl_dictionary)
-{
-}
-
-BFRES& BFRES::operator=(const BFRES& other)
-{
-  // This is alright because the pointer won't be deleted until MainWindow is destructed.
-  m_file = other.m_file;
-
-  m_header = other.m_header;
-  m_fmdl_dictionary = other.m_fmdl_dictionary;
-  return *this;
-}
-
 ResultCode BFRES::ReadHeader()
 {
   const quint32 start_pos = m_file->Pos();

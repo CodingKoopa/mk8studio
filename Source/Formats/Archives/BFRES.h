@@ -11,8 +11,6 @@ class BFRES : public FormatBase
 {
 public:
   BFRES(File* file = nullptr, quint32 start_offset = 0);
-  BFRES(const BFRES& other);
-  BFRES& operator=(const BFRES& other);
 
   enum class Endianness
   {

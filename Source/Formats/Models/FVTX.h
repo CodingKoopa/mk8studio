@@ -8,6 +8,7 @@ class FVTX : public FormatBase
 {
 public:
   FVTX(File* file = nullptr, quint32 start_offset = 0);
+
   ResultCode ReadHeader();
   ResultCode ReadAttributes();
   ResultCode ReadBuffers();

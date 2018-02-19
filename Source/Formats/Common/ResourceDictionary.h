@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "Common.h"
 #include "File.h"
 #include "Formats/FormatBase.h"
@@ -44,7 +46,7 @@ public:
     qint32 value_offset;
 
     QString key;
-    T value;
+    std::shared_ptr<T> value;
   };
 
   // Expose read-only references to nodes via [].
@@ -82,8 +84,8 @@ public:
       m_file->Seek(m_node_list[node].key_offset);
       if (m_node_list[node].key_offset)
         m_node_list[node].key = m_file->ReadStringASCII();
-      m_node_list[node].value = T(m_file, m_node_list[node].value_offset);
-      m_node_list[node].value.SetName(m_node_list[node].key);
+      m_node_list[node].value = std::make_shared<T>(m_file, m_node_list[node].value_offset);
+      m_node_list[node].value->SetName(m_node_list[node].key);
     }
 
     // TODO: Utility function for checking header size.
