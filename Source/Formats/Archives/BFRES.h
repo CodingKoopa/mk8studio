@@ -38,8 +38,6 @@ public:
     QVector<quint32> file_offsets;
     QVector<quint16> file_counts;
     quint32 unknown_f;
-
-    QString file_name;
   };
 
   struct IndexGroupHeader

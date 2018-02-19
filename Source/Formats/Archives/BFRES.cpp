@@ -43,7 +43,7 @@ ResultCode BFRES::ReadHeader()
   m_file->Seek(m_header.file_name_offset);
   // TODO: apparantly the string table stores the lengths of strings too, so a better way of doing
   // this might be seeking back 4 bytes, reading the length, and calling readstring with that length
-  m_header.file_name = m_file->ReadStringASCII(0);
+  m_name = m_file->ReadStringASCII(0);
   return res;
 }
 
