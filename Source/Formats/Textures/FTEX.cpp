@@ -4,7 +4,10 @@
 
 #include "Formats/Textures/GX2ImageBase.h"
 
-FTEX::FTEX(File* file, quint64 start_offset) : GX2ImageBase(file, start_offset, HEADER_SIZE) {}
+FTEX::FTEX(std::shared_ptr<File> file, quint64 start_offset)
+    : GX2ImageBase(file, start_offset, HEADER_SIZE)
+{
+}
 
 FTEX::~FTEX()
 {

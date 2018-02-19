@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "Common.h"
 #include "File.h"
 #include "Formats/FormatBase.h"
@@ -7,7 +9,7 @@
 class FVTX : public FormatBase
 {
 public:
-  FVTX(File* file = nullptr, quint32 start_offset = 0);
+  FVTX(std::shared_ptr<File> file, quint32 start_offset = 0);
 
   ResultCode ReadHeader();
   ResultCode ReadAttributes();

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include <QMainWindow>
 #include <QScrollArea>
 #include <QSplitter>
@@ -29,7 +31,7 @@ private:
 
   QSplitter* m_file_tree_attributes_splitter = nullptr;
   QSplitter* m_left_right_splitter = nullptr;
-  File* m_file = nullptr;
+  std::shared_ptr<File> m_file;
 
   Node* m_current_file_node = nullptr;
 

@@ -10,9 +10,7 @@
 class FMDL : public FormatBase
 {
 public:
-  // This constructor must have the ability to be called without arguments so that a vector can
-  // construct default objects.
-  FMDL(File* file = nullptr, quint32 start_offset = 0);
+  FMDL(std::shared_ptr<File> file, quint32 start_offset = 0);
   ResultCode ReadHeader();
   ResultCode ReadFVTXArray();
 

@@ -52,21 +52,16 @@ MainWindow::~MainWindow()
 {
   if (m_current_file_node)
     delete m_current_file_node;
-  if (m_file)
-    delete m_file;
   delete m_ui;
 }
 
 void MainWindow::OpenFile(const QString& path)
 {
-  if (m_file)
-    delete m_file;
-
   if (path.isEmpty())
-    m_file = new File(
+    m_file = std::make_shared<File>(
         QFileDialog::getOpenFileName(this, "Open File", QDir::homePath(), "BFRES Model (*.bfres)"));
   else
-    m_file = new File(path);
+    m_file = std::make_shared<File>(path);
 
   if (!m_file->GetCanRead())
   {

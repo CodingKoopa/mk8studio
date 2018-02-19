@@ -1,6 +1,9 @@
 #include "Formats/Archives/BFRES.h"
 
-BFRES::BFRES(File* file, quint32 start_offset) : FormatBase(file, start_offset, HEADER_SIZE) {}
+BFRES::BFRES(std::shared_ptr<File> file, quint32 start_offset)
+    : FormatBase(file, start_offset, HEADER_SIZE)
+{
+}
 
 ResultCode BFRES::ReadHeader()
 {
@@ -62,11 +65,6 @@ const BFRES::Header& BFRES::GetHeader() const
 void BFRES::SetHeader(const Header& header)
 {
   m_header = header;
-}
-
-File* BFRES::GetFile() const
-{
-  return m_file;
 }
 
 const ResourceDictionary<FMDL>& BFRES::GetFMDLDictionary() const

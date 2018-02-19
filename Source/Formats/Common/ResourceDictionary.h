@@ -11,7 +11,7 @@ class ResourceDictionary : public FormatBase
 {
 public:
   // This must be defined here and not in a CPP file, because of how templates work.
-  ResourceDictionary(File* file = nullptr, quint32 start_offset = 0)
+  ResourceDictionary(std::shared_ptr<File> file = nullptr, quint32 start_offset = 0)
       : FormatBase(file, start_offset)
   {
   }

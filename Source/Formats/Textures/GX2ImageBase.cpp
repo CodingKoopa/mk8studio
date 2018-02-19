@@ -2,7 +2,7 @@
 
 #include "Formats/Textures/DDS.h"
 
-GX2ImageBase::GX2ImageBase(File* file, quint32 start_offset, quint32 header_size)
+GX2ImageBase::GX2ImageBase(std::shared_ptr<File> file, quint32 start_offset, quint32 header_size)
     : FormatBase(file, start_offset, header_size)
 {
 }

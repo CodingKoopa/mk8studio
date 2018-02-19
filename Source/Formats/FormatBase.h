@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include <QString>
 
 #include "Common.h"
@@ -9,7 +11,10 @@ class FormatBase
 {
   // When saving is implemented, this class will be more useful.
 public:
-  FormatBase(File* file = nullptr, quint32 start_offset = 0, quint32 header_size = 0);
+  // There must be an empty constructor, for stuff like the DDS class that may not have a File right
+  // away.
+  FormatBase(std::shared_ptr<File> file = nullptr, quint32 start_offset = 0,
+             quint32 header_size = 0);
   FormatBase(const FormatBase&) = delete;
   FormatBase& operator=(const FormatBase&) = delete;
 
@@ -24,7 +29,7 @@ public:
 protected:
   ResultCode CheckHeaderSize(quint32 start_pos, quint32 header_size = 0);
 
-  File* m_file;
+  std::shared_ptr<File> m_file;
   quint32 m_start_offset;
   quint32 m_header_size;
   QString m_name;

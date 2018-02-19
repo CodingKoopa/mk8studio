@@ -1,6 +1,6 @@
 #include "Formats/FormatBase.h"
 
-FormatBase::FormatBase(File* file, quint32 start_offset, quint32 header_size)
+FormatBase::FormatBase(std::shared_ptr<File> file, quint32 start_offset, quint32 header_size)
     : m_file(file), m_start_offset(start_offset), m_header_size(header_size)
 {
 }

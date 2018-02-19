@@ -1,6 +1,6 @@
 #include "Formats/Models/FMDL.h"
 
-FMDL::FMDL(File* file, quint32 start_offset)
+FMDL::FMDL(std::shared_ptr<File> file, quint32 start_offset)
     : FormatBase(file, start_offset, HEADER_SIZE),
       m_fvtx_list(std::make_shared<std::vector<std::shared_ptr<FVTX>>>())
 {

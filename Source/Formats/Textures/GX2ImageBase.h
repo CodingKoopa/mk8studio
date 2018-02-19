@@ -9,7 +9,7 @@ class GX2ImageBase : public FormatBase
 {
 public:
   // Parameter passthrough.
-  GX2ImageBase(File* file = nullptr, quint32 start_offset = 0, quint32 header_size = 0);
+  GX2ImageBase(std::shared_ptr<File> file, quint32 start_offset = 0, quint32 header_size = 0);
 
   // Common kinds of formats.
   enum class CommonFormat

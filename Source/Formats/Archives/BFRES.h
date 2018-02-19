@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "Common.h"
 #include "File.h"
 #include "Formats/Common/ResourceDictionary.h"
@@ -10,7 +12,8 @@
 class BFRES : public FormatBase
 {
 public:
-  BFRES(File* file = nullptr, quint32 start_offset = 0);
+  /// Initializes a new instance of the BFRES class.
+  BFRES(std::shared_ptr<File> file, quint32 start_offset = 0);
 
   enum class Endianness
   {
@@ -69,8 +72,6 @@ public:
 
   const Header& GetHeader() const;
   void SetHeader(const Header& header);
-
-  File* GetFile() const;
 
   const ResourceDictionary<FMDL>& GetFMDLDictionary() const;
   void SetFMDLDictionary(const ResourceDictionary<FMDL>& dictionary);

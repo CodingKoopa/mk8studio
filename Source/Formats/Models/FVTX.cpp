@@ -1,6 +1,9 @@
 #include "Formats/Models/FVTX.h"
 
-FVTX::FVTX(File* file, quint32 start_offset) : FormatBase(file, start_offset, HEADER_SIZE) {}
+FVTX::FVTX(std::shared_ptr<File> file, quint32 start_offset)
+    : FormatBase(file, start_offset, HEADER_SIZE)
+{
+}
 
 ResultCode FVTX::ReadHeader()
 {

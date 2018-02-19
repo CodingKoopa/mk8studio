@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include <QString>
 
 #include "File.h"
@@ -8,7 +10,7 @@
 class FTEX : public GX2ImageBase
 {
 public:
-  FTEX(File* file, quint64 start_offset);
+  FTEX(std::shared_ptr<File> file, quint64 start_offset = 0);
   FTEX(const FTEX&) = delete;
   FTEX& operator=(const FTEX&) = delete;
   ~FTEX();
