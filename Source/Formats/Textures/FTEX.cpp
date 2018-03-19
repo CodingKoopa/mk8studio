@@ -111,24 +111,9 @@ void FTEX::InjectImage()
   m_file->Save();
 }
 
-const QVector<QString> FTEX::GetComponentNameList() const
+std::array<QString, 6> FTEX::GetComponentNames()
 {
-  return m_component_name_list;
-}
-
-quint8 FTEX::GetComponentIDFromName(const QString& name) const
-{
-  for (quint8 id = 0; id < m_component_name_list.size(); ++id)
-  {
-    if (name == m_component_name_list[id])
-      return id;
-  }
-  return 0;
-}
-
-quint64 FTEX::GetStart() const
-{
-  return m_start_offset;
+  return m_component_names;
 }
 
 const FTEX::Header& FTEX::GetHeader() const

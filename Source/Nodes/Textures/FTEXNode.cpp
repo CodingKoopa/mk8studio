@@ -52,14 +52,6 @@ ResultCode FTEXNode::LoadAttributeArea()
   QStandardItemModel* header_attributes_model = new QStandardItemModel;
   m_delegate_group = CustomItemDelegate::DelegateGroup();
 
-  // TODO: Hex Spinbox
-
-  // Header Offset
-  header_attributes_model->setItem(row, 0, new QStandardItem("Header Offset"));
-  header_attributes_model->setItem(
-      row, 1, new QStandardItem("0x" + QString::number(m_ftex->GetStart(), 16)));
-  ++row;
-
   // Magic
   header_attributes_model->setItem(row, 0, new QStandardItem("Magic File Identifier"));
   CustomStandardItem* magic_item = new CustomStandardItem(m_ftex_header.magic);
@@ -234,14 +226,10 @@ ResultCode FTEXNode::LoadAttributeArea()
   m_delegate_group.spin_box_delegates << row;
   ++row;
 
-  QVector<QString> component_name_list = m_ftex->GetComponentNameList();
+  auto component_names = m_ftex->GetComponentNames();
   QStandardItemModel* component_selector_combo_box_entries = new QStandardItemModel();
-  component_selector_combo_box_entries->appendRow(new QStandardItem(component_name_list[0]));
-  component_selector_combo_box_entries->appendRow(new QStandardItem(component_name_list[1]));
-  component_selector_combo_box_entries->appendRow(new QStandardItem(component_name_list[2]));
-  component_selector_combo_box_entries->appendRow(new QStandardItem(component_name_list[3]));
-  component_selector_combo_box_entries->appendRow(new QStandardItem(component_name_list[4]));
-  component_selector_combo_box_entries->appendRow(new QStandardItem(component_name_list[5]));
+  for (quint32 component = 0; component < component_names.size(); ++component)
+    component_selector_combo_box_entries->appendRow(new QStandardItem(component_names[component]));
 
   // Red Channel Selector
   header_attributes_model->setItem(row, 0, new QStandardItem("Texture Red Channel Binding"));
@@ -249,10 +237,9 @@ ResultCode FTEXNode::LoadAttributeArea()
   m_delegate_group.combo_box_delegates << row;
   m_delegate_group.combo_box_selections << m_ftex_header.red_channel_component;
   CustomStandardItem* red_channel_component_item =
-      new CustomStandardItem(component_name_list[m_ftex_header.red_channel_component]);
-  red_channel_component_item->SetFunction([this](QString text) {
-    m_ftex_header.red_channel_component = m_ftex->GetComponentIDFromName(text);
-  });
+      new CustomStandardItem(component_names[m_ftex_header.red_channel_component]);
+  red_channel_component_item->SetFunction(
+      [this, component_names](quint32 index) { m_ftex_header.red_channel_component = index; });
   header_attributes_model->setItem(row, 1, red_channel_component_item);
   ++row;
 
@@ -262,10 +249,9 @@ ResultCode FTEXNode::LoadAttributeArea()
   m_delegate_group.combo_box_delegates << row;
   m_delegate_group.combo_box_selections << m_ftex_header.green_channel_component;
   CustomStandardItem* green_channel_component_item =
-      new CustomStandardItem(component_name_list[m_ftex_header.green_channel_component]);
-  green_channel_component_item->SetFunction([this](QString text) {
-    m_ftex_header.green_channel_component = m_ftex->GetComponentIDFromName(text);
-  });
+      new CustomStandardItem(component_names[m_ftex_header.green_channel_component]);
+  green_channel_component_item->SetFunction(
+      [this, component_names](quint32 index) { m_ftex_header.green_channel_component = index; });
   header_attributes_model->setItem(row, 1, green_channel_component_item);
   ++row;
 
@@ -275,23 +261,21 @@ ResultCode FTEXNode::LoadAttributeArea()
   m_delegate_group.combo_box_delegates << row;
   m_delegate_group.combo_box_selections << m_ftex_header.blue_channel_component;
   CustomStandardItem* blue_channel_component_item =
-      new CustomStandardItem(component_name_list[m_ftex_header.blue_channel_component]);
-  blue_channel_component_item->SetFunction([this](QString text) {
-    m_ftex_header.blue_channel_component = m_ftex->GetComponentIDFromName(text);
-  });
+      new CustomStandardItem(component_names[m_ftex_header.blue_channel_component]);
+  blue_channel_component_item->SetFunction(
+      [this, component_names](quint32 index) { m_ftex_header.blue_channel_component = index; });
   header_attributes_model->setItem(row, 1, blue_channel_component_item);
   ++row;
 
-  // Alpha Channel Selector
+  // Red Channel Selector
   header_attributes_model->setItem(row, 0, new QStandardItem("Texture Alpha Channel Binding"));
   m_delegate_group.combo_box_entries << component_selector_combo_box_entries;
   m_delegate_group.combo_box_delegates << row;
   m_delegate_group.combo_box_selections << m_ftex_header.alpha_channel_component;
   CustomStandardItem* alpha_channel_component_item =
-      new CustomStandardItem(component_name_list[m_ftex_header.alpha_channel_component]);
-  alpha_channel_component_item->SetFunction([this](QString text) {
-    m_ftex_header.alpha_channel_component = m_ftex->GetComponentIDFromName(text);
-  });
+      new CustomStandardItem(component_names[m_ftex_header.alpha_channel_component]);
+  alpha_channel_component_item->SetFunction(
+      [this, component_names](quint32 index) { m_ftex_header.alpha_channel_component = index; });
   header_attributes_model->setItem(row, 1, alpha_channel_component_item);
   ++row;
 

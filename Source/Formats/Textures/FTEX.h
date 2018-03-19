@@ -37,8 +37,10 @@ public:
   /// rebuilding becomes possible for this tool.
   void InjectImage();
 
-  const QVector<QString> GetComponentNameList() const;
-  quint8 GetComponentIDFromName(const QString& name) const;
+  /// Gets the component name reference.
+  ///
+  /// @return   The component name reference.
+  static std::array<QString, 6> GetComponentNames();
 
   /// Represents the FTEX header.
   ///
@@ -84,12 +86,15 @@ private:
   /// The size of the main %FTEX header.
   static constexpr quint32 HEADER_SIZE = 0xC0;
 
-  const inline static QVector<QString> m_component_name_list{"Texture Red Values",
-                                                             "Texture Green Values",
-                                                             "Texture Blue Values",
-                                                             "Texture Alpha Values",
-                                                             "Always 0",
-                                                             "Always 1"};
+  /// Reference for what the name of each component is. Unlike the other references, the entries
+  /// here are consecutive, the ID for one entry comes right after the previous one. Therefore, we
+  /// can use an array instead of a key/value model.
+  inline static const std::array<QString, 6> m_component_names{"Texture Red Values",
+                                                               "Texture Green Values",
+                                                               "Texture Blue Values",
+                                                               "Texture Alpha Values",
+                                                               "Always 0",
+                                                               "Always 1"};
 
   /// The %FTEX header parsed from the file.
   Header m_header = Header();

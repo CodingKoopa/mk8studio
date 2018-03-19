@@ -58,6 +58,7 @@ enum class ResultCode
   NoBytesWritten,
   IncorrectHeaderSize,
   IncorrectBFRESEndianness,
+  UnsupportedFTEXComponent,
   UnsupportedTextureFormat,
   UnsupportedAttributeFormat,
   ImportantUnsupportedFileFormat
