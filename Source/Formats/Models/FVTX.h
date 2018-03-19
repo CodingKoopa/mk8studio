@@ -157,6 +157,7 @@ private:
       {0x7,     "GX2_ATTRIB_FORMAT_UNORM_16_16"},
       {0xA,     "GX2_ATTRIB_FORMAT_UNORM_8_8_8_8"},
       // Unsigned Integer
+      {0x0100,  "GX2_ATTRIB_FORMAT_UINT_8"},
       {0x0104,  "GX2_ATTRIB_FORMAT_UINT_8_8" },
       {0x010A,  "GX2_ATTRIB_FORMAT_UINT_8_8_8_8"},
       // Signed Normals
