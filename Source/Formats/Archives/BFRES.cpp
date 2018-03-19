@@ -41,8 +41,6 @@ ResultCode BFRES::ReadHeader()
     return res;
 
   m_file->Seek(m_header.file_name_offset);
-  // TODO: apparantly the string table stores the lengths of strings too, so a better way of doing
-  // this might be seeking back 4 bytes, reading the length, and calling readstring with that length
   m_name = m_file->ReadStringASCII(0);
   return res;
 }
@@ -67,26 +65,6 @@ void BFRES::SetHeader(const Header& header)
   m_header = header;
 }
 
-const ResourceDictionary<FMDL>& BFRES::GetFMDLDictionary() const
-{
-  return m_fmdl_dictionary;
-}
-
-void BFRES::SetFMDLDictionary(const ResourceDictionary<FMDL>& dictionary)
-{
-  m_fmdl_dictionary = dictionary;
-}
-
-const ResourceDictionary<FTEX>& BFRES::GetFTEXDictionary() const
-{
-  return m_ftex_dictionary;
-}
-
-void BFRES::SetFTEXDictionary(const ResourceDictionary<FTEX>& dictionary)
-{
-  m_ftex_dictionary = dictionary;
-}
-
 std::map<BFRES::Endianness, QString> BFRES::GetEndianNames()
 {
   return m_endian_names;
@@ -95,4 +73,14 @@ std::map<BFRES::Endianness, QString> BFRES::GetEndianNames()
 const QString& BFRES::GetEndianName() const
 {
   return m_endian_name;
+}
+
+std::shared_ptr<ResourceDictionary<FMDL>> BFRES::GetFMDLDictionary() const
+{
+  return m_fmdl_dictionary;
+}
+
+std::shared_ptr<ResourceDictionary<FTEX>> BFRES::GetFTEXDictionary() const
+{
+  return m_ftex_dictionary;
 }

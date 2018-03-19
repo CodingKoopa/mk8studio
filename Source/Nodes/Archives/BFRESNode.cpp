@@ -244,6 +244,4 @@ void BFRESNode::HandleAttributeItemChange(QStandardItem* item)
   CustomStandardItem* custom_item = dynamic_cast<CustomStandardItem*>(item);
   if (custom_item)
     custom_item->ExecuteFunction();
-
-  m_bfres->SetHeader(m_bfres_header);
 }

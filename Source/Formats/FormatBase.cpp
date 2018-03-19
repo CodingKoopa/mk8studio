@@ -5,16 +5,6 @@ FormatBase::FormatBase(std::shared_ptr<File> file, quint32 start_offset, quint32
 {
 }
 
-const QString& FormatBase::GetName() const
-{
-  return m_name;
-}
-
-void FormatBase::SetName(const QString& name)
-{
-  m_name = name;
-}
-
 const QString& FormatBase::GetPath() const
 {
   return m_path;
@@ -23,6 +13,16 @@ const QString& FormatBase::GetPath() const
 void FormatBase::SetPath(const QString& path)
 {
   m_path = path;
+}
+
+const QString& FormatBase::GetName() const
+{
+  return m_name;
+}
+
+void FormatBase::SetName(const QString& name)
+{
+  m_name = name;
 }
 
 quint32 FormatBase::GetHeaderSize() const

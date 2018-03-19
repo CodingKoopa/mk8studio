@@ -7,31 +7,9 @@ GX2ImageBase::GX2ImageBase(std::shared_ptr<File> file, quint32 start_offset, qui
 {
 }
 
-ResultCode GX2ImageBase::SetupInfo()
-{
-  try
-  {
-    m_format_info = m_format_infos.at(m_base_header.format);
-    m_common_format_info = m_common_format_infos.at(m_format_info.common_format);
-
-    m_tile_mode_info = m_tile_mode_infos.at(m_base_header.tile_mode);
-    m_common_tile_mode_rotation = m_common_tile_mode_rotations.at(m_tile_mode_info.mode);
-  }
-  catch (std::out_of_range)
-  {
-    return ResultCode::UnsupportedTextureFormat;
-  }
-  return ResultCode::Success;
-}
-
 ResultCode GX2ImageBase::ReadImageFromData()
 {
   return CopyImage(&m_raw_image_data, &m_deswizzled_image_data, false);
-}
-
-ResultCode GX2ImageBase::WriteDeswizzledImageToData()
-{
-  return CopyImage(&m_deswizzled_image_data, &m_raw_image_data, true);
 }
 
 ResultCode GX2ImageBase::ImportDDS(QString path)
@@ -40,7 +18,7 @@ ResultCode GX2ImageBase::ImportDDS(QString path)
   dds.SetPath(path);
   dds.ReadFile();
   m_deswizzled_image_data = dds.GetImageData();
-  return WriteDeswizzledImageToData();
+  return CopyImage(&m_deswizzled_image_data, &m_raw_image_data, true);
 }
 
 ResultCode GX2ImageBase::ExportToDDS(QString path)

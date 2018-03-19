@@ -46,8 +46,8 @@ ResultCode FVTX::ReadAttributes()
       return ResultCode::UnsupportedAttributeFormat;
     }
   }
-  ResultCode ret = CheckHeaderSize(m_header.attribute_array_offset,
-                                   ATTRIBUTE_HEADER_SIZE * m_header.attribute_count);
+  ResultCode ret =
+      CheckHeaderSize(m_header.attribute_array_offset, ATTRIBUTE_SIZE * m_header.attribute_count);
   if (ret != ResultCode::Success)
     return ret;
 
@@ -85,7 +85,7 @@ ResultCode FVTX::ReadBuffers()
     m_buffer_list[buffer].data_offset = m_file->ReadS32RelativeOffset();
   };
   ResultCode ret =
-      CheckHeaderSize(m_header.buffer_array_offset, BUFFER_HEADER_SIZE * m_header.buffer_count);
+      CheckHeaderSize(m_header.buffer_array_offset, BUFFER_SIZE * m_header.buffer_count);
   if (ret != ResultCode::Success)
     return ret;
 
@@ -102,6 +102,11 @@ void FVTX::SetHeader(const Header& header)
   m_header = header;
 }
 
+const QVector<FVTX::Attribute>& FVTX::GetAttributeList() const
+{
+  return m_attribute_list;
+}
+
 std::map<quint32, QString> FVTX::GetAttributeFormatNames()
 {
   return m_attribute_format_names;
@@ -115,11 +120,6 @@ const QVector<QString>& FVTX::GetAttributeFormatNameList() const
 const QVector<FVTX::AttributeNameInfo>& FVTX::GetAttributeNameInfoList() const
 {
   return m_attribute_name_info_list;
-}
-
-const QVector<FVTX::Attribute>& FVTX::GetAttributeList() const
-{
-  return m_attribute_list;
 }
 
 const QVector<FVTX::Buffer>& FVTX::GetBufferList() const
