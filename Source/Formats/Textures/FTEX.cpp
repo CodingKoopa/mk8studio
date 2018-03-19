@@ -68,7 +68,7 @@ ResultCode FTEX::ReadHeader()
   if (res != ResultCode::Success)
     return res;
 
-  m_base_header = static_cast<ImageHeaderBase>(m_header);
+  m_base_header = static_cast<HeaderBase>(m_header);
 
   return SetupInfo();
 }
@@ -139,5 +139,6 @@ const FTEX::Header& FTEX::GetHeader() const
 void FTEX::SetHeader(const FTEX::Header& ftex_header)
 {
   m_header = ftex_header;
-  m_base_header = static_cast<ImageHeaderBase>(m_header);
+  m_base_header = static_cast<HeaderBase>(m_header);
+  SetupInfo();
 }

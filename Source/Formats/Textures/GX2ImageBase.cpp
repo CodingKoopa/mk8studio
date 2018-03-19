@@ -77,6 +77,23 @@ const GX2ImageBase::TileModeInfo& GX2ImageBase::GetTileModeInfo() const
   return m_tile_mode_info;
 }
 
+ResultCode GX2ImageBase::SetupInfo()
+{
+  try
+  {
+    m_format_info = m_format_infos.at(m_base_header.format);
+    m_common_format_info = m_common_format_infos.at(m_format_info.common_format);
+
+    m_tile_mode_info = m_tile_mode_infos.at(m_base_header.tile_mode);
+    m_common_tile_mode_rotation = m_common_tile_mode_rotations.at(m_tile_mode_info.mode);
+  }
+  catch (std::out_of_range)
+  {
+    return ResultCode::UnsupportedTextureFormat;
+  }
+  return ResultCode::Success;
+}
+
 ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray* destination, bool swizzle)
 {
   // Temporary hack to find special textures.
@@ -220,7 +237,7 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray* destination, 
       switch (m_tile_mode_info.mode)
       {
       case CommonTileMode::Macro:
-        original_offset = ComputeSurfaceAddrFromCoordMacroTiled(x, y, 0, 0, 0, 0);
+        original_offset = GetPixelOffsetMacroTiled(x, y, 0, 0, 0, 0);
         break;
       default:
         return ResultCode::UnsupportedTextureFormat;
@@ -251,18 +268,17 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray* destination, 
   return ResultCode::Success;
 }
 
-quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y, quint32 slice,
-                                                            quint32 sample, quint32 tile_base,
-                                                            quint32 comp_bits)
+quint64 GX2ImageBase::GetPixelOffsetMacroTiled(quint32 x, quint32 y, quint32 slice, quint32 sample,
+                                               quint32 tile_base, quint32 comp_bits)
 {
   // The commenting in this function will eventually be removed in favor of a dedicated document
   // explaining the whole thing.
 
-  // TODO: Using m_num_samples directly might be possible. Needs testing with AA surfaces.
+  /// @todo Using m_num_samples directly might be possible. Needs testing with AA surfaces.
   quint32 num_samples = m_num_samples;
 
   // Get the pixel index within the micro tile.
-  quint64 pixel_index_within_micro_tile = ComputePixelIndexWithinMicroTile(x, y, slice);
+  quint64 pixel_index_within_micro_tile = GetPixelIndexMicroTiled(x, y, slice);
 
   // Offset of the beginning of the current sample of the current tile.
   quint64 sample_offset_within_micro_tile;
@@ -321,8 +337,8 @@ quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y
   quint64 tile_slice_bits;
 
   // If there's more than one sample, and one micro tile can't fit in one split.
-  // TODO: some of this might be able to be moved to readimagefromdata?
-  // TODO: This is currently undocumented because I have no AA or thick textures to work off of.
+  /// @todo Some of this might be able to be moved to readimagefromdata?
+  /// @todo This is currently undocumented because I have no AA or thick textures to work off of.
   if (num_samples > 1 && m_num_micro_tile_bytes > static_cast<quint64>(SPLIT_SIZE))
   {
     samples_per_slice = SPLIT_SIZE / m_bytes_per_sample;
@@ -465,7 +481,7 @@ quint64 GX2ImageBase::ComputeSurfaceAddrFromCoordMacroTiled(quint32 x, quint32 y
   return offset;
 }
 
-quint32 GX2ImageBase::ComputePixelIndexWithinMicroTile(quint32 x, quint32 y, quint32 z)
+quint32 GX2ImageBase::GetPixelIndexMicroTiled(quint32 x, quint32 y, quint32 z)
 {
   quint32 pixel_bit_0 = 0;
   quint32 pixel_bit_1 = 0;

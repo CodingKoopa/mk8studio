@@ -408,7 +408,6 @@ void FTEXNode::HandleAttributeItemChange(QStandardItem* item)
     custom_item->ExecuteFunction();
 
   m_ftex->SetHeader(m_ftex_header);
-  m_ftex->SetupInfo();
 }
 
 void FTEXNode::HandleExportActionClick()

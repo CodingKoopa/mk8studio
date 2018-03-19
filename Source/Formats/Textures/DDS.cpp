@@ -71,16 +71,12 @@ ResultCode DDS::ReadFile()
   m_image_data_buffer = new char[image_data_size];
   dds_file.ReadBytes(image_data_size, m_image_data_buffer);
   m_image_data.setRawData(m_image_data_buffer, image_data_size);
-
-  // TODO: Verify number of bytes read.
-
   return ResultCode::Success;
 }
 
-// TODO: Add uncompressed support
 int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mips,
                    quint32 element_size, GX2ImageBase::FormatInfo format_info,
-                   GX2ImageBase::CommonFormatInfo shared_format_info)
+                   GX2ImageBase::CommonFormatInfo common_format_info)
 {
   File dds_file(m_path);
   dds_file.SetByteOrder(QDataStream::LittleEndian);
@@ -97,7 +93,7 @@ int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mip
   m_header.flags = static_cast<quint32>(ImageFlag::RequiredFlags);
   if (num_mips > 1)
     m_header.flags |= static_cast<quint32>(ImageFlag::MipMaps);
-  if (shared_format_info.compressed)
+  if (common_format_info.compressed)
     m_header.flags |= static_cast<quint32>(ImageFlag::LinearSize);
   else
     m_header.flags |= static_cast<quint32>(ImageFlag::Pitch);
@@ -112,7 +108,7 @@ int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mip
   dds_file.Write32(m_header.width);
 
   // Pitch for uncompressed textures, or linear size for compressed textures.
-  if (shared_format_info.compressed)
+  if (common_format_info.compressed)
     m_header.pitch_or_linear_size = CalculateLinearSize(element_size);
   else
     // TODO
@@ -136,14 +132,14 @@ int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mip
   dds_file.Write32(m_header.pixel_format.format_size);
 
   // Pixel flags
-  if (shared_format_info.compressed)
+  if (common_format_info.compressed)
     m_header.pixel_format.pixel_flags = static_cast<quint32>(PixelFlag::IsCompressed);
   else
     m_header.pixel_format.pixel_flags = static_cast<quint32>(PixelFlag::IsUncompressedRGB);
   dds_file.Write32(m_header.pixel_format.pixel_flags);
 
   // Four character code
-  if (shared_format_info.compressed)
+  if (common_format_info.compressed)
   {
     switch (format_info.common_format)
     {
@@ -171,7 +167,7 @@ int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mip
   dds_file.WriteStringASCII(m_header.pixel_format.four_cc, 4);
 
   // RGBA bitmasks, not used for compressed images
-  if (shared_format_info.compressed)
+  if (common_format_info.compressed)
   {
     m_header.pixel_format.rgb_bit_count = 0;
     m_header.pixel_format.red_bit_mask = 0;
@@ -206,7 +202,6 @@ int DDS::WriteFile(quint32 width, quint32 height, quint32 depth, quint32 num_mip
 
   // Image data
   int image_data_bytes_written = dds_file.WriteBytes(m_image_data.data(), m_image_data.size());
-  // TODO: Verify number of bytes written.
 
   dds_file.Save();
   return image_data_bytes_written;

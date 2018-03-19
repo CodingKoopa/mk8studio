@@ -10,22 +10,40 @@
 class FTEX : public GX2ImageBase
 {
 public:
+  /// Initializes a new instance of the FTEX class.
+  ///
+  /// @param    file            Shared pointer to the file to read from.
+  /// @param    start_offset    The offset to start reading at, where the BFRES structure starts.
   FTEX(std::shared_ptr<File> file, quint64 start_offset = 0);
+  /// Initializes a new instance of the FTEX class from an existing copy. Deleted so that the image
+  /// data buffer is not double deleted.
   FTEX(const FTEX&) = delete;
+  /// Assigns this instance of the FTEX class to a new one. Deleted so that the image data buffer
+  /// is not double deleted.
   FTEX& operator=(const FTEX&) = delete;
+  /// Uninitializes an instance of the DDS class, deleting the image data buffer.
   ~FTEX();
 
+  /// Reads the %FTEX header from the file, and parses it into a Header.
+  ///
+  /// @return   The success of the reading.
   ResultCode ReadHeader();
+  /// Reads the raw image from the file, and deswizzles it with GX2ImageBase::ReadImageFromData().
+  ///
+  /// @return   The success of the reading.
   ResultCode ReadImage();
 
+  /// Writes the %FTEX header and swizzled image data to the file. Temporary, until %BFRES
+  /// rebuilding becomes possible for this tool.
   void InjectImage();
 
   const QVector<QString> GetComponentNameList() const;
   quint8 GetComponentIDFromName(const QString& name) const;
 
-  quint64 GetStart() const;
-
-  struct Header : ImageHeaderBase
+  /// Represents the FTEX header.
+  ///
+  /// @todo The fields here can be documented.
+  struct Header : HeaderBase
   {
     QString magic;
     quint32 dimension;
@@ -53,16 +71,17 @@ public:
     quint16 user_data_entry_count;
   };
 
+  /// Gets the %FTEX header.
+  ///
+  /// @return   The %FTEX header.
   const Header& GetHeader() const;
-  void SetHeader(const Header& ftex_header);
-
-  struct Component
-  {
-    quint8 id;
-    QString name;
-  };
+  /// Sets the %FTEX header.
+  ///
+  /// @param    header  The %FTEX header.
+  void SetHeader(const Header& header);
 
 private:
+  /// The size of the main %FTEX header.
   static constexpr quint32 HEADER_SIZE = 0xC0;
 
   const inline static QVector<QString> m_component_name_list{"Texture Red Values",
@@ -72,6 +91,9 @@ private:
                                                              "Always 0",
                                                              "Always 1"};
 
+  /// The %FTEX header parsed from the file.
   Header m_header = Header();
+
+  /// The image data buffer, temporarily used when moving image data to and from a %FTEX file.
   char* m_raw_image_data_buffer = nullptr;
 };

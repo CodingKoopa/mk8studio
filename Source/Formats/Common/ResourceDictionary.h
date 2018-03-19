@@ -6,37 +6,31 @@
 #include "File.h"
 #include "Formats/FormatBase.h"
 
+/// Represents a resource dictionary, used throughout the %BFRES format.
+///
+/// Resource dictionaries are radix trees composed of patricia tries that allow for quick lookups
+/// of elements. They are also sometimes less accurately referred to as index groups. Despite them
+/// being radix trees, here nodes are read in a straightforward manner, ignoring the heirarchy of
+/// nodes.
+///
+/// @tparam T   The type of the value/resource that the dictionary is storing.
 template <typename T>
 class ResourceDictionary : public FormatBase
 {
 public:
-  // This must be defined here and not in a CPP file, because of how templates work.
+  /// Initializes a new instance of the ResourceDictionary class.
+  ///
+  /// @param    file            Shared pointer to the file to read from.
+  /// @param    start_offset    The offset to start reading at, where the dictionary starts.
   ResourceDictionary(std::shared_ptr<File> file = nullptr, quint32 start_offset = 0)
       : FormatBase(file, start_offset)
   {
   }
 
-  ResourceDictionary(const ResourceDictionary& other)
-      : FormatBase(other.m_file, other.m_start_offset), m_header(other.m_header),
-        m_node_list(other.m_node_list)
-  {
-  }
-
-  ResourceDictionary& operator=(const ResourceDictionary& other)
-  {
-    m_file = other.m_file;
-    m_start_offset = other.m_start_offset;
-    m_header = other.m_header;
-    m_node_list = other.m_node_list;
-    return *this;
-  }
-
-  struct Header
-  {
-    quint32 size;
-    qint32 num_nodes;
-  };
-
+  /// Represents a node within a dictionary, containing a resource. **This is different from the
+  /// node classes used in the GUI!**
+  ///
+  /// @todo The fields here can be documented.
   struct Node
   {
     quint32 search_value;
@@ -49,22 +43,41 @@ public:
     std::shared_ptr<T> value;
   };
 
-  // Expose read-only references to nodes via [].
+  /// Gets read-only references to nodes by index via []. This follows the ordering in which the
+  /// nodes are defined in the file, and not the heirarchy of nodes.
+  ///
+  /// @param    index   The index of the node.
+  ///
+  /// @return   A copy of the node at the index.
   Node operator[](quint32 index) const { return m_node_list[index]; }
-  // Expose modifiable references to nodes via [].
+  /// Gets modifiable references to nodes by index via []. This follows the same ordering as
+  /// the other access operator.
+  ///
+  /// @param    index   The index of the node.
+  ///
+  /// @return   A reference to the node at the index.
+  ///
+  /// @todo Properly link to the other access operator.
   Node& operator[](quint32 index) { return m_node_list[index]; }
 
-  quint32 Size() const { return m_node_list.size(); }
-
+  /// Reads the resource dictionary header from the file, and parses it into a Header.
+  ///
+  /// @return   The success of the reading.
+  ///
+  /// @todo     Verify the number of bytes read.
   ResultCode ReadHeader()
   {
     m_file->Seek(m_start_offset);
     m_header.size = m_file->ReadU32();
     m_header.num_nodes = m_file->ReadS32();
-    // TODO: header check
     return ResultCode::Success;
   }
 
+  /// Reads the dictionary nodes from the file, and parses each into a Node.
+  ///
+  /// @return   The success of the reading.
+  ///
+  /// @todo     Verify the number of bytes read.
   ResultCode ReadNodes()
   {
     m_node_list.resize(m_header.num_nodes + 1);
@@ -88,18 +101,44 @@ public:
       m_node_list[node].value->SetName(m_node_list[node].key);
     }
 
-    // TODO: Utility function for checking header size.
     return ResultCode::Success;
   }
 
+  /// Gets the size of the dictionary.
+  ///
+  /// @return   The number of nodes, not including the root node.
+  quint32 Size() const { return m_node_list.size(); }
+
+  /// Represents the Resource Dictionary header.
+  ///
+  /// @todo The fields here can be documented.
+  struct Header
+  {
+    quint32 size;
+    qint32 num_nodes;
+  };
+
+  /// Gets the Header. There is no accompanying setter because the Header's fields should not be
+  /// modified manually manually externally, but from methods here that can add notes with the whole
+  /// dictionary in mind.
+  ///
+  /// @return   A read-only reference to the Header.
   const Header& GetHeader() const { return m_header; }
 
+  /// Gets the list of nodes.
+  ///
+  /// @return   A read-only reference to the list of nodes.
   const QVector<Node>& GetNodeList() const { return m_node_list; }
 
 private:
+  /// The size of the main resource dictionary header.
   static constexpr quint32 HEADER_SIZE = 0x08;
+  /// The size of one node in a resource dictionary.
   static constexpr quint32 NODE_SIZE = 0x10;
 
+  /// The resource dictionary header parsed from the file.
   Header m_header;
+
+  /// The list of nodes in the dictionary. This is a linear list that does not follow the hierarchy.
   QVector<Node> m_node_list;
 };

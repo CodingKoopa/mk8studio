@@ -55,7 +55,6 @@ ResultCode FVTX::ReadAttributes()
   for (quint8 attribute = 0; attribute < m_header.attribute_count; ++attribute)
   {
     m_file->Seek(m_attribute_list[attribute].name_offset);
-    // TODO: Use string table.
     m_attribute_list[attribute].name = m_file->ReadStringASCII(3);
     try
     {
