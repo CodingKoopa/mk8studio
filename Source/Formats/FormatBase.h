@@ -19,11 +19,6 @@ public:
   /// @param    header_size     The size of the format header.
   FormatBase(std::shared_ptr<File> file = nullptr, quint32 start_offset = 0,
              quint32 header_size = 0);
-  FormatBase(const FormatBase&) = delete;
-  FormatBase& operator=(const FormatBase&) = delete;
-
-  const QString& GetName() const;
-  void SetName(const QString& name);
 
   /// Gets the file path.
   ///

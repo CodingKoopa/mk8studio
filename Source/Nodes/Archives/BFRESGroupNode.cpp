@@ -3,32 +3,11 @@
 #include "Nodes/Models/FMDLNode.h"
 #include "Nodes/Textures/FTEXNode.h"
 
-BFRESGroupNodeQObject::BFRESGroupNodeQObject(QObject* parent) : Node(parent) {}
-
-void BFRESGroupNodeQObject::HandleAttributeItemChange(QStandardItem* item)
-{
-  // TODO. See: BFRESNode::HandleAttributeItemChange
-  item = item;
-}
-
 template <typename GroupType>
-BFRESGroupNode<GroupType>::BFRESGroupNode(const ResourceDictionary<GroupType>& dictionary,
+BFRESGroupNode<GroupType>::BFRESGroupNode(std::shared_ptr<ResourceDictionary<GroupType>> dictionary,
                                           QObject* parent)
-    : BFRESGroupNodeQObject(parent), m_dictionary(dictionary)
+    : Node(parent), m_dictionary(dictionary)
 {
-}
-
-template <typename GroupType>
-BFRESGroupNode<GroupType>::BFRESGroupNode(const BFRESGroupNode& other)
-    : BFRESGroupNodeQObject(other.parent()), m_dictionary(other.m_dictionary)
-{
-}
-
-template <typename GroupType>
-BFRESGroupNode<GroupType>& BFRESGroupNode<GroupType>::operator=(const BFRESGroupNode& other)
-{
-  m_dictionary = other.m_dictionary;
-  return *this;
 }
 
 template <typename GroupType>
@@ -36,7 +15,7 @@ CustomStandardItem* BFRESGroupNode<GroupType>::MakeItem()
 {
   if (!m_header_loaded)
   {
-    ResultCode res = m_dictionary.ReadHeader();
+    ResultCode res = m_dictionary->ReadHeader();
     if (res != ResultCode::Success)
     {
       emit NewStatus(res);
@@ -44,13 +23,13 @@ CustomStandardItem* BFRESGroupNode<GroupType>::MakeItem()
     }
     else
     {
-      m_dictionary_header = m_dictionary.GetHeader();
+      m_dictionary_header = m_dictionary->GetHeader();
       m_header_loaded = true;
     }
   }
   if (!m_nodes_loaded)
   {
-    ResultCode res = m_dictionary.ReadNodes();
+    ResultCode res = m_dictionary->ReadNodes();
     if (res != ResultCode::Success)
     {
       emit NewStatus(res);
@@ -73,9 +52,9 @@ CustomStandardItem* BFRESGroupNode<FMDL>::MakeGroupDependentItem()
   CustomStandardItem* group_node = new CustomStandardItem("FMDL Models");
 
   // Skip the root node by starting at 1.
-  for (quint32 row = 1; row < m_dictionary.Size(); ++row)
+  for (quint32 row = 1; row < m_dictionary->Size(); ++row)
   {
-    FMDLNode* fmdl_node = new FMDLNode(m_dictionary[row].value, this);
+    FMDLNode* fmdl_node = new FMDLNode((*m_dictionary)[row].value, this);
     connect(fmdl_node, &FMDLNode::ConnectNode, this, &BFRESGroupNode::ConnectNode);
     emit ConnectNode(fmdl_node);
     group_node->appendRow(fmdl_node->MakeItem());
@@ -90,9 +69,9 @@ CustomStandardItem* BFRESGroupNode<FTEX>::MakeGroupDependentItem()
   CustomStandardItem* group_node = new CustomStandardItem("FTEX Textures");
 
   // Skip the root node by starting at 1.
-  for (quint32 row = 1; row < m_dictionary.Size(); ++row)
+  for (quint32 row = 1; row < m_dictionary->Size(); ++row)
   {
-    FTEXNode* ftex_node = new FTEXNode(m_dictionary[row].value, this);
+    FTEXNode* ftex_node = new FTEXNode((*m_dictionary)[row].value, this);
     // Sync the FMDL object.
     //  connect(child_node, &FMDLNode::NewFMDL, this, [this, row](const FMDL& fmdl) {
     //    m_bfres.SetFMDL(fmdl, row);
@@ -111,7 +90,7 @@ ResultCode BFRESGroupNode<GroupType>::LoadAttributeArea()
 {
   if (!m_header_loaded)
   {
-    ResultCode res = m_dictionary.ReadHeader();
+    ResultCode res = m_dictionary->ReadHeader();
     if (res != ResultCode::Success)
     {
       emit NewStatus(res);
@@ -119,13 +98,13 @@ ResultCode BFRESGroupNode<GroupType>::LoadAttributeArea()
     }
     else
     {
-      m_dictionary_header = m_dictionary.GetHeader();
+      m_dictionary_header = m_dictionary->GetHeader();
       m_header_loaded = true;
     }
   }
   if (!m_nodes_loaded)
   {
-    ResultCode res = m_dictionary.ReadNodes();
+    ResultCode res = m_dictionary->ReadNodes();
     if (res != ResultCode::Success)
     {
       emit NewStatus(res);
@@ -159,21 +138,19 @@ ResultCode BFRESGroupNode<GroupType>::LoadAttributeArea()
   group_attributes_model->setRowCount(row);
   group_attributes_model->setColumnCount(2);
 
-  connect(group_attributes_model, &QStandardItemModel::itemChanged, this,
-          &BFRESGroupNodeQObject::HandleAttributeItemChange);
-
   emit NewAttributesArea(MakeAttributeSection(group_attributes_model));
   return ResultCode::Success;
 }
 
 template <typename GroupType>
-void BFRESGroupNode<GroupType>::SetDictionary(const ResourceDictionary<GroupType>& value)
+void BFRESGroupNode<GroupType>::SetDictionary(std::shared_ptr<ResourceDictionary<GroupType>> value)
 {
   m_dictionary = value;
 }
 
-//      FTEXNode* child_node = new FTEXNode(m_bfres.GetFTEXList()[row], this);
-//      connect(child_node, &FTEXNode::ConnectNode, this, &BFRESGroupNode::ConnectNode);
-//      emit ConnectNode(child_node);
-//      child_item = child_node->MakeItem();
-//      break;
+// The values aren't meant to be changed.
+template <typename GroupType>
+void BFRESGroupNode<GroupType>::HandleAttributeItemChange(QStandardItem*)
+{
+  return;
+}

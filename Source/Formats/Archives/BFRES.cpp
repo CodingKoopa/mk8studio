@@ -49,9 +49,9 @@ ResultCode BFRES::ReadHeader()
 
 ResultCode BFRES::ReadDictionaries()
 {
-  m_fmdl_dictionary = ResourceDictionary<FMDL>(
+  m_fmdl_dictionary = std::make_shared<ResourceDictionary<FMDL>>(
       m_file, m_header.file_offsets[static_cast<quint32>(GroupType::FMDL)]);
-  m_ftex_dictionary = ResourceDictionary<FTEX>(
+  m_ftex_dictionary = std::make_shared<ResourceDictionary<FTEX>>(
       m_file, m_header.file_offsets[static_cast<quint32>(GroupType::FTEX)]);
 
   return ResultCode::Success;
