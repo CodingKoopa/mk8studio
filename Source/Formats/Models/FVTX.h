@@ -6,7 +6,7 @@
 #include "File.h"
 #include "Formats/FormatBase.h"
 
-/// Represents a ca<b>f</b>e <b>v</b>er<b>t</b>e<b>x</b> (%FVTX).
+/// @brief Represents a ca<b>f</b>e <b>v</b>er<b>t</b>e<b>x</b> (%FVTX).
 ///
 /// %FVTX structures are groups of verticies making up a model. This directs the reader towards the
 /// raw vertex data, and the respective vertex attributes to go along with them.
@@ -33,7 +33,7 @@ public:
   /// @return   The success of the reading.
   ResultCode ReadBuffers();
 
-  /// Represents the %FVTX header.
+  /// @brief Represents the %FVTX header.
   ///
   /// @todo The fields here can be documented.
   struct Header
@@ -59,9 +59,11 @@ public:
   /// @param    header  The %FVTX header.
   void SetHeader(const Header& header);
 
-  /// Represents an attribute. For this particular %FVTX, this will, for a given attribute (e.g.
-  /// positioning, U.V. mapping), define the format to be used. Additionally, it points to where the
-  /// buffer containing the data for every vertex is in the %BFRES file.
+  /// @brief Represents an attribute.
+  ///
+  /// For this particular %FVTX, this will, for a given attribute (e.g. positioning, U.V. mapping),
+  /// define the format to be used. Additionally, it points to where the buffer containing the data
+  /// for every vertex is in the %BFRES file.
   ///
   /// @todo The fields here can be documented.
   struct Attribute
@@ -87,7 +89,7 @@ public:
   /// @return   The Attribute format names.
   const QVector<QString>& GetAttributeFormatNameList() const;
 
-  /// Contains info about an attribute that can be collected from its name.
+  /// @brief Contains info about an attribute that can be collected from its name.
   ///
   /// @todo The fields here can be documented.
   struct AttributeNameInfo
@@ -115,9 +117,11 @@ public:
   /// @return   The AttributeNameInfo list.
   const QVector<AttributeNameInfo>& GetAttributeNameInfoList() const;
 
-  /// Represents a buffer. Buffers are referred to by vertex Attribute structures. Where Attribute
-  /// structures describe meta info about an attribute, Buffer structures contain the actual data
-  /// for the attribute.
+  /// @brief Represents a buffer.
+  ///
+  /// Buffers are referred to by vertex Attribute structures. Where
+  /// Attribute structures describe meta info about an attribute, Buffer structures contain the
+  /// actual data for the attribute.
   ///
   /// @todo The fields here can be documented.
   struct Buffer

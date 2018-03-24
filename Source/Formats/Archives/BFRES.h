@@ -9,7 +9,7 @@
 #include "Formats/Models/FMDL.h"
 #include "Formats/Textures/FTEX.h"
 
-/// Represents a <b>b</b>inary ca<b>f</b>e <b>res</b>ource (%BFRES) graphics data archive.
+/// @brief Represents a <b>b</b>inary ca<b>f</b>e <b>res</b>ource (%BFRES) graphics data archive.
 ///
 /// %BFRES files contain pretty much everything you could ever want to know about a given grahical
 /// resource. For example, for a given 3D character, the %BFRES for them would contain their
@@ -34,7 +34,7 @@ public:
   /// @return   The success of the reading.
   ResultCode ReadDictionaries();
 
-  /// Represents the %BFRES header.
+  /// @brief Represents the %BFRES header.
   ///
   /// @todo These unknowns have been figured out and documented on Tockdom.
   ///

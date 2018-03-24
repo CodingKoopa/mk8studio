@@ -6,7 +6,7 @@
 #include "File.h"
 #include "Formats/FormatBase.h"
 
-/// Represents a resource dictionary, used throughout the %BFRES format.
+/// @brief Represents a resource dictionary, used throughout the %BFRES format.
 ///
 /// Resource dictionaries are radix trees composed of patricia tries that allow for quick lookups
 /// of elements. They are also sometimes less accurately referred to as index groups. Despite them
@@ -27,8 +27,10 @@ public:
   {
   }
 
-  /// Represents a node within a dictionary, containing a resource. **This is different from the
-  /// node classes used in the GUI!**
+  /// @brief Represents a node within a dictionary, containing a resource.
+  ///
+  /// This is different from the node classes used in the GUI! These refer to the node data
+  /// structures in %BFRES files, GUI nodes are a different concept.
   ///
   /// @todo The fields here can be documented.
   struct Node
@@ -109,7 +111,7 @@ public:
   /// @return   The number of nodes, not including the root node.
   quint32 Size() const { return m_node_list.size(); }
 
-  /// Represents the Resource Dictionary header.
+  /// @brief Represents the Resource Dictionary header.
   ///
   /// @todo The fields here can be documented.
   struct Header

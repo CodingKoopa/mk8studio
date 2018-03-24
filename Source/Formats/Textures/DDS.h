@@ -6,7 +6,7 @@
 #include "Formats/FormatBase.h"
 #include "Formats/Textures/GX2ImageBase.h"
 
-/// Represents a <b>D</b>irect<b>D</b>raw <b>S</b>urface (%DDS) textire.
+/// @brief Represents a <b>D</b>irect<b>D</b>raw <b>S</b>urface (%DDS) textire.
 ///
 /// %DDS is Microsoft's format for storing a texture for usage in a 3D space, and its mipmaps. It's
 /// useful to have as an option because unswizzled GX2 raw image data can be copied to a DDS and be
@@ -26,7 +26,7 @@ public:
   /// Uninitializes an instance of the DDS class, deleting the image data buffer.
   ~DDS();
 
-  /// Represents the pixel format structure of the %DDS header.
+  /// @brief Represents the pixel format structure of the %DDS header.
   ///
   /// @todo The fields here can be documented.
   struct PixelFormat
@@ -41,7 +41,7 @@ public:
     quint32 alpha_bit_mask;
   };
 
-  /// Represents the %DDS header.
+  /// @brief Represents the %DDS header.
   ///
   /// @todo The fields here can be documented.
   struct Header

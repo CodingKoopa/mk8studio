@@ -7,6 +7,7 @@
 #include "File.h"
 #include "Formats/Textures/GX2ImageBase.h"
 
+/// @brief Represents a ca<b>f</b>e <b>tex</b>ture (%FTEX).
 class FTEX : public GX2ImageBase
 {
 public:
@@ -42,7 +43,7 @@ public:
   /// @return   The component name reference.
   static std::array<QString, 6> GetComponentNames();
 
-  /// Represents the FTEX header.
+  /// @brief Represents the FTEX header.
   ///
   /// @todo The fields here can be documented.
   struct Header : HeaderBase

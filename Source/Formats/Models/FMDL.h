@@ -7,7 +7,7 @@
 #include "Formats/FormatBase.h"
 #include "Formats/Models/FVTX.h"
 
-/// Represents a ca<b>f</b>e <b>m</b>o<b>d</b>e<b>l</b> (%FMDL).
+/// @brief Represents a ca<b>f</b>e <b>m</b>o<b>d</b>e<b>l</b> (%FMDL).
 ///
 /// %FMDL structures contain the composition of the model, defining the verticies, how they are put
 /// together, and what attributes they have. Although what texture is assigned to surfaces is
@@ -30,7 +30,7 @@ public:
   /// @return   The success of the reading.
   ResultCode ReadFVTXArray();
 
-  /// Represents the %FMDL header.
+  /// @brief Represents the %FMDL header.
   ///
   /// @todo The fields here can be documented.
   struct Header
@@ -60,9 +60,8 @@ public:
   /// @param    header  The %FMDL header.
   void SetHeader(const Header& header);
 
-  /// Convenience type for a list of FVTX objects.
-  ///
-  /// For more info on why this kind of complex typing with smart pointers is necessary, see
+  /// Convenience type for a list of FVTX objects. For more info on why this kind of complex typing
+  /// with smart pointers is necessary, see
   /// @ref Communication "this".
   typedef std::shared_ptr<std::vector<std::shared_ptr<FVTX>>> FVTXList;
 

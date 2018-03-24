@@ -33,7 +33,8 @@ public:
     BC5 = 0x35
   };
 
-  /// Contains info about a common format that can be collected from the kind of specific format.
+  /// @brief Contains info about a common format that can be collected from the kind of specific
+  /// format.
   ///
   /// @todo The fields here can be documented.
   struct CommonFormatInfo
@@ -51,7 +52,7 @@ public:
     bool compressed;
   };
 
-  /// Contains info about a specific format that can be collected from the ID.
+  /// @brief Contains info about a specific format that can be collected from the ID.
   ///
   /// @todo The fields here can be documented.
   struct FormatInfo
@@ -72,14 +73,27 @@ public:
     } type;
   };
 
-  // Tile Mode enumerations just for convienience.
+  /// The common, shared color tiling modes. There are a lot of GX2 tiling modes, but they can be
+  /// grouped together in what kind of tiling they use. The shorthand conventions
+  /// used to refer to each mode follows the format of xD, where x is a number representing where
+  /// the tile falls in the hierarchy. For example, a tile of format 2D is larger than, and contains
+  /// tiles of format 1D. These names have no relation to dimensions, e.g. 3D means a tile with a
+  /// relative size of 3, and not 3-dimensional.
+  ///
+  /// @todo The fields here can be documented.
   enum class CommonTileMode
   {
     Linear,
+    /// Micro tiles, or 1D tiles, group pixels into relatively simple tiles. When addressing a
+    /// coordinate of a micro tile, GX2ImageBase::GetPixelIndexMicroTiled() will interleave the X,
+    /// Y, and (if applicable) Z coordinates to find the index of a pixel in a micro tile.
     Micro,
     Macro
   };
 
+  /// @brief Contains info about a specific tile mode that can be collected from the ID.
+  ///
+  /// @todo The fields here can be documented.
   struct TileModeInfo
   {
     CommonTileMode mode;
@@ -94,7 +108,7 @@ public:
     bool swap_banks;
   };
 
-  /// Represents the common parts of the %FTEX and %BFLIM headers.
+  /// @brief Represents the common parts of the %FTEX and %BFLIM headers.
   ///
   /// @todo The fields here can be documented.
   struct HeaderBase

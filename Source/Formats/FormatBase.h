@@ -7,7 +7,7 @@
 #include "Common.h"
 #include "File.h"
 
-/// Abstracts common aspects of file formats.
+/// @brief Abstracts common aspects of file formats.
 class FormatBase
 {
 public:
