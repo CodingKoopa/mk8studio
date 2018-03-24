@@ -147,10 +147,3 @@ void BFRESGroupNode<GroupType>::SetDictionary(std::shared_ptr<ResourceDictionary
 {
   m_dictionary = value;
 }
-
-// The values aren't meant to be changed.
-template <typename GroupType>
-void BFRESGroupNode<GroupType>::HandleAttributeItemChange(QStandardItem*)
-{
-  return;
-}

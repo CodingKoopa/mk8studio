@@ -8,26 +8,13 @@
 #include "Formats/Models/FMDL.h"
 #include "Nodes/Node.h"
 
-class BFRESGroupNodeQObject : public Node
-{
-  Q_OBJECT
-public:
-  BFRESGroupNodeQObject(QObject* parent = 0);
-
-signals:
-  void NewDictionary(const ResourceDictionary<FMDL>&);
-  void NewDictionary(const ResourceDictionary<FTEX>&);
-
-protected slots:
-  void HandleAttributeItemChange(QStandardItem* item);
-};
-
 template <typename GroupType>
-class BFRESGroupNode : public BFRESGroupNodeQObject
+class BFRESGroupNode : public Node
 {
 public:
-  BFRESGroupNode(const ResourceDictionary<GroupType>& dictionary = ResourceDictionary<GroupType>(),
-                 QObject* parent = 0);
+  BFRESGroupNode(
+      std::shared_ptr<ResourceDictionary<GroupType>> dictionary = ResourceDictionary<GroupType>(),
+      QObject* parent = 0);
   BFRESGroupNode(const BFRESGroupNode& other);
   BFRESGroupNode& operator=(const BFRESGroupNode& other);
 
@@ -37,10 +24,10 @@ public:
 
   ResultCode LoadAttributeArea();
 
-  void SetDictionary(const ResourceDictionary<GroupType>& value);
+  void SetDictionary(std::shared_ptr<ResourceDictionary<GroupType>> value);
 
 private:
-  ResourceDictionary<GroupType> m_dictionary;
+  std::shared_ptr<ResourceDictionary<GroupType>> m_dictionary;
   // TODO: what's this? owo
   typename ResourceDictionary<GroupType>::Header m_dictionary_header;
 
