@@ -1,0 +1,31 @@
+/** @page frontendvsbackend Frontend VS. Backend
+ * The frontend and backend of MK8Studio are different components essential to the program.
+ *
+ * In MK8Studio, there are two main parts of the application. The backend is the core code, what
+ * internally parses files. The frontend is the GUI code, what displays the pretty stuff to the
+ * user. Currently, a Qt frontend is in development alongside the backend.
+ *
+ * @todo The frontend and backend currently aren't very distinguishable, hence the use of Qt types
+ * in the core code. Ideally, the two components should be separated, independent of each other to
+ * the point where, say, one could make an SDL2 frontend coexisting with the Qt frontend.
+ *
+ * @section Communication
+ * When a file to operate on is set in place, let's say a BFRES file, the frontend will send the
+ * file path to the backend and have it parse the file. In return, the frontend can now use the
+ * parsed info, in our example to make a BFRESNode. The BFRESNode calls methods like
+ * BFRES::GetFMDLDictionary() to get more parsed internals, and makes an FMDLNode. This chain is
+ * simple enough, in the one direction of getters.
+ *
+ * However, what if the user has changed something from the FMDLNode in the GUI? The FMDLNode only
+ * knows its own FMDL object, and nothing about its parent FMDL ResourceDictionary. It's not
+ * plausible to have FMDLNode emit a signal letting the parent node know that the FMDL has changed,
+ * because what about the other FMDLs in the same level of the hierarchy? Thus, it is non-trivial to
+ * maintain a hierarchy of nodes while keeping track of how to call setters.
+ *
+ * For this reason, for each frontend node, the backend provides shared pointers to the nodes, so
+ * that classes like FMDLNode can modify the FMDL without having to worry about notify other nodes.
+ * While this does grant unrestricted access through a getter, this is magnitudes easier than the
+ * alternatives.@nThis does **not** apply to structures self-contained within one frontend node. An
+ * example of this is BFRES::Header. A BFRESNode has the BFRES object, and has both GetHeader and
+ * SetHeader within reach.
+ */

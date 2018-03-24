@@ -1,0 +1,107 @@
+# Doxyfile 1.8.14
+
+# This file describes the settings to be used by the documentation system
+# doxygen (www.doxygen.org) for a project.
+
+##---------------------------------------------------------------------------
+## Project related configuration options
+##---------------------------------------------------------------------------
+## Set the name of the project.
+PROJECT_NAME           = "Mario Kart 8 Studio"
+## Set the brief description of the project. This should match the brief description on the GitHub
+## repo.
+PROJECT_BRIEF          = "A Mario Kart 8 editor for everyone"
+## Set the logo of the project, TODO.
+PROJECT_LOGO           =
+## Don't display brief member descriptions in the file/class documentation. For many members, the
+## brief description is all there is, so it's redundant to display that twice. The downside to this
+## is that, despite the name of this tag, class descriptions are also omiitted (e.g. at the top of
+## the BFRES class reference, the description of the BFRES class itself ends up a bit down the
+## page.)
+BRIEF_MEMBER_DESC      = NO
+## Don't display file names, out of security concerns.
+FULL_PATH_NAMES        = NO
+## Optimize for C++.
+OPTIMIZE_OUTPUT_FOR_C  = YES
+## Use Markdown.
+MARKDOWN_SUPPORT       = YES
+## Optimize for C++ STL usage.
+BUILTIN_STL_SUPPORT    = YES
+## Inline struct documentation, to make the documentation compact and avoid unecessary pages.
+INLINE_SIMPLE_STRUCTS  = YES
+
+##---------------------------------------------------------------------------
+## Build related configuration options
+##---------------------------------------------------------------------------
+## Include private members in the documentation.
+EXTRACT_PRIVATE        = YES
+## Include static members in the documentation.
+EXTRACT_STATIC         = YES
+## Do not sort the detailed documentation of members in alphabetical order, preserve the original
+## order.
+SORT_MEMBER_DOCS       = NO
+## Do not display testcase lists. They are currently not used in the documentation.
+GENERATE_TESTLIST      = NO
+## Do not display bug lists. They are currently not used in the documentation, in favor of TODOs and
+## GitHub issues.
+GENERATE_BUGLIST       = YES
+## Do not display deprecated lists. They are currently not used in the documentation.
+GENERATE_DEPRECATEDLIST= YES
+## Do not display namespaces. They are not used in this codebase.
+SHOW_NAMESPACES        = NO
+
+##---------------------------------------------------------------------------
+## Configuration options related to warning and progress messages
+##---------------------------------------------------------------------------
+## Warn if no parameter or return documentation is present.
+WARN_NO_PARAMDOC       = YES
+## TODO: Enable this, when the codebase documentation is complete.
+## WARN_AS_ERROR          = NO
+
+##---------------------------------------------------------------------------
+## Configuration options related to the input files
+##---------------------------------------------------------------------------
+## Source the MK8Studio source code, and external documentation files in this directory.
+INPUT                  = ../Source .
+## Parse DOX files containing external documentation.
+FILE_PATTERNS          += *.dox
+## Scan subdirectories.
+RECURSIVE              = YES
+
+##---------------------------------------------------------------------------
+## Configuration options related to source browsing
+##---------------------------------------------------------------------------
+## Allow the viewing of the source code on its own.
+SOURCE_BROWSER         = YES
+## Do not strip Doxygen comments, because there's not much reason not to.
+STRIP_CODE_COMMENTS    = NO
+## List usages of members.
+REFERENCED_BY_RELATION = YES
+## In references, don't link to the source. This is done so that if you're already in the docs, you
+## stay there, instead of being sent to the source.
+REFERENCES_LINK_SOURCE = NO
+
+##---------------------------------------------------------------------------
+## Configuration options related to the HTML output
+##---------------------------------------------------------------------------
+## TODO: The default look of the documentation could use a new stylesheet, when a homepage for this
+## project is made.
+
+## Hue of the color of the Cyan variation of the MK8MC icon.
+HTML_COLORSTYLE_HUE    = 190
+## Cyan saturation.
+HTML_COLORSTYLE_SAT    = 100
+## Cyan gamma.
+HTML_COLORSTYLE_GAMMA  = 100
+
+##---------------------------------------------------------------------------
+## Configuration options related to the LaTeX output
+##---------------------------------------------------------------------------
+## Turn Latex docs off.
+GENERATE_LATEX         = NO
+
+##---------------------------------------------------------------------------
+## Configuration options related to external references
+##---------------------------------------------------------------------------
+## TODO: Qt tagfiles
+TAGFILES               =

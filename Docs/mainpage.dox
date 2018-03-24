@@ -1,0 +1,35 @@
+/** @mainpage
+ * Welcome to the developer documentation for Mario Kart 8 Studio! This section of the documentation
+ * contains technical details about the editor, and its codebase. For more info on Mario Kart 8
+ * Studio, the GitHub repository can be found [here](https://github.com/mk8mc/mk8studio).
+ * @section Introduction
+ * Mario Kart 8 Studio is currently written in C++17, with a Qt frontend. It is designed to work on
+ * Windows, Mac, and Linux. Another goal of the project is to have 100% code documentation,
+ * documenting all classes and members. This is where this section of the documentation comes in.
+ * Powered by [Doxygen](http://www.doxygen.org), there are two main parts of these docs:
+ * - <a href="./pages.html">Related Pages</a>. These are individual, hand-written pages of
+ * documentation that go in-depth into the specific details of MK8Studio. It is recommended to skim
+ * through these before moving onto other parts of the codebase.
+ * - <a href="./annotated.html">Data Structures</a>. This is an exhaustive list of every data
+ * structure defined in MK8Studio. Each class reference page starts with an include line,
+ * inheritance diagram, and a small table of contents for what the class contains. After that is the
+ * class description, followed by detailed descriptions of the members linked to by the mini table
+ * of contents. For any member, there is a link to the [Source
+ * Browser](http://www.stack.nl/~dimitri/doxygen/manual/config.html#config_source_browser), at the
+ * line and file where it is defined. Additionally, references to it are listed, with links to the
+ * appropriate documentation.
+ *
+ * MK8Studio is an amalgamation of many different open source projects. The aim is to
+ * adopt good practices and ideas from other projects to better this editor. Some examples of
+ * similarities with other projects include:
+ * - [Dolphin](https://dolphin-emu.org/), a GameCube/Wii emulator. Dolphin is what this codebase is
+ * most heavily influenced by. This project uses Dolphin's C++ coding style, practices, and
+ * directory/file structure.
+ * - [Citra](https://citra-emu.org/), a 3DS emulator. Citra also is very much influenced by Dolphin,
+ * and is another example of a great C++ project to use as a reference for code samples.
+ * - [Decaf](https://github.com/decaf-emu/decaf-emu), a Wii U emulator. This is where the code
+ * starts to diverge, with Decaf having a different coding style. That said, being tailored for the
+ * Wii U specifically, it is still an indispensible resource, with MK8Studio's current texture
+ * decoding algorithm being taken from the Decaf project.
+ *
+ */
