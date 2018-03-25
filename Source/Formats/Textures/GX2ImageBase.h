@@ -5,11 +5,13 @@
 #include "Common.h"
 #include "Formats/FormatBase.h"
 
-/// Abstracts common aspects of Wii U textures. For more technical information, see the GX2 page.
+/// @brief Abstracts common aspects of Wii U textures.
 ///
 /// Currently, the implementations of the methods here are heavily annotated in lieu of proper
 /// documentation. When a proper write-up of the tiling and swizzling algorithms is made, the
 /// comments will be removed.
+///
+/// For more technical information on the algorithms used here, see the GX2 page.
 ///
 /// @todo GX2TextureBase might be a more appropriate name for this class.
 class GX2ImageBase : public FormatBase

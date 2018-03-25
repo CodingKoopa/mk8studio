@@ -1,0 +1,67 @@
+/** @page gx2 GX2
+ * There is a lot to graphics on the Wii U.
+ *
+ * @section Hardware
+ * Before looking at the software side of things, it helps to know what hardware we're working with.
+ * First there is the main PowerPC CPU, the [Espresso](http://wiiubrew.org/wiki/Espresso).
+ * Accompanying it is the security ARM CPU, unofficially referred to as the Starbuck. What is mainly
+ * of interest to us here though, is the AMD Radeon GPU, the GX2. The GX2 falls somewhere in the
+ * family of AMD Radeon R700 GPUs (See [this](https://www.x.org/wiki/RadeonFeature/#index5h2)
+ * reference for Readon engineering names and marketing names.). Finally, a specification that will
+ * be important for macro tiling later, there are 4 dual-channel RAM chips. For more info, see
+ * WiiUBrew's [console specs page](http://wiiubrew.org/wiki/Wii_U/console), and [motherboard
+ * page](http://wiiubrew.org/wiki/Wii_U/console/motherboard). Also see fail0verflow's [Console
+ * Hacking 2013](https://fail0verflow.com/blog/2014/console-hacking-2013-omake/) talk.
+ *
+ * @section Desktop Drivers
+ * We can use the fact that the GX2 is a part of the R700 family to our advantage. Let's take a
+ * visit to the [Linux world](https://wiki.archlinux.org/index.php/Xorg#Driver_installation). There
+ * are 4 main AMD video drivers for Linux:
+ * - The proprietary [Catalyst](https://wiki.archlinux.org/index.php/AMD_Catalyst) driver. Being
+ * closed source, there's not a whole lot that can be gotten out of this. Additionally, the
+ * TeraScale 1 microarchitecture used by the R700 family is no longer supported.
+ * - The open source [ATI](https://wiki.archlinux.org/index.php/ATI) DDX driver
+ * ([Git](https://cgit.freedesktop.org/xorg/driver/xf86-video-ati/)). This does support the R700
+ * family.
+ * - The proprietary [AMDGPU PRO](https://wiki.archlinux.org/index.php/AMDGPU#AMDGPU_PRO). This is
+ * also closed source, and doesn't support the R700 family.
+ * - The open source [AMDGPU](https://wiki.archlinux.org/index.php/AMDGPU) driver. This doesn't
+ * support the R700 family.
+ *
+ * With these in mind, the most useful driver for us comes out as the ATI driver. A highly
+ * simplified version of the [Linux graphics
+ * stack](https://upload.wikimedia.org/wikipedia/commons/9/99/Linux_kernel_and_OpenGL_video_games.svg)
+ * with this driver might look something like this:
+ * - The program calls an OpenGL function. [Mesa](https://www.mesa3d.org/)
+ * ([Git](https://cgit.freedesktop.org/mesa/mesa/)) implements OpenGL functions, and knows what to
+ * do with this.
+ * - Mesa passes down parsed info from the OpenGL commands to the graphics driver, here specifically
+ * the ATI driver.
+ * - The graphics driver now must get the display to the GPU. A feature of the Linux kernel is the
+ * [display rendering manager (DRM)](https://en.wikipedia.org/wiki/Direct_Rendering_Manager), a
+ * component of the [display rendering
+ * infrastructure](https://en.wikipedia.org/wiki/Direct_Rendering_Infrastructure) designed to help
+ * with the task. The graphics driver interacts with it to finally display the image.
+ *
+ * @section Tiling
+ * One of the most important, and unique aspects of GX2 textures is the tiling. The history of the
+ * tiling modes goes as follows:
+ * - A set of patches for experimental micro and macro tiling support for the the ATI R600/R700
+ * graphics stack were [introduced](https://www.phoronix.com/scan.php?page=news_item&px=ODI5Mw),
+ * including patches for the ATI driver, Mesa, and the display rendering manager (DRM).
+ * - The DRM patch was committed to the Linux 2.6.36 kernel.
+ * - The ATI driver patch was
+ * [committed](https://www.phoronix.com/scan.php?page=news_item&px=ODQ4MA), with stable micro tiling
+ * and experimental macro tiling. At the same time, the Mesa patches were also committed, with
+ * stable micro and macro tiling.
+ * - The micro tiling in the ATI driver was [made
+ * default](https://www.phoronix.com/scan.php?page=news_item&px=OTU2Mg).
+ * - The macro tiling in the ATI driver was [further
+ * developed](https://www.phoronix.com/scan.php?page=news_item&px=MTA0MTk).
+ * - The macro tiling in the ATI driver was
+ * [finished](https://www.phoronix.com/scan.php?page=news_item&px=MTA1MjY).
+ *
+ * Something to note about this timeline is that it is not exhaustive. There are many patches,
+ * between the kernel DRM and Mesa not listed here. Additionally, this only concerns the R600 and
+ * R700. The R500, and its predecessors, have a somewhat different history.
+ */
