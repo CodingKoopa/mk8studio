@@ -49,5 +49,5 @@ signals:
 protected slots:
   void HandleFileTreeClick(QModelIndex index);
   void HandleTreeCustomContextMenuRequest(const QPoint& point);
-  virtual void HandleAttributeItemChange(QStandardItem* item) = 0;
+  virtual void HandleAttributeItemChange(QStandardItem*) { return; }
 };
