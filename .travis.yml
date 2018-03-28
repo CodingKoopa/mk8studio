@@ -1,14 +1,27 @@
 # Use C++.
 language: cpp
-# Building for Linux.
-os: linux
-# Use Ubuntu Trusty 14.04.
-dist: trusty
-# Use sudo, because it's needed for Docker.
-sudo: required
-# Use Docker, for a newer Ubuntu container.
-services: docker
-# Install the dependencies.
-install: "./CI/Travis/Linux/InstallDeps.sh"
-# Build the program, in a Docker container.
-script: "./CI/Travis/Linux/StartDockerBuild.sh"
+jobs:
+  include:
+    # 1st stage: Code analysis. TODO: clang-format
+    - stage: analysis
+      # Builds documentation with Doxygen.
+      - env: NAME="Doxygen Developer Documentation Build"
+        addons:
+          apt:
+            # Install Doxygen, to generate the documentation.
+            packages: doxygen
+        # Generate the documentation. The Doxyfile will be configured to quit upon any errors.
+        script: "./CI/Travis/Linux/BuildDevDocs.sh"
+    # 2nd stage: Building. TODO: Mac.
+    - stage: build
+      # Compiles code for Linux.
+      - env: NAME="Linux Build"
+        # Use sudo, because it's needed for Docker.
+        sudo: required
+        # Use Docker, for a newer Ubuntu container.
+        services: docker
+        # Install the dependencies.
+        install: "./CI/Travis/Linux/InstallDeps.sh"
+        # Build the program, in a Docker container.
+        script: "./CI/Travis/Linux/StartDockerBuild.sh"
+    # TODO: Deploy the developer documentation, and release to GitHub.
