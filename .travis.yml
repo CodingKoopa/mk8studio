@@ -2,7 +2,19 @@
 language: cpp
 jobs:
   include:
-    # 1st stage: Code analysis. TODO: clang-format
+    # Code analysis stage.
+    - stage: analysis
+      # Lints code with ClangFormat.
+      env: NAME="ClangFormat Lint"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-6.0
+          packages:
+            - clang-format-6.0
+      script: "./CI/Travis/Linux/ClangFormat.sh"
+    # Code analysis stage.
     - stage: analysis
       # Builds documentation with Doxygen.
       env: NAME="Doxygen Developer Documentation Build"
@@ -12,7 +24,7 @@ jobs:
           packages: doxygen
       # Generate the documentation. The Doxyfile will be configured to quit upon any errors.
       script: "./CI/Travis/Linux/BuildDevDocs.sh"
-    # 2nd stage: Building. TODO: Mac.
+    # Code building stage.
     - stage: build
       # Compiles code for Linux.
       env: NAME="Linux Build"
@@ -24,4 +36,4 @@ jobs:
       install: "./CI/Travis/Linux/InstallDeps.sh"
       # Build the program, in a Docker container.
       script: "./CI/Travis/Linux/StartDockerBuild.sh"
-    # TODO: Deploy the developer documentation, and release to GitHub.
+      # TODO: Deploy the developer documentation, and release to GitHub.
