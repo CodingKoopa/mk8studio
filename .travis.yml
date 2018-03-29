@@ -2,7 +2,7 @@
 language: cpp
 jobs:
   include:
-    # Code analysis stage.
+    # Analysis stage.
     - stage: analysis
       # Lints code with ClangFormat.
       env: NAME="ClangFormat Lint"
@@ -14,7 +14,7 @@ jobs:
           packages:
             - clang-format-6.0
       script: "./CI/Travis/Linux/ClangFormat.sh"
-    # Code analysis stage.
+    # Analysis stage.
     - stage: analysis
       # Builds documentation with Doxygen.
       env: NAME="Doxygen Developer Documentation Build"
