@@ -17,7 +17,7 @@ apt-get install -y doxygen graphviz
 # If we are not in the deploying stage.
 if [ "$TRAVIS_BUILD_STAGE_NAME" != "Deploy" ]; then
   # Disable HTML generation.
-  cat "GENERATE_HTML          = NO" >> Doxyfile
+  echo "GENERATE_HTML          = NO" >> Doxyfile
 fi
 
 # Build the docmentation, and quit if any errors are encountered.
