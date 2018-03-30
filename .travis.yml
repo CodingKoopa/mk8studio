@@ -1,0 +1,57 @@
+# Use C++.
+language: cpp
+jobs:
+  include:
+    # Analysis stage.
+    - stage: analysis
+      # Lints code with ClangFormat.
+      env: NAME="ClangFormat Lint"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-6.0
+          packages:
+            - clang-format-6.0
+      script: "./CI/Travis/Linux/ClangFormat.sh"
+    # Analysis stage.
+    - stage: analysis
+      # Builds documentation with Doxygen.
+      env: NAME="Doxygen Developer Documentation Build"
+      # Use Docker, for a newer Ubuntu container.
+      services: docker
+      # Install the dependencies.
+      install: "./CI/Travis/Linux/InstallDockerDeps.sh"
+      # Generate the documentation. The Doxyfile will be configured to quit upon any errors.
+      script: "./CI/Travis/Linux/StartDockerDevDocBuild.sh"
+    # Code building stage.
+    - stage: build
+      # Compiles code for Linux.
+      env: NAME="Linux Build"
+      # Use sudo, because it's needed for Docker.
+      sudo: required
+      # Use Docker, for a newer Ubuntu container.
+      services: docker
+      # Install the dependencies.
+      install: "./CI/Travis/Linux/InstallDockerDeps.sh"
+      # Build the program, in a Docker container.
+      script: "./CI/Travis/Linux/StartDockerBuild.sh"
+    # Deploying stage.
+    - stage: deploy
+      # Deploys documentation to GitHub Pages.
+      env: NAME="GitHub Pages Developer Documentation Publish"
+      # Use Docker, for a newer Ubuntu container.
+      services: docker
+      # Install the dependencies.
+      install: "./CI/Travis/Linux/InstallDockerDeps.sh"
+      # Generate the documentation. The Doxyfile will be configured to quit upon any errors.
+      script: "./CI/Travis/Linux/StartDockerDevDocBuild.sh"
+      deploy:
+        # Use GitHub Pages.
+        provider: pages
+        # Don't delete the build files, because that would remove the documentation.
+        skip-cleanup: true
+        # Use the GitHub token specified in the dashboard.
+        github-token: $GITHUB_TOKEN
+        # on:
+        #   branch: master
