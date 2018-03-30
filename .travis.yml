@@ -51,7 +51,9 @@ jobs:
       deploy:
         # Use GitHub Pages.
         provider: pages
-        # Don't delete the build files, because that would remove the documentation.
-        skip-cleanup: true
         # Use the GitHub token specified in the dashboard.
         github-token: $GITHUB_TOKEN
+        # Don't delete the build files, because that would remove the documentation.
+        skip-cleanup: true
+        # Use the built developer documentation.
+        local-dir: "./Docs/HTML"

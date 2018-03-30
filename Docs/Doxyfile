@@ -87,6 +87,9 @@ REFERENCES_LINK_SOURCE = NO
 ## TODO: The default look of the documentation could use a new stylesheet, when a homepage for this
 ## project is made.
 
+# Output to the "HTML" directory, instead of "html".
+HTML_OUTPUT            = HTML
+
 ## Hue of the color of the Cyan variation of the MK8MC icon.
 HTML_COLORSTYLE_HUE    = 190
 ## Cyan saturation.
