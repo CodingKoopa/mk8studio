@@ -4,7 +4,7 @@
 # Docker container, started from "StartDockerDevDocBuild.sh"
 
 # Enter the documentation directory.
-cd ${DOCUMENTATION_MOUNT_POINT}
+cd ${PROJECT_ROOT_MOUNT_POINT}/Docs
 
 # Update the system.
 apt-get update
