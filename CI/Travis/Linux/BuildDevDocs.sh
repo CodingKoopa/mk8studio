@@ -4,7 +4,7 @@
 # Docker container, started from "StartDockerDevDocBuild.sh"
 
 # Enter the documentation directory.
-cd ${PROJECT_ROOT_MOUNT_POINT}/Docs
+cd "${PROJECT_ROOT_MOUNT_POINT}/Docs"
 
 # Update the system.
 apt-get update
@@ -13,6 +13,12 @@ apt-get update
 # - doxygen   The main Doxygen executable.
 # - graphviz  The dot tool used for generating diagrams.
 apt-get install -y doxygen graphviz
+
+# If we are not in the deploying stage.
+if [ "$TRAVIS_BUILD_STAGE_NAME" != "Deploy" ]; then
+  # Disable HTML generation.
+  cat "GENERATE_HTML          = NO" >> Doxyfile
+fi
 
 # Build the docmentation, and quit if any errors are encountered.
 doxygen

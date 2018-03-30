@@ -36,4 +36,22 @@ jobs:
       install: "./CI/Travis/Linux/InstallDockerDeps.sh"
       # Build the program, in a Docker container.
       script: "./CI/Travis/Linux/StartDockerBuild.sh"
-      # TODO: Deploy the developer documentation, and release to GitHub.
+    # Deploying stage.
+    - stage: deploy
+      # Deploys documentation to GitHub Pages.
+      env: NAME="GitHub Pages Developer Documentation Publish"
+      # Use Docker, for a newer Ubuntu container.
+      services: docker
+      # Install the dependencies.
+      install: "./CI/Travis/Linux/InstallDockerDeps.sh"
+      # Generate the documentation. The Doxyfile will be configured to quit upon any errors.
+      script: "./CI/Travis/Linux/StartDockerDevDocBuild.sh"
+      deploy:
+        # Use GitHub Pages.
+        provider: pages
+        # Don't delete the build files, because that would remove the documentation.
+        skip-cleanup: true
+        # Use the GitHub token specified in the dashboard.
+        github-token: $GITHUB_TOKEN
+        # on:
+        #   branch: master
