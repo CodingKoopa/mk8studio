@@ -40,6 +40,8 @@ jobs:
     - stage: deploy
       # Deploys documentation to GitHub Pages.
       env: NAME="GitHub Pages Developer Documentation Publish"
+      # This stage should only happen on the master branch.
+      if: branch = master
       # Use Docker, for a newer Ubuntu container.
       services: docker
       # Install the dependencies.
@@ -53,5 +55,3 @@ jobs:
         skip-cleanup: true
         # Use the GitHub token specified in the dashboard.
         github-token: $GITHUB_TOKEN
-        # on:
-        #   branch: master
