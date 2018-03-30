@@ -10,8 +10,9 @@ cd ${PROJECT_ROOT_MOUNT_POINT}/Docs
 apt-get update
 # Install documentation build dependencies. This is not done in "InstallDeps.sh" because they would
 # be lost after the "install" TravisCI step. The dependencies are:
-# - doxygen The main Doxygen executable.
-apt-get install -y doxygen
+# - doxygen   The main Doxygen executable.
+# - graphviz  The dot tool used for generating diagrams.
+apt-get install -y doxygen graphviz
 
 # Build the docmentation, and quit if any errors are encountered.
 doxygen
