@@ -56,4 +56,4 @@ jobs:
         # Don't delete the build files, because that would remove the documentation.
         skip-cleanup: true
         # Use the built developer documentation.
-        local-dir: "./Docs/HTML"
+        local-dir: "Docs/HTML"
