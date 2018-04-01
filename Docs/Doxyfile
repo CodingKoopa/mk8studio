@@ -33,6 +33,8 @@ INLINE_SIMPLE_STRUCTS  = YES
 ##---------------------------------------------------------------------------
 ## Build related configuration options
 ##---------------------------------------------------------------------------
+## Assume everything is documented.
+EXTRACT_ALL            = YES
 ## Include private members in the documentation.
 EXTRACT_PRIVATE        = YES
 ## Include static members in the documentation.
