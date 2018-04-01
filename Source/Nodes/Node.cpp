@@ -87,6 +87,9 @@ void Node::HandleFileTreeClick(QModelIndex index)
   // TODO: dunno if there's any way to not have to specify a type?
   else if (BFRESGroupNode<FMDL>* bfres_group_node = dynamic_cast<BFRESGroupNode<FMDL>*>(upcast))
     bfres_group_node->LoadAttributeArea();
+
+  else if (BFRESGroupNode<FTEX>* bfres_group_node = dynamic_cast<BFRESGroupNode<FTEX>*>(upcast))
+    bfres_group_node->LoadAttributeArea();
 }
 
 void Node::HandleTreeCustomContextMenuRequest(const QPoint& point)
