@@ -82,7 +82,7 @@ ResultCode FVTXAttributeNode::LoadAttributeArea()
   connect(header_attributes_model, &QStandardItemModel::itemChanged, this,
           &FVTXAttributeNode::HandleAttributeItemChange);
 
-  emit NewAttributesArea(MakeAttributeSection(header_attributes_model));
+  emit NewAttributeArea(MakeAttributeSection(header_attributes_model));
   return ResultCode::Success;
 }
 

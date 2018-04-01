@@ -361,7 +361,7 @@ ResultCode FTEXNode::LoadAttributeArea()
 
   m_sections_container = MakeAttributeSection(header_attributes_model);
 
-  emit NewAttributesArea(m_sections_container);
+  emit NewAttributeArea(m_sections_container);
   return ResultCode::Success;
 }
 

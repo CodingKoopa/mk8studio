@@ -132,7 +132,7 @@ ResultCode BFRESGroupNode<GroupType>::LoadAttributeArea()
   group_attributes_model->setRowCount(row);
   group_attributes_model->setColumnCount(2);
 
-  emit NewAttributesArea(MakeAttributeSection(group_attributes_model));
+  emit NewAttributeArea(MakeAttributeSection(group_attributes_model));
   return ResultCode::Success;
 }
 

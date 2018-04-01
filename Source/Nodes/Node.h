@@ -42,7 +42,7 @@ protected:
 signals:
   void ConnectNode(Node*);
   void NewFileTreeArea(QScrollArea*);
-  void NewAttributesArea(QScrollArea*);
+  void NewAttributeArea(QScrollArea*);
   void NewMainWidget(QWidget*);
   void NewStatus(ResultCode status = ResultCode::Success, QString message = QString());
 
