@@ -43,9 +43,9 @@ CustomStandardItem* FMDLNode::MakeItem()
   {
     FVTXNode* fvtx_node = new FVTXNode(fvtx, this);
     connect(fvtx_node, &FVTXNode::ConnectNode, this, &FMDLNode::ConnectNode);
-    emit ConnectNode(fvtx_node);
     fvtx_group_item->appendRow(fvtx_node->MakeItem());
   }
+  emit ConnectNode(this);
   return fmdl_item;
 }
 
@@ -184,7 +184,7 @@ ResultCode FMDLNode::LoadAttributeArea()
   connect(header_attributes_model, &QStandardItemModel::itemChanged, this,
           &FMDLNode::HandleAttributeItemChange);
 
-  emit NewAttributesArea(MakeAttributeSection(header_attributes_model));
+  emit NewAttributeArea(MakeAttributeSection(header_attributes_model));
   return ResultCode::Success;
 }
 

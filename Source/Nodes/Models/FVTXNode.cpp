@@ -53,7 +53,6 @@ CustomStandardItem* FVTXNode::MakeItem()
         new FVTXAttributeNode(m_attribute_list[attribute], attribute_format_name_list[attribute],
                               attribute_name_info_list[attribute].friendly_name, this);
     connect(fvtx_attribute_node, &FVTXAttributeNode::ConnectNode, this, &FVTXNode::ConnectNode);
-    emit ConnectNode(fvtx_attribute_node);
     attribute_group_item->appendRow(fvtx_attribute_node->MakeItem());
   }
   CustomStandardItem* buffer_group_item = new CustomStandardItem("Buffers");
@@ -62,9 +61,9 @@ CustomStandardItem* FVTXNode::MakeItem()
   {
     FVTXBufferNode* fvtx_buffer_node = new FVTXBufferNode(m_buffer_list[buffer], this);
     connect(fvtx_buffer_node, &FVTXBufferNode::ConnectNode, this, &FVTXNode::ConnectNode);
-    emit ConnectNode(fvtx_buffer_node);
     buffer_group_item->appendRow(fvtx_buffer_node->MakeItem());
   }
+  emit ConnectNode(this);
   return fvtx_item;
 }
 

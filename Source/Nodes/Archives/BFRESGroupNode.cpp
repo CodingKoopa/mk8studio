@@ -43,6 +43,7 @@ CustomStandardItem* BFRESGroupNode<GroupType>::MakeItem()
   CustomStandardItem* item = MakeGroupDependentItem();
 
   item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
+  emit ConnectNode(this);
   return item;
 }
 
@@ -56,7 +57,6 @@ CustomStandardItem* BFRESGroupNode<FMDL>::MakeGroupDependentItem()
   {
     FMDLNode* fmdl_node = new FMDLNode((*m_dictionary)[row].value, this);
     connect(fmdl_node, &FMDLNode::ConnectNode, this, &BFRESGroupNode::ConnectNode);
-    emit ConnectNode(fmdl_node);
     group_node->appendRow(fmdl_node->MakeItem());
   }
 
@@ -72,13 +72,7 @@ CustomStandardItem* BFRESGroupNode<FTEX>::MakeGroupDependentItem()
   for (quint32 row = 1; row < m_dictionary->Size(); ++row)
   {
     FTEXNode* ftex_node = new FTEXNode((*m_dictionary)[row].value, this);
-    // Sync the FMDL object.
-    //  connect(child_node, &FMDLNode::NewFMDL, this, [this, row](const FMDL& fmdl) {
-    //    m_bfres.SetFMDL(fmdl, row);
-    //    emit NewNodeList(this->);
-    //  });
     connect(ftex_node, &FTEXNode::ConnectNode, this, &BFRESGroupNode::ConnectNode);
-    emit ConnectNode(ftex_node);
     group_node->appendRow(ftex_node->MakeItem());
   }
 

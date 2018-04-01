@@ -9,6 +9,7 @@ FVTXBufferNode::FVTXBufferNode(const FVTX::Buffer& buffer, QObject* parent)
 
 CustomStandardItem* FVTXBufferNode::MakeItem()
 {
+  emit ConnectNode(this);
   return MakeLabelItem("Buffer");
 }
 

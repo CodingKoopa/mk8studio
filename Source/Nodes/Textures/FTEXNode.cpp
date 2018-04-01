@@ -31,6 +31,7 @@ CustomStandardItem* FTEXNode::MakeItem()
   CustomStandardItem* item = new CustomStandardItem;
   item->setData(m_ftex->GetName() + " (FTEX)", Qt::DisplayRole);
   item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
+  emit ConnectNode(this);
   return item;
 }
 

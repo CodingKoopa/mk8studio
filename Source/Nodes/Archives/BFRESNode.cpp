@@ -61,6 +61,8 @@ ResultCode BFRESNode::LoadFileTreeArea()
 
 CustomStandardItem* BFRESNode::MakeItem()
 {
+  emit ConnectNode(this);
+
   CustomStandardItem* bfres_item = new CustomStandardItem();
   bfres_item->setData(QString(m_bfres->GetName() + " (BFRES)"), Qt::DisplayRole);
   // Store the current instance in a QVariant as an upcasted Node pointer.
@@ -72,13 +74,11 @@ CustomStandardItem* BFRESNode::MakeItem()
   BFRESGroupNode<FMDL>* fmdl_group_node =
       new BFRESGroupNode<FMDL>(m_bfres->GetFMDLDictionary(), this);
   connect(fmdl_group_node, &BFRESGroupNode<FMDL>::ConnectNode, this, &BFRESNode::ConnectNode);
-  emit ConnectNode(fmdl_group_node);
   bfres_item->appendRow(fmdl_group_node->MakeItem());
 
   BFRESGroupNode<FTEX>* ftex_group_node =
       new BFRESGroupNode<FTEX>(m_bfres->GetFTEXDictionary(), this);
   connect(ftex_group_node, &BFRESGroupNode<FTEX>::ConnectNode, this, &BFRESNode::ConnectNode);
-  emit ConnectNode(ftex_group_node);
   bfres_item->appendRow(ftex_group_node->MakeItem());
 
   return bfres_item;
@@ -228,7 +228,7 @@ ResultCode BFRESNode::LoadAttributeArea()
   connect(header_attributes_model, &QStandardItemModel::itemChanged, this,
           &BFRESNode::HandleAttributeItemChange);
 
-  emit NewAttributesArea(MakeAttributeSection(header_attributes_model));
+  emit NewAttributeArea(MakeAttributeSection(header_attributes_model));
   return ResultCode::Success;
 }
 

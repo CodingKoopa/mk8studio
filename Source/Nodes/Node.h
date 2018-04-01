@@ -40,10 +40,10 @@ protected:
   QScrollArea* MakeAttributeSection(QStandardItemModel* table_view_layout);
 
 signals:
+  void ConnectNode(Node*);
   void NewFileTreeArea(QScrollArea*);
   void NewAttributesArea(QScrollArea*);
   void NewMainWidget(QWidget*);
-  void ConnectNode(Node*);
   void NewStatus(ResultCode status = ResultCode::Success, QString message = QString());
 
 protected slots:

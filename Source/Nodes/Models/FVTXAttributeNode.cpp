@@ -11,6 +11,7 @@ FVTXAttributeNode::FVTXAttributeNode(const FVTX::Attribute& attribute,
 
 CustomStandardItem* FVTXAttributeNode::MakeItem()
 {
+  emit ConnectNode(this);
   return MakeLabelItem(m_attribute_friendly_name);
 }
 
