@@ -1,0 +1,112 @@
+/** @page qtfrontendnodes Qt Frontend Nodes
+ * In the @ref qtfrontendeditorview, the file tree widget displays a tree of nodes, with each node
+ * representing a subsection of the file.
+ *
+ * @section qtfrontendrootnodecreation Creation of the Root Node
+ * The creation of a tree for a %BFRES file (Currently, this is the only format supported.), up to
+ * the root node, goes as follows:
+ * - In the @ref qtfrontendwelcomeview of the MainWindow, the user opens a file, emitting the
+ * QAction::triggered signal.
+ * - The MainWindow::OpenFile slot receives the signal. Using a QFileDialog, it gets a path to a
+ * file to open.
+ * - MainWindow::OpenFile instantiates a BFRES object. This is, effectively, the "core" of the
+ * backend. Instead of, like you would in an emulator, having a Core class, here the format classes
+ * *are* the cores.
+ * - MainWindow::OpenFile instantiates a BFRESNode object. The Node derived classes are the bridges
+ * between the backend "core" classes, and the Qt frontend.
+ * - MainWindow::OpenFile connects BFRESNode's Node::ConnectNode signal to
+ * MainWindow::MakeNodeConnections. Node connections are what allow the nodes to upload their
+ * widgets to the editor view. Nodes can upload their own file tree area widget (Signal
+ * Node::NewFileTreeArea), node attribute area widget (Signal Node::NewAttributeArea), or viewer
+ * widget (Signal Node::NewMainWidget). Additionally, Nodes can also upload a new status (Signal:
+ * Node::NewStatus).
+ * - MainWindow::OpenFile calls BFRESNode::LoadFileTreeArea. Node::LoadFileTreeArea is a virtual
+ * method that Node derived classes can reimplement to provide their own file tree, but it is not
+ * mandatory.
+ * - BFRESNode::LoadFileTreeArea constructs the QTreeView within a QScrollArea, using its BFRES
+ * object that MainWindow::OpenFile provided.
+ * - **BFRESNode::LoadFileTreeArea emits the Node::NewFileTreeArea signal**. Thanks to the node
+ * connections, MainWindow recieves the signal (the MainWindow::UpdateFileTreeContainer slot to be
+ * specific), and with it updates the editor view. **The BFRESNode has uploaded a new file tree**.
+ *
+ * That is the overview of how things work for the top level root BFRESNode. There is more to it,
+ * however.
+ *
+ * @section qtfrontendremainingnodecreation Creation of the Remaining Nodes
+ * Let's look at the BFRESNode's file tree loading sequence, a bit more in depth:
+ * - BFRESNode::LoadFileTreeArea method calls another reimplemented virtual method,
+ * BFRESNode::MakeItem. This method makes a CustomStandardItem, and stores the BFRESNode in it.
+ * Node::MakeItem is a pure virtual method, every Node derived class must be able to make a
+ * CustomStandardItem and store itself in it.
+ * - BFRESNode::MakeItem instantiates some BFRESGroupNode objects.
+ * - BFRESNode::MakeItem connects the BFRESGroupNode::ConnectNode signal to its own
+ * BFRESNode::ConnectNode signal. What this means is that, when BFRESGroupNode emits the signal,
+ * it'll be passed onto the BFRESNode, and then MainWindow.
+ * - BFRESNode::MakeItem calls the BFRESGroupNode::MakeItem implementations.
+ * - BFRESGroupNode::MakeItem emits the BFRESGroupNode::ConnectNode signals, and the signal is
+ * carried up to MainWindow.
+ *
+ * Therefore, with this established, this could be the series of events:
+ * - BFRESGroupNode::LoadAttributeArea is called. We'll get back to how exactly this is called
+ * later.
+ * - BFRESGroupNode::LoadAttributeArea constructs its QTreeView. Same deal as in
+ * BFRESNode::LoadFileTreeArea.
+ * - **BFRESGroupNode::LoadAttributeArea emits the Node::NewAttributeArea signal**. Since the
+ * ConnectNode signal was passed up from the BFRESGroupNode to the MainWindow, now **the
+ * BFRESGroupNode can upload its attribute area**.
+ *
+ * @section qtfrontendfiletreeclickdispatch File Tree Click Dispatching
+ * Now, onto how BFRESGroupNode::LoadAttributeArea is called.
+ *
+ * When BFRESNode::LoadFileTreeArea created the QTreeView, it made a connection so that any file
+ * tree clicks would be handled by Node::HandleFileTreeClick. Node::HandleFileTreeClick is the file
+ * tree click dispatcher. Here, all the method has to work with is a QModelIndex. But, since the
+ * Node::MakeItem overrides stored itself inside the CustomStandardItem, Node::HandleFileTreeClick
+ * can take the item, and downcast the stored data in the item back to the original class. When the
+ * downcast is complete, Node::HandleFileTreeClick calls the method, e.g.
+ * BFRESGroupNode::LoadAttributeArea.
+ *
+ * In addition to the click dispatcher, when a file is loaded, MainWindow::OpenFile manually calls
+ * the methods, as a one time deal.
+ *
+ * @section qtfrontendnodebackendcommunication Backend Communication
+ * This section will detail how exactly the internal node hierarchy keeps track of the backend core
+ * classes.
+ *
+ * Back to BFRESNode's loading sequence once more:
+ * - BFRESNode::LoadFileTreeArea calls BFRES::ReadHeader, followed by BFRES::LoadHeader. Recall
+ * that, when the BFRESNode was created, an acompannying BFRES object was passed in.
+ * - BFRESNode::LoadFileTreeArea calls BFRESNode::MakeItem.
+ * - BFRESNode::MakeItem calls BFRES::ReadDictionaries, followed by calling BFRES's dictionary
+ * getters. For example, BFRES::GetFMDLDictionary.
+ * - BFRESNode::MakeItem instantiates some BFRESGroupNode objects, **passing in the objects recieved
+ * from the BFRES dictionary getters**.
+ *
+ * Every node is assinged to its own format class. During the Node::MakeItem method, the node calls
+ * a getter from its format object, makes a new node, and passes in the result of that getter. This
+ * pattern is essentially a chain of getters, and is easy enough to follow as just that, a one way
+ * road of nodes passing down parsed objects from getters of the objects that they were put in
+ * charge of. But what about when the node wants to modify their format objects?
+ *
+ * First lets establish *when* the format object will be modified. Primarily, the modifictions will
+ * be done by editing the @ref qtfrontendattributes. When the user changes a field of the node
+ * attribute widget, it is not handled by a centralized dispatcher like Node::HandleFileTreeClick.
+ * Instead, nodes with editable attributes reimplement Node::HandleAttributeItemChange. So, this
+ * method is the when.
+ *
+ * Node::HandleAttributeItemChange reimplementations only have access to the node class and nothing
+ * more. Let's say the user changes an attribute of a FMDLNode. FMDLNode::HandleAttributeItemChange
+ * has access to FMDLNode::m_fmdl, that's not a problem. What is a problem, however, is the parents
+ * of that FMDL. If FMDLNode modifies a copy of a FMDL object, then ResourceDictionary it came from
+ * will still have the original, unmodified FMDL  It's not plausible to have FMDLNode emit a
+ * signal letting the parent node know that the FMDL has changed, because what about the other FMDLs
+ * in the same level of the hierarchy? A system of signals to keep everything up to date would get
+ * very complex, very quickly.
+ *
+ * For this reason, for each node, the backend provides shared pointers to the nodes, so
+ * that classes like FMDLNode can modify the FMDL without having to worry about notifying other
+ * nodes. While this does grant unrestricted access through a getter, this is magnitudes easier than
+ * the alternatives. This does **not** apply to structures self-contained within one frontend node.
+ * An example of this is BFRES::Header. A BFRESNode has the BFRES object, and has both GetHeader and
+ * SetHeader within reach.
+ */

@@ -1,0 +1,23 @@
+/** @page qtfrontendoverview Qt Frontend Overview
+ * The Qt frontend of MK8Studio has 2 main UI states, the welcome view, and the file explorer view.
+ * Both of them are contained within the MainWindow instance.
+ *
+ * @section qtfrontendwelcomeview Welcome View
+ * The welcome view is the first thing that the user sees. It is currently not complete, but some
+ * things it should eventually fulfill are:
+ * - Display a list of recently opened files.
+ * - Display what would usually be in an about screen, such as the program version.
+ * - Link to the user and developer documentation.
+ *
+ * @section qtfrontendeditorview Editor View
+ * The editor view is what the user sees when they open a file. It consists of a horizontal
+ * QSplitter with 2 widgets:
+ * - On the left, the file explorer. This is a vertical QSplitter splitter with two widgets:
+ *   - On the top, the file tree area widget. This is a QScrollArea containing a QTreeView populated
+ * with a tree of nodes representative of the file opened. For more info, see @ref qtfrontendnodes.
+ *   - On the bottom, the node attribute area widget. This is a QScrollArea containing one or more
+ * QLabels, and QTableViews, with the table representing the selected file tree node. For more info,
+ * see @ref qtfrontendattributes.
+ * - On the right, the viewer widget. This is a purposefully generic QWidget, being whatever viewer
+ * is relevant to the selected node, be it a model viewer, texture viewer, etc.
+ */

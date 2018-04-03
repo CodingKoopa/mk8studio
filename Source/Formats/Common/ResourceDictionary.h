@@ -29,8 +29,7 @@ public:
 
   /// @brief Represents a node within a dictionary, containing a resource.
   ///
-  /// This is different from the node classes used in the GUI! These refer to the node data
-  /// structures in %BFRES files, GUI nodes are a different concept.
+  /// This is different from the @ref qtfrontendnodes.
   ///
   /// @todo The fields here can be documented.
   struct Node

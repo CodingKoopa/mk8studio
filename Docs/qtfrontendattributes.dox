@@ -1,0 +1,13 @@
+/** @page qtfrontendattributes Qt Frontend Attributes
+ * In the @ref qtfrontendeditorview, the node attribute widget displays tables of values that have
+ * been parsed from the file.
+ *
+ * @section qtfrontendattributecriteria Attribute Criteria
+ * Nodes should show *everything* that was parsed from the file. With that said, not everything
+ * should be editable. The general rule of thumb is that an attribute should not be editable if
+ * changing it, for sure, will break something. For instance, take the number of items in a resource
+ * dictionary. If a user arbitrarily changes the number, then that will break any tool parsing it.
+ * Instead, the correct thing to do would be to have an option to add or remove items from a
+ * resource dictionary, with the feature not only changing the number, but adjusting other necessary
+ * parts of the data structure.
+ */

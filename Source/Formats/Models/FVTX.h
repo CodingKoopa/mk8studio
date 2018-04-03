@@ -63,7 +63,7 @@ public:
   ///
   /// For this particular %FVTX, this will, for a given attribute (e.g. positioning, U.V. mapping),
   /// define the format to be used. Additionally, it points to where the buffer containing the data
-  /// for every vertex is in the %BFRES file.
+  /// for every vertex is in the %BFRES file. This is different from the @ref qtfrontendattributes.
   ///
   /// @todo The fields here can be documented.
   struct Attribute

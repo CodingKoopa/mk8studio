@@ -62,7 +62,7 @@ public:
 
   /// Convenience type for a list of FVTX objects. For more info on why this kind of complex typing
   /// with smart pointers is necessary, see
-  /// @ref Communication "this".
+  /// @ref qtfrontendnodebackendcommunication "this".
   typedef std::shared_ptr<std::vector<std::shared_ptr<FVTX>>> FVTXList;
 
   /// Gets the list of FVTX objects representing the %FVTX array.
