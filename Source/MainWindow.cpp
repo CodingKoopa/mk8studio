@@ -113,6 +113,13 @@ void MainWindow::UpdateStatus(ResultCode status, const QString& details)
 {
   switch (status)
   {
+  case ResultCode::Success:
+    m_ui->statusbar->showMessage("Success.");
+    return;
+  case ResultCode::UpdateStatusBar:
+    m_ui->statusbar->showMessage(details);
+    return;
+
   case ResultCode::NotAvailable:
     QMessageBox::critical(this, "Error",
                           QString("The requested widget isn't available for this file type."));
@@ -139,6 +146,9 @@ void MainWindow::UpdateStatus(ResultCode status, const QString& details)
   case ResultCode::UnsupportedTextureFormat:
     QMessageBox::critical(this, "Error", "Unsupported FTEX texture format.");
     break;
+  case ResultCode::UnsupportedFTEXComponent:
+    QMessageBox::critical(this, "Error", "Unsupported FTEX component.");
+    break;
   case ResultCode::UnsupportedAttributeFormat:
     QMessageBox::critical(this, "Error", "Unsupported FVTX attribute format.");
     break;
@@ -147,20 +157,7 @@ void MainWindow::UpdateStatus(ResultCode status, const QString& details)
                           "This texture has anti-aliasing, thickness, or is 3D, which is "
                           "unsupported. Please send this file to Koopa ASAP!");
     break;
-  default:
-    break;
   }
 
-  switch (status)
-  {
-  case ResultCode::Success:
-    m_ui->statusbar->showMessage("Success.");
-    break;
-  case ResultCode::UpdateStatusBar:
-    m_ui->statusbar->showMessage(details);
-    break;
-  default:
-    m_ui->statusbar->showMessage("Failed.");
-    break;
-  }
+  m_ui->statusbar->showMessage("Failed.");
 }
