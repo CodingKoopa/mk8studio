@@ -33,10 +33,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
   connect(m_ui->action_open, SIGNAL(triggered()), this, SLOT(OpenFile()));
 
   // Splitter for the left side of the UI
-  m_file_tree_attributes_splitter = new QSplitter();
-  m_file_tree_attributes_splitter->setOrientation(Qt::Vertical);
-  m_left_right_splitter = new QSplitter();
-  m_left_right_splitter->addWidget(m_file_tree_attributes_splitter);
+  m_vertical_splitter = new QSplitter();
+  m_vertical_splitter->setOrientation(Qt::Vertical);
+  m_horizontal_splitter = new QSplitter();
+  m_horizontal_splitter->addWidget(m_vertical_splitter);
 
   settings.beginGroup("file_paths");
   if (!settings.value("last_main_file").toString().isEmpty())
@@ -50,8 +50,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
 
 MainWindow::~MainWindow()
 {
-  if (m_current_file_node)
-    delete m_current_file_node;
   delete m_ui;
 }
 
@@ -69,51 +67,46 @@ void MainWindow::OpenFile(const QString& path)
     return;
   }
 
-  m_current_file_node = new BFRESNode(std::make_shared<BFRES>(m_file), this);
+  m_root_node = std::make_unique<BFRESNode>(std::make_shared<BFRES>(m_file), this);
+  m_root_node->LoadAttributeArea();
 
   // Make the connections for the BFRES node and any children.
-  connect(m_current_file_node, &Node::ConnectNode, this, &MainWindow::MakeNodeConnections);
+  connect(m_root_node.get(), &Node::ConnectNode, this, &MainWindow::MakeNodeConnections);
 
-  // Manually make the connections for the BFRES parent node.
-  MakeNodeConnections(m_current_file_node);
-
-  if (m_current_file_node->LoadFileTreeArea() != ResultCode::Success)
-    return;
-  if (m_current_file_node->LoadAttributeArea() != ResultCode::Success)
+  if (m_root_node->LoadFileTreeArea() != ResultCode::Success ||
+      m_root_node->LoadAttributeArea() != ResultCode::Success)
     return;
 
-  setCentralWidget(m_left_right_splitter);
+  setCentralWidget(m_horizontal_splitter);
 }
 
 void MainWindow::MakeNodeConnections(Node* node)
 {
   connect(node, &Node::NewFileTreeArea, this, &MainWindow::UpdateFileTreeContainer);
-  connect(node, &Node::NewAttributesArea, this, &MainWindow::UpdateSectionsContainer);
+  connect(node, &Node::NewAttributeArea, this, &MainWindow::UpdateAttributeContainer);
   connect(node, &Node::NewMainWidget, this, &MainWindow::UpdateMainWidget);
   connect(node, &Node::NewStatus, this, &MainWindow::UpdateStatus);
 }
 
 void MainWindow::UpdateFileTreeContainer(QScrollArea* area)
 {
-  if (m_file_tree_attributes_splitter->widget(0))
-  {
-    delete m_file_tree_attributes_splitter->widget(0);
-  }
-  m_file_tree_attributes_splitter->insertWidget(0, area);
+  if (m_vertical_splitter->widget(0))
+    delete m_vertical_splitter->widget(0);
+  m_vertical_splitter->insertWidget(0, area);
 }
 
-void MainWindow::UpdateSectionsContainer(QScrollArea* area)
+void MainWindow::UpdateAttributeContainer(QScrollArea* area)
 {
-  if (m_file_tree_attributes_splitter->widget(1))
-    delete m_file_tree_attributes_splitter->widget(1);
-  m_file_tree_attributes_splitter->insertWidget(1, area);
+  if (m_vertical_splitter->widget(1))
+    delete m_vertical_splitter->widget(1);
+  m_vertical_splitter->insertWidget(1, area);
 }
 
 void MainWindow::UpdateMainWidget(QWidget* widget)
 {
-  if (m_left_right_splitter->widget(1))
-    delete m_left_right_splitter->widget(1);
-  m_left_right_splitter->addWidget(widget);
+  if (m_horizontal_splitter->widget(1))
+    delete m_horizontal_splitter->widget(1);
+  m_horizontal_splitter->addWidget(widget);
 }
 
 void MainWindow::UpdateStatus(ResultCode status, const QString& details)
