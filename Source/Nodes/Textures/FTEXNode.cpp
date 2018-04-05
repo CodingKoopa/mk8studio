@@ -487,13 +487,6 @@ void FTEXNode::HandleInjectActionClick()
       m_path_line_edit, path_button, "DirectDraw Surface Texture Format (*.dds);;All Files (*.*)");
   output_layout->addLayout(path_layout);
 
-  // The problem with this if is that when adding the widget, it will take ownership of the sections
-  // container and therefore delete it when the window is closed despite it possible still being
-  // needed.
-  // if (!m_sections_container)
-  LoadAttributeArea();
-  output_layout->addWidget(m_sections_container);
-
   output_group->setLayout(output_layout);
 
   inject_dialog.AddGroup(output_group);
