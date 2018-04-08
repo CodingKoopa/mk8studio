@@ -58,5 +58,4 @@ HEADERS  += \
     Nodes/Models/FVTXBufferNode.h
 
 FORMS += \
-    MainWindow.ui \
-    IODialog.ui
+    MainWindow.ui

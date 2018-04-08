@@ -18,11 +18,11 @@ FTEXNode::FTEXNode(std::shared_ptr<FTEX> ftex, QObject* parent) : Node(parent), 
   m_context_menu = new QMenu;
 
   QAction* action_export = new QAction("Export", this);
-  connect(action_export, &QAction::triggered, this, &FTEXNode::HandleExportActionClick);
+  connect(action_export, &QAction::triggered, this, &FTEXNode::HandleExportAction);
   m_context_menu->addAction(action_export);
 
   QAction* action_inject = new QAction("Inject", this);
-  connect(action_inject, &QAction::triggered, this, &FTEXNode::HandleInjectActionClick);
+  connect(action_inject, &QAction::triggered, this, &FTEXNode::HandleInjectAction);
   m_context_menu->addAction(action_inject);
 }
 
@@ -395,109 +395,56 @@ void FTEXNode::HandleAttributeItemChange(QStandardItem* item)
   m_ftex->SetHeader(m_ftex_header);
 }
 
-void FTEXNode::HandleExportActionClick()
+void FTEXNode::HandleExportAction()
 {
-  IODialog export_dialog(IODialog::Type::Export);
-  QSettings settings;
+  IODialog export_dialog(IODialog::Type::Export, m_last_export_path_key, m_ftex->GetName(),
+                         "DirectDraw Surface Texture Format (*.dds);;All Files (*.*)");
 
-  // GROUP: Output
-  QGroupBox* output_group = new QGroupBox("Output");
-  QVBoxLayout* output_layout = new QVBoxLayout();
-
-  // Layout: File export path label, line edit, and button.
-  QHBoxLayout* path_layout = new QHBoxLayout;
-
-  path_layout->addWidget(new QLabel("Path: "));
-
-  m_path_line_edit = new QLineEdit;
-  settings.beginGroup("file_paths");
-  QString last_path = settings.value("last_ftex_export_path").toString();
-  if (!last_path.isEmpty())
-  {
-    QFileInfo file_info = last_path;
-    m_path_line_edit->setText(file_info.dir().path() + QDir::separator() + m_ftex->GetName() + '.' +
-                              file_info.suffix());
-  }
-  settings.endGroup();
-  path_layout->addWidget(m_path_line_edit);
-
-  QPushButton* path_button = new QPushButton("...");
-  path_layout->addWidget(path_button);
-  export_dialog.MakeSaveFilePathConnection(
-      m_path_line_edit, path_button, "DirectDraw Surface Texture Format (*.dds);;All Files (*.*)");
-  output_layout->addLayout(path_layout);
-
-  // Layout: Format label and combo box.
-  QHBoxLayout* format_layout = new QHBoxLayout;
-
-  format_layout->addWidget(new QLabel("Format: "));
+  QLabel* format_label = new QLabel("Format: ");
 
   m_format_combo_box = new QComboBox;
-  m_format_combo_box->addItem("DDS");
-  format_layout->addWidget(m_format_combo_box);
-  output_layout->addLayout(format_layout);
+  m_format_combo_box->addItem(m_dds_item_string);
 
-  output_group->setLayout(output_layout);
+  QHBoxLayout* format_layout = new QHBoxLayout;
+  format_layout->addWidget(format_label);
+  format_layout->addWidget(m_format_combo_box);
+
+  QGroupBox* output_group = new QGroupBox;
+  output_group->setLayout(format_layout);
   export_dialog.AddGroup(output_group);
 
-  connect(&export_dialog, &IODialog::StartIOAction, this, &FTEXNode::HandleExportButtonClick);
+  connect(&export_dialog, &IODialog::StartAction, this, &FTEXNode::HandleExportButton);
   export_dialog.exec();
 }
 
-void FTEXNode::HandleExportButtonClick()
+void FTEXNode::HandleExportButton(const QString& path)
 {
   QSettings settings;
   settings.beginGroup("file_paths");
-  settings.setValue("last_ftex_export_path", m_path_line_edit->text());
+  settings.setValue(m_last_export_path_key, path);
   settings.endGroup();
   if (!m_header_loaded)
     m_ftex->ReadHeader();
   if (!m_image_loaded)
     m_ftex->ReadImage();
   if (m_format_combo_box->currentText() == "DDS")
-    m_ftex->ExportToDDS(m_path_line_edit->text());
+    m_ftex->ExportToDDS(path);
 }
 
-void FTEXNode::HandleInjectActionClick()
+void FTEXNode::HandleInjectAction()
 {
-  IODialog inject_dialog(IODialog::Type::Inject);
-  QSettings settings;
-
-  QGroupBox* output_group = new QGroupBox("Output");
-
-  QVBoxLayout* output_layout = new QVBoxLayout();
-
-  // Layout: File export path label, line edit, and button.
-  QHBoxLayout* path_layout = new QHBoxLayout;
-
-  path_layout->addWidget(new QLabel("Path: "));
-
-  m_path_line_edit = new QLineEdit;
-  settings.beginGroup("file_paths");
-  // Not a typo, the intended functionality is for it to use the path of the last exported DDS file.
-  QString last_path = settings.value("last_ftex_export_path").toString();
-  if (!last_path.isEmpty())
-    m_path_line_edit->setText(last_path);
-  settings.endGroup();
-  path_layout->addWidget(m_path_line_edit);
-
-  QPushButton* path_button = new QPushButton("...");
-  path_layout->addWidget(path_button);
-  inject_dialog.MakeOpenFilePathConnection(
-      m_path_line_edit, path_button, "DirectDraw Surface Texture Format (*.dds);;All Files (*.*)");
-  output_layout->addLayout(path_layout);
-
-  output_group->setLayout(output_layout);
-
-  inject_dialog.AddGroup(output_group);
-
-  connect(&inject_dialog, &IODialog::StartIOAction, this, &FTEXNode::HandleInjectButtonClick);
+  IODialog inject_dialog(IODialog::Type::Inject, m_last_inject_path_key, m_ftex->GetName(),
+                         "DirectDraw Surface Texture Format (*.dds);;All Files (*.*)");
+  connect(&inject_dialog, &IODialog::StartAction, this, &FTEXNode::HandleInjectButton);
   inject_dialog.exec();
 }
 
-void FTEXNode::HandleInjectButtonClick()
+void FTEXNode::HandleInjectButton(const QString& path)
 {
   QSettings settings;
-  m_ftex->ImportDDS(m_path_line_edit->text());
+  settings.beginGroup("file_paths");
+  settings.setValue(m_last_inject_path_key, path);
+  settings.endGroup();
+  m_ftex->ImportDDS(path);
   m_ftex->InjectImage();
 }
