@@ -24,28 +24,26 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
 {
   m_ui->setupUi(this);
 
-  QCoreApplication::setOrganizationName("Mario Kart 8 Modding Central");
-  QCoreApplication::setApplicationName("Mario Kart 8 Studio");
-  setWindowTitle("Mario Kart 8 Studio");
-
-  QSettings settings;
-
-  connect(m_ui->action_open, SIGNAL(triggered()), this, SLOT(OpenFile()));
-
-  // Splitter for the left side of the UI
-  m_vertical_splitter = new QSplitter();
+  m_vertical_splitter = new QSplitter;
   m_vertical_splitter->setOrientation(Qt::Vertical);
-  m_horizontal_splitter = new QSplitter();
+
+  m_horizontal_splitter = new QSplitter;
   m_horizontal_splitter->addWidget(m_vertical_splitter);
 
-  settings.beginGroup("file_paths");
-  if (!settings.value("last_main_file").toString().isEmpty())
-    OpenFile(settings.value("last_main_file").toString());
-  settings.endGroup();
+  setWindowTitle("Mario Kart 8 Studio");
+  connect(m_ui->action_open, SIGNAL(triggered()), this, SLOT(OpenFile()));
 
   m_ui->welcome_widget->show();
 
   m_ui->statusbar->showMessage("Ready.");
+
+  QCoreApplication::setOrganizationName("mk8mc");
+  QCoreApplication::setApplicationName("mk8studio");
+  QSettings settings;
+  settings.beginGroup("file_paths");
+  if (!settings.value("last_main_file").toString().isEmpty())
+    OpenFile(settings.value("last_main_file").toString());
+  settings.endGroup();
 }
 
 MainWindow::~MainWindow()
