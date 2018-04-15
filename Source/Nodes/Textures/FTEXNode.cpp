@@ -398,7 +398,8 @@ void FTEXNode::HandleAttributeItemChange(QStandardItem* item)
 void FTEXNode::HandleExportAction()
 {
   IODialog export_dialog(IODialog::Type::Export, m_last_export_path_key, m_ftex->GetName(),
-                         "DirectDraw Surface Texture Format (*.dds);;All Files (*.*)");
+                         "DirectDraw Surface Texture Format (*.dds);;All Files (*.*)",
+                         QStandardPaths::PicturesLocation, "dds");
 
   QLabel* format_label = new QLabel("Format: ");
 
@@ -434,7 +435,8 @@ void FTEXNode::HandleExportButton(const QString& path)
 void FTEXNode::HandleInjectAction()
 {
   IODialog inject_dialog(IODialog::Type::Inject, m_last_inject_path_key, m_ftex->GetName(),
-                         "DirectDraw Surface Texture Format (*.dds);;All Files (*.*)");
+                         "DirectDraw Surface Texture Format (*.dds);;All Files (*.*)",
+                         QStandardPaths::PicturesLocation, "dds");
   connect(&inject_dialog, &IODialog::StartAction, this, &FTEXNode::HandleInjectButton);
   inject_dialog.exec();
 }

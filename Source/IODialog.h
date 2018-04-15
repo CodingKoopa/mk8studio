@@ -3,6 +3,7 @@
 #include <QComboBox>
 #include <QDialog>
 #include <QGroupBox>
+#include <QStandardPaths>
 #include <QVBoxLayout>
 
 namespace Ui
@@ -38,23 +39,27 @@ public:
 
   /// Initializes a new instance of the IODialog class.
   ///
-  /// @param    type            The type of the dialog.
-  /// @param    last_path_key   The settings key for the last path used.
-  /// @param    name            The name of the file to suggest.
-  /// @param    path_filter     The filter for the file dialog, be it opening or saving.
-  /// @param    parent          The pointer to the parent widget.
-  explicit IODialog(Type type, const QString& last_path_key, const QString& name,
-                    const QString& path_filter, QWidget* parent = 0);
+  /// @param  type              The type of the dialog.
+  /// @param  last_path_key     The settings key for the last path used.
+  /// @param  name              The name of the file to suggest.
+  /// @param  path_filter       The filter for the file dialog, be it opening or saving.
+  /// @param  default_dir_path  The default directory to save to.
+  /// @param  default_extention The default extention to use.
+  /// @param  parent            The pointer to the parent widget.
+  explicit IODialog(
+      Type type, const QString& last_path_key, const QString& name, const QString& path_filter,
+      QStandardPaths::StandardLocation default_dir = QStandardPaths::DocumentsLocation,
+      const QString& default_extention = QString(), QWidget* parent = 0);
 
   /// Adds a group of options after the path editor, but before the action button.
   ///
-  /// @param    group   The group to add.
+  /// @param  group   The group to add.
   void AddGroup(QGroupBox* group);
 
 private:
   /// Resizes a line edit widget to fit most of the text.
   ///
-  /// @param    line_edit   The pointer to the line edit widget.
+  /// @param  line_edit   The pointer to the line edit widget.
   void ResizeLineEditToText(QLineEdit* line_edit);
 
   /// The central layout of options. Used to insert widgets into.
@@ -68,6 +73,6 @@ private:
 signals:
   /// Signal emitted when the user has pressed the action button.
   ///
-  /// @param    path    The path to the file to operate on.
+  /// @param  path    The path to the file to operate on.
   void StartAction(const QString& path);
 };
