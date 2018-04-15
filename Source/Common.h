@@ -2,56 +2,93 @@
 
 #include <QDebug>
 
-template <typename T1>
-constexpr T1 Bit(T1 byte)
+/// Gets the size of a type, in bits.
+///
+/// @tparam T  The type to get the size of.
+///
+/// @return The size of the type, in bits.
+template <typename T>
+constexpr size_t GetBitSize() noexcept
 {
-  return byte & 1;
+  return sizeof(T) * CHAR_BIT;
 }
 
-template <typename T1, typename T2>
-constexpr T1 Bit(T1 byte, T2 position = 0)
+/// Gets the bit at a specified position of a byte.
+///
+/// @tparam T1        The type of the byte, and bit.
+///
+/// @param  byte      The byte to operate on.
+/// @param  position  The position to extract the bit from. If omitted, the LSB will be used.
+///
+/// @return The extracted bit.
+template <typename T>
+constexpr T GetBit(const T byte, const size_t position = 0) noexcept
 {
-  return (byte >> position) & static_cast<T1>(1);
+  return (byte >> position) & static_cast<T>(1);
 }
 
-template <typename T1>
-constexpr T1 InclusiveBitMask(T1 byte)
+/// Gets the bits in a specified range of a byte. This is inclusive.
+///
+/// @tparam T       The type of the byte.
+/// @tparam Result  The type of the bit. If omitted, the unsigned analog of T will be used.
+///
+/// @param  byte    The byte to operate on.
+/// @param  begin   The beginning of the range.
+/// @param  end     The end of the range.
+///
+/// @return The extracted bits.
+template <typename T, typename Result = std::make_unsigned_t<T>>
+constexpr Result GetBits(const T byte, const size_t begin, const size_t end) noexcept
 {
-  return (static_cast<T1>(1) << byte) - static_cast<T1>(1);
+  return static_cast<Result>(((static_cast<Result>(byte) << ((GetBitSize<T>() - 1) - end)) >>
+                              (GetBitSize<T>() - end + begin - 1)));
 }
 
-template <typename T1, typename T2, typename T3>
-constexpr T1 GetBits(T1 byte, T2 position, T3 num_bits)
-{
-  return (byte >> position) & num_bits;
-}
-
+/// Makes a byte from a specified set of bits.
+///
+/// @tparam T1    The type of the first bit.
+/// @tparam T2    The type of the parameter pack of the rest of the bits.
+///
+/// @param  bit   The first bit.
+/// @param  bits  The parameter back of the rest of the bits.
+///
+/// @return The new concatenated byte.
 template <typename T1, typename... T2>
-constexpr T1 MakeByte(T1 bit, T2... bits)
+constexpr T1 MakeByte(T1 bit, T2... bits) noexcept
 {
   T1 byte = bit;
-  quint32 pos = 0;
-  ((byte |= ((bits & 1) << ++pos)), ...);
+  T1 pos = 0;
+  ((byte |= ((bits & static_cast<T1>(1)) << ++pos)), ...);
   return byte;
 }
 
-template <typename T>
-constexpr T BitsToBytes(T num_bits)
+/// Converts a number of bits to a number of bytes.
+///
+/// @param  num_bits  The number of bits.
+///
+/// @return The number of bytes.
+constexpr size_t BitsToBytes(size_t num_bits) noexcept
 {
-  return num_bits / static_cast<T>(8);
+  return num_bits / 8;
 }
 
-template <typename T>
-constexpr T BytesToBits(T num_bytes)
+/// Converts a number of bytes to a number of bits.
+///
+/// @param  num_bytes The number of bytes.
+///
+/// @return The number of bits.
+constexpr size_t BytesToBits(size_t num_bytes) noexcept
 {
-  return num_bytes * static_cast<T>(8);
+  return num_bytes * 8;
 }
 
-// TODO: Catagorize these in a different way?
+/// The possible results functions can return to let the caller know whether the action succeeded.
+///
+/// @todo This system for determining success isn't great. At the very least, there should be more
+/// organization, and a consistent naming scheme.
 enum class ResultCode
 {
   Success,
-  // For noncritical updates on things
   UpdateStatusBar,
   NotAvailable,
   FileNotFound,

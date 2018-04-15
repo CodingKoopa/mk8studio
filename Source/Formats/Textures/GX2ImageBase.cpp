@@ -156,9 +156,10 @@ ResultCode GX2ImageBase::CopyImage(QByteArray* source, QByteArray* destination, 
         BitsToBytes(m_base_header.pitch * m_base_header.height * m_common_format_info.bpp *
                     static_cast<quint32>(m_tile_mode_info.thickness) * m_num_samples);
 
-    m_pipe_swizzle = Bit(m_base_header.swizzle, 8);
+    m_pipe_swizzle = GetBit(m_base_header.swizzle, NUM_LOW_OFFSET_BITS);
 
-    m_bank_swizzle = GetBits(m_base_header.swizzle, 9, 3);
+    m_bank_swizzle = GetBits(m_base_header.swizzle, NUM_LOW_OFFSET_BITS + NUM_PIPE_BITS,
+                             NUM_LOW_OFFSET_BITS + NUM_PIPE_BITS + NUM_PIPE_BITS);
 
   // Fallthrough
   // (This comment is here to prevent compiler warnings.)
@@ -338,23 +339,23 @@ quint64 GX2ImageBase::GetPixelOffsetMacroTiled(quint32 x, quint32 y, quint32 sli
   // This might have some correlation with pBitPosition?
   elem_offset /= 8;
 
-  quint32 x_3 = Bit(x, 3);
-  quint32 x_4 = Bit(x, 4);
+  quint32 x_3 = GetBit(x, 3);
+  quint32 x_4 = GetBit(x, 4);
 
-  quint32 y_3 = Bit(y, 3);
+  quint32 y_3 = GetBit(y, 3);
 
   quint64 macro_tile_index_x = x / m_macro_tile_pitch;
   quint64 macro_tile_index_y = y / m_macro_tile_height;
 
   // The Wii U has 4 RAM chips, here we select a seemingly "random" one using an
   // algorithm to generate one from the coordinates.
-  quint32 bank_bit_0 = Bit((y / (16 * NUM_PIPES)) ^ x_3);
-  quint32 bank_bit_1 = Bit((y / (8 * NUM_PIPES)) ^ x_4);
+  quint32 bank_bit_0 = GetBit((y / (16 * NUM_PIPES)) ^ x_3);
+  quint32 bank_bit_1 = GetBit((y / (8 * NUM_PIPES)) ^ x_4);
   quint32 bank = MakeByte(bank_bit_0, bank_bit_1);
 
   // Each of the Wii U's RAM chips has 2 channels, here we select a seemingly
   // "random" one using an algorithm to generate one from the coordinates.
-  quint32 pipe = Bit((y_3 ^ x_3));
+  quint32 pipe = GetBit((y_3 ^ x_3));
 
   // Random bank index <<
   // Number of bank bits
@@ -415,7 +416,7 @@ quint64 GX2ImageBase::GetPixelOffsetMacroTiled(quint32 x, quint32 y, quint32 sli
   }
   // Calculate final offset
   // Get mask targeting every group bit.
-  quint64 group_mask = InclusiveBitMask(NUM_LOW_OFFSET_BITS);
+  quint64 group_mask = 0b11111111;
   // Offset of the macro tile +
   // Offset of the slice relative to the beginning of the macro tile =
   // Absolute offset of the slice.
@@ -470,14 +471,14 @@ quint32 GX2ImageBase::GetPixelIndexMicroTiled(quint32 x, quint32 y, quint32 z)
   quint32 pixel_bit_6 = 0;
   quint32 pixel_bit_7 = 0;
 
-  quint32 x_0 = Bit(x, 0);
-  quint32 x_1 = Bit(x, 1);
-  quint32 x_2 = Bit(x, 2);
-  quint32 y_0 = Bit(y, 0);
-  quint32 y_1 = Bit(y, 1);
-  quint32 y_2 = Bit(y, 2);
-  quint32 z_0 = Bit(z, 0);
-  quint32 z_1 = Bit(z, 1);
+  quint32 x_0 = GetBit(x, 0);
+  quint32 x_1 = GetBit(x, 1);
+  quint32 x_2 = GetBit(x, 2);
+  quint32 y_0 = GetBit(y, 0);
+  quint32 y_1 = GetBit(y, 1);
+  quint32 y_2 = GetBit(y, 2);
+  quint32 z_0 = GetBit(z, 0);
+  quint32 z_1 = GetBit(z, 1);
 
   if (m_micro_tile_type != MicroTileType::Displayable)
   {
