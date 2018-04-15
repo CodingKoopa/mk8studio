@@ -18,9 +18,9 @@ public:
   /// Initializes a new instance of the GX2ImageBase class. This is just a passthrough for all of
   /// the parameters.
   ///
-  /// @param    file            Shared pointer to the file to read from.
-  /// @param    start_offset    The offset to start reading at, where the FVTX structure starts.
-  /// @param    header_size     The size of the format header.
+  /// @param  file          Shared pointer to the file to read from.
+  /// @param  start_offset  The offset to start reading at, where the FVTX structure starts.
+  /// @param  header_size   The size of the format header.
   GX2ImageBase(std::shared_ptr<File> file, quint32 start_offset = 0, quint32 header_size = 0);
 
   /// The common, shared formats. There are a lot of GX2 formats, but they can be grouped together
@@ -138,33 +138,33 @@ public:
   /// Reads the deswizzled image data from a %DDS file, swizzles it, and copies it to the GX2 image
   /// data.
   ///
-  /// @param    path    The path to write the new file to.
+  /// @param  path  The path to write the new file to.
   ///
-  /// @return   The success of the writing.
+  /// @return The success of the writing.
   ResultCode ImportDDS(QString path);
   /// Writes the deswizzled image data to a %DDS file.
   ///
-  /// @param    path    The path to write the new file to.
+  /// @param  path  The path to write the new file to.
   ///
-  /// @return   The success of the writing.
+  /// @return The success of the writing.
   ResultCode ExportToDDS(QString path);
 
   /// Gets the format info reference.
   ///
-  /// @return   The format info reference.
+  /// @return The format info reference.
   static std::map<quint32, FormatInfo> GetFormatInfos();
   /// Gets the format info reference.
   ///
-  /// @return   The format info reference.
+  /// @return The format info reference.
   static std::map<quint32, TileModeInfo> GetTileModeInfos();
 
   /// Gets the parsed format info.
   ///
-  /// @return  The parsed format info.
+  /// @return The parsed format info.
   const FormatInfo& GetFormatInfo() const;
   /// Gets the parsed tile mode info.
   ///
-  /// @return   The parsed tile mode info.
+  /// @return The parsed tile mode info.
   const TileModeInfo& GetTileModeInfo() const;
 
 protected:
@@ -181,11 +181,11 @@ protected:
 private:
   /// Copies image data, either unswizzling or swizzling it.
   ///
-  /// @param    source      The source image data to copy from.
-  /// @param    destination The destination image data to copy to.
-  /// @param    swizzle     Whether to swizzle the texture while copying or not.
+  /// @param  source      The source image data to copy from.
+  /// @param  destination The destination image data to copy to.
+  /// @param  swizzle     Whether to swizzle the texture while copying or not.
   ///
-  /// @return   The success of copying.
+  /// @return The success of copying.
   ///
   /// @todo A proper error should be thrown if this method attmpts to read or write outside of the
   /// image boundaries.
@@ -193,12 +193,12 @@ private:
 
   /// Gets the address of a pixel from a coordinate, within a macro tiled texture.
   ///
-  /// @param    x           The X coordinate of the pixel.
-  /// @param    y           The Y coordinate of the pixel.
-  /// @param    slice       Unknown, Z coordinate? Used for 3D textures.
-  /// @param    sample      Which sample. Used for textures with anti-aliasing.
-  /// @param    tile_base   Unknown. Used for 3D textures.
-  /// @param    comp_bits   Unknown. Used for 3D textures.
+  /// @param  x         The X coordinate of the pixel.
+  /// @param  y         The Y coordinate of the pixel.
+  /// @param  slice     Unknown, Z coordinate? Used for 3D textures.
+  /// @param  sample    Which sample. Used for textures with anti-aliasing.
+  /// @param  tile_base Unknown. Used for 3D textures.
+  /// @param  comp_bits Unknown. Used for 3D textures.
   ///
   /// @todo 3D texture support is present from Decaf, but untested and undocumented.
   quint64 GetPixelOffsetMacroTiled(quint32 x, quint32 y, quint32 slice, quint32 sample,
@@ -206,9 +206,9 @@ private:
 
   /// Gets the index of a pixel from a coordinate, within a micro tile.
   ///
-  /// @param    x           The X coordinate of the pixel.
-  /// @param    y           The Y coordinate of the pixel.
-  /// @param    z           The Z coordinate of the pixel.
+  /// @param  x The X coordinate of the pixel.
+  /// @param  y The Y coordinate of the pixel.
+  /// @param  z The Z coordinate of the pixel.
   ///
   /// @return The index of the pixel relative to the start of the micro tile. Also known as the
   /// pixel number. NOT the pixel offset, that's different.

@@ -66,7 +66,7 @@ public:
   /// Reads a DDS file at the path specified by FormatBase::m_path, parses the header into a Header,
   /// and reads the image data.
   ///
-  /// @return   The success of the reading.
+  /// @return The success of the reading.
   ///
   /// @todo Handle the path not being set, or just accept the path as a parameter, because using
   /// FormatBase::m_path for both the reading and writing path is clunky.
@@ -75,13 +75,13 @@ public:
   ResultCode ReadFile();
   /// Writes the Header and image data to a DDS file to the path specified by FormatBase::m_path.
   ///
-  /// @param    width               The width of the texture.
-  /// @param    height              The height of the texture.
-  /// @param    depth               The depth of the texture.
-  /// @param    num_mips            The number of mipmaps in the texture.
-  /// @param    element_size        The size of one element. See GX2ImageBase::m_element_size.
-  /// @param    format_info         The specific format info of the texture.
-  /// @param    common_format_info  The common format info of the texture.
+  /// @param  width               The width of the texture.
+  /// @param  height              The height of the texture.
+  /// @param  depth               The depth of the texture.
+  /// @param  num_mips            The number of mipmaps in the texture.
+  /// @param  element_size        The size of one element. See GX2ImageBase::m_element_size.
+  /// @param  format_info         The specific format info of the texture.
+  /// @param  common_format_info  The common format info of the texture.
   ///
   /// @todo Verify the number of bytes written.
   /// @todo Add uncompressed file support.
@@ -92,11 +92,11 @@ public:
 
   /// Gets the current image data.
   ///
-  /// @return   The image data.
+  /// @return The image data.
   const QByteArray& GetImageData() const;
   /// Sets the current image data.
   ///
-  /// @param    The image data.
+  /// @param  The image data.
   void SetImageData(const QByteArray& image_data);
 
 private:

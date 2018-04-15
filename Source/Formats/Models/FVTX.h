@@ -15,22 +15,22 @@ class FVTX : public FormatBase
 public:
   /// Initializes a new instance of the FMDL class.
   ///
-  /// @param    file            Shared pointer to the file to read from.
-  /// @param    start_offset    The offset to start reading at, where the FVTX structure starts.
+  /// @param  file            Shared pointer to the file to read from.
+  /// @param  start_offset    The offset to start reading at, where the FVTX structure starts.
   FVTX(std::shared_ptr<File> file, quint32 start_offset = 0);
 
   /// Reads the %FVTX header from the file, and parses it into a Header.
   ///
-  /// @return   The success of the reading.
+  /// @return The success of the reading.
   ResultCode ReadHeader();
   /// Reads the array of %FVTX vertex attributes from the file, and parses each into an Attribute of
   /// the list.
   ///
-  /// @return   The success of the reading.
+  /// @return The success of the reading.
   ResultCode ReadAttributes();
   /// Reads the %FVTX vertex buffers from the file, and parses each into a Buffer.
   ///
-  /// @return   The success of the reading.
+  /// @return The success of the reading.
   ResultCode ReadBuffers();
 
   /// @brief Represents the %FVTX header.
@@ -52,11 +52,11 @@ public:
 
   /// Gets the %FVTX header.
   ///
-  /// @return   The %FVTX header.
+  /// @return The %FVTX header.
   const Header& GetHeader() const;
   /// Sets the %FVTX header.
   ///
-  /// @param    header  The %FVTX header.
+  /// @param  header  The %FVTX header.
   void SetHeader(const Header& header);
 
   /// @brief Represents an attribute.
@@ -77,16 +77,16 @@ public:
 
   /// Gets the list of Attribute objects representing the attribute array.
   ///
-  /// @return   The Attribute list.
+  /// @return The Attribute list.
   const QVector<Attribute>& GetAttributeList() const;
 
   /// Gets the attribute format name info reference.
   ///
-  /// @return   The Attribute format name info reference.
+  /// @return The Attribute format name info reference.
   static std::map<quint32, QString> GetAttributeFormatNames();
   /// Gets the list of parsed attribute format names.
   ///
-  /// @return   The Attribute format names.
+  /// @return The Attribute format names.
   const QVector<QString>& GetAttributeFormatNameList() const;
 
   /// @brief Contains info about an attribute that can be collected from its name.
@@ -114,7 +114,7 @@ public:
 
   /// Gets the list of attribute name info objects.
   ///
-  /// @return   The AttributeNameInfo list.
+  /// @return The AttributeNameInfo list.
   const QVector<AttributeNameInfo>& GetAttributeNameInfoList() const;
 
   /// @brief Represents a buffer.
@@ -137,7 +137,7 @@ public:
 
   /// Gets the list of Buffer objects representing the buffer array.
   ///
-  /// @return   The Buffer list.
+  /// @return The Buffer list.
   const QVector<Buffer>& GetBufferList() const;
 
 private:

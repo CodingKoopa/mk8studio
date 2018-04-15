@@ -59,7 +59,7 @@ public:
 private:
   /// Resizes a line edit widget to fit most of the text.
   ///
-  /// @param  line_edit   The pointer to the line edit widget.
+  /// @param  line_edit The pointer to the line edit widget.
   void ResizeLineEditToText(QLineEdit* line_edit);
 
   /// The central layout of options. Used to insert widgets into.
@@ -73,6 +73,6 @@ private:
 signals:
   /// Signal emitted when the user has pressed the action button.
   ///
-  /// @param  path    The path to the file to operate on.
+  /// @param  path  The path to the file to operate on.
   void StartAction(const QString& path);
 };

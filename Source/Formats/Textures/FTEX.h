@@ -13,8 +13,8 @@ class FTEX : public GX2ImageBase
 public:
   /// Initializes a new instance of the FTEX class.
   ///
-  /// @param    file            Shared pointer to the file to read from.
-  /// @param    start_offset    The offset to start reading at, where the BFRES structure starts.
+  /// @param  file          Shared pointer to the file to read from.
+  /// @param  start_offset  The offset to start reading at, where the BFRES structure starts.
   FTEX(std::shared_ptr<File> file, quint64 start_offset = 0);
   /// Initializes a new instance of the FTEX class from an existing copy. Deleted so that the image
   /// data buffer is not double deleted.
@@ -27,11 +27,11 @@ public:
 
   /// Reads the %FTEX header from the file, and parses it into a Header.
   ///
-  /// @return   The success of the reading.
+  /// @return The success of the reading.
   ResultCode ReadHeader();
   /// Reads the raw image from the file, and deswizzles it with GX2ImageBase::ReadImageFromData().
   ///
-  /// @return   The success of the reading.
+  /// @return The success of the reading.
   ResultCode ReadImage();
 
   /// Writes the %FTEX header and swizzled image data to the file. Temporary, until %BFRES
@@ -40,7 +40,7 @@ public:
 
   /// Gets the component name reference.
   ///
-  /// @return   The component name reference.
+  /// @return The component name reference.
   static std::array<QString, 6> GetComponentNames();
 
   /// @brief Represents the FTEX header.
@@ -76,11 +76,11 @@ public:
 
   /// Gets the %FTEX header.
   ///
-  /// @return   The %FTEX header.
+  /// @return The %FTEX header.
   const Header& GetHeader() const;
   /// Sets the %FTEX header.
   ///
-  /// @param    header  The %FTEX header.
+  /// @param  header  The %FTEX header.
   void SetHeader(const Header& header);
 
 private:

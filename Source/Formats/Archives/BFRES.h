@@ -21,17 +21,17 @@ class BFRES : public FormatBase
 public:
   /// Initializes a new instance of the BFRES class.
   ///
-  /// @param    file            Shared pointer to the file to read from.
-  /// @param    start_offset    The offset to start reading at, where the BFRES structure starts.
+  /// @param  file          Shared pointer to the file to read from.
+  /// @param  start_offset  The offset to start reading at, where the BFRES structure starts.
   BFRES(std::shared_ptr<File> file, quint32 start_offset = 0);
 
   /// Reads the %BFRES header from the file, and parses it into a Header.
   ///
-  /// @return   The success of the reading.
+  /// @return The success of the reading.
   ResultCode ReadHeader();
   /// Reads the %BFRES group dictionaries from the file, and parses each into a ResourceDictionary.
   ///
-  /// @return   The success of the reading.
+  /// @return The success of the reading.
   ResultCode ReadDictionaries();
 
   /// @brief Represents the %BFRES header.
@@ -60,11 +60,11 @@ public:
 
   /// Gets the %BFRES header.
   ///
-  /// @return   The %BFRES header.
+  /// @return The %BFRES header.
   const Header& GetHeader() const;
   /// Sets the %BFRES header.
   ///
-  /// @param    header  The %BFRES header.
+  /// @param  header  The %BFRES header.
   void SetHeader(const Header& header);
 
   /// The possible endian values of the %BFRES file.
@@ -76,20 +76,20 @@ public:
 
   /// Gets the endian names.
   ///
-  /// @return   The endian names mapped to the values.
+  /// @return The endian names mapped to the values.
   static std::map<Endianness, QString> GetEndianNames();
   /// Gets the current endian name.
   ///
-  /// @return   The current endian name.
+  /// @return The current endian name.
   const QString& GetEndianName() const;
 
   /// Gets the FMDL ResourceDictionary.
   ///
-  /// @return   A shared pointer to the FMDL ResourceDictionary.
+  /// @return A shared pointer to the FMDL ResourceDictionary.
   std::shared_ptr<ResourceDictionary<FMDL>> GetFMDLDictionary() const;
   /// Gets the FTEX ResourceDictionary.
   ///
-  /// @return   A shared pointer to the FTEX ResourceDictionary.
+  /// @return A shared pointer to the FTEX ResourceDictionary.
   std::shared_ptr<ResourceDictionary<FTEX>> GetFTEXDictionary() const;
 
 private:

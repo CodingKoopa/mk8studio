@@ -13,15 +13,15 @@
 /// being radix trees, here nodes are read in a straightforward manner, ignoring the heirarchy of
 /// nodes.
 ///
-/// @tparam T   The type of the value/resource that the dictionary is storing.
+/// @tparam T The type of the value/resource that the dictionary is storing.
 template <typename T>
 class ResourceDictionary : public FormatBase
 {
 public:
   /// Initializes a new instance of the ResourceDictionary class.
   ///
-  /// @param    file            Shared pointer to the file to read from.
-  /// @param    start_offset    The offset to start reading at, where the dictionary starts.
+  /// @param  file          Shared pointer to the file to read from.
+  /// @param  start_offset  The offset to start reading at, where the dictionary starts.
   ResourceDictionary(std::shared_ptr<File> file = nullptr, quint32 start_offset = 0)
       : FormatBase(file, start_offset)
   {
@@ -47,25 +47,25 @@ public:
   /// Gets read-only references to nodes by index via []. This follows the ordering in which the
   /// nodes are defined in the file, and not the heirarchy of nodes.
   ///
-  /// @param    index   The index of the node.
+  /// @param  index   The index of the node.
   ///
-  /// @return   A copy of the node at the index.
+  /// @return A copy of the node at the index.
   Node operator[](quint32 index) const { return m_node_list[index]; }
   /// Gets modifiable references to nodes by index via []. This follows the same ordering as
   /// the other access operator.
   ///
-  /// @param    index   The index of the node.
+  /// @param  index   The index of the node.
   ///
-  /// @return   A reference to the node at the index.
+  /// @return A reference to the node at the index.
   ///
   /// @todo Properly link to the other access operator.
   Node& operator[](quint32 index) { return m_node_list[index]; }
 
   /// Reads the resource dictionary header from the file, and parses it into a Header.
   ///
-  /// @return   The success of the reading.
+  /// @return The success of the reading.
   ///
-  /// @todo     Verify the number of bytes read.
+  /// @todo Verify the number of bytes read.
   ResultCode ReadHeader()
   {
     m_file->Seek(m_start_offset);
@@ -76,9 +76,9 @@ public:
 
   /// Reads the dictionary nodes from the file, and parses each into a Node.
   ///
-  /// @return   The success of the reading.
+  /// @return The success of the reading.
   ///
-  /// @todo     Verify the number of bytes read.
+  /// @todo Verify the number of bytes read.
   ResultCode ReadNodes()
   {
     m_node_list.resize(m_header.num_nodes + 1);
@@ -107,7 +107,7 @@ public:
 
   /// Gets the size of the dictionary.
   ///
-  /// @return   The number of nodes, not including the root node.
+  /// @return The number of nodes, not including the root node.
   quint32 Size() const { return m_node_list.size(); }
 
   /// @brief Represents the Resource Dictionary header.
@@ -123,12 +123,12 @@ public:
   /// modified manually manually externally, but from methods here that can add notes with the whole
   /// dictionary in mind.
   ///
-  /// @return   A read-only reference to the Header.
+  /// @return A read-only reference to the Header.
   const Header& GetHeader() const { return m_header; }
 
   /// Gets the list of nodes.
   ///
-  /// @return   A read-only reference to the list of nodes.
+  /// @return A read-only reference to the list of nodes.
   const QVector<Node>& GetNodeList() const { return m_node_list; }
 
 private:

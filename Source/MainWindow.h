@@ -31,7 +31,7 @@ class MainWindow : public QMainWindow
 public:
   /// Initializes a new instance of the MainWindow class.
   ///
-  /// @param    parent  The pointer to the parent widget.
+  /// @param  parent  The pointer to the parent widget.
   explicit MainWindow(QWidget* parent = 0);
   /// Uninitializes an instance of the MainWindow class.
   ~MainWindow();
@@ -53,32 +53,32 @@ private:
 private slots:
   /// Opens a file, and loads the node tree area and attribute area for the root node.
   ///
-  /// @param    path    The path to load the file from. This is only used for debugging purposes,
+  /// @param  path    The path to load the file from. This is only used for debugging purposes,
   /// and can be omitted. When omitted, a QFileDialog instead will appear.
   void OpenFile(const QString& path = QString());
 
   /// For a given node, allows it to upload widgets to the editor view.
   ///
-  /// @param    node    The node to make connections for.
+  /// @param  node  The node to make connections for.
   void MakeNodeConnections(Node* node);
   /// Uploads a new file tree area to the editor view.
   ///
-  /// @param    area    The new file tree area.
+  /// @param  area  The new file tree area.
   void UpdateFileTreeContainer(QScrollArea* area);
   /// Uploads a new attribute area to the editor view.
   ///
-  /// @param    area    The new attribute area.
+  /// @param  area  The new attribute area.
   void UpdateAttributeContainer(QScrollArea* area);
   /// Uploads a new main widget to the editor view.
   ///
-  /// @param    widget  The new main widget.
+  /// @param  widget  The new main widget.
   void UpdateMainWidget(QWidget* widget);
   /// Uploads a new status to the window, and optionally display a message box.
   ///
-  /// @param    status  The status, either:
+  /// @param  status  The status, either:
   /// - ResultCode::Success for success. This just changes the status bar.
   /// - ResultCode::UpdateStatusBar for a neutral status update. This just changes the status bar.
   /// - Anything else for an error. This changes the status bar, and displays an error message box.
-  /// @param    details The status update string, if ResultCode::UpdateStatusBar was specified.
+  /// @param  details The status update string, if ResultCode::UpdateStatusBar was specified.
   void UpdateStatus(ResultCode status, const QString& details = QString());
 };

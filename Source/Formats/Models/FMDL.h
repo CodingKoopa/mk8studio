@@ -17,8 +17,8 @@ class FMDL : public FormatBase
 public:
   /// Initializes a new instance of the FMDL class.
   ///
-  /// @param    file            Shared pointer to the file to read from.
-  /// @param    start_offset    The offset to start reading at, where the BFRES structure starts.
+  /// @param  file          Shared pointer to the file to read from.
+  /// @param  start_offset  The offset to start reading at, where the BFRES structure starts.
   FMDL(std::shared_ptr<File> file, quint32 start_offset = 0);
 
   /// Reads the %FMDL header from the file, and parses it into a Header.
@@ -27,7 +27,7 @@ public:
   ResultCode ReadHeader();
   /// Reads the array of FVTXs from the file, and parses each into an FVTX of the list.
   ///
-  /// @return   The success of the reading.
+  /// @return The success of the reading.
   ResultCode ReadFVTXArray();
 
   /// @brief Represents the %FMDL header.
@@ -53,11 +53,11 @@ public:
 
   /// Gets the %FMDL header.
   ///
-  /// @return   The %FMDL header.
+  /// @return The %FMDL header.
   const Header& GetHeader() const;
   /// Sets the %FMDL header.
   ///
-  /// @param    header  The %FMDL header.
+  /// @param  header  The %FMDL header.
   void SetHeader(const Header& header);
 
   /// Convenience type for a list of FVTX objects. For more info on why this kind of complex typing
@@ -67,7 +67,7 @@ public:
 
   /// Gets the list of FVTX objects representing the %FVTX array.
   ///
-  /// @return   The FVTX list.
+  /// @return The FVTX list.
   FVTXList GetFVTXList() const;
 
 private:
