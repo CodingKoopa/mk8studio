@@ -8,10 +8,10 @@
 #include <QTreeView>
 #include <QVBoxLayout>
 
-#include "CustomDelegate.h"
-#include "CustomStandardItem.h"
 #include "Formats/Archives/BFRES.h"
 #include "Nodes/Textures/FTEXNode.h"
+#include "QtUtils/DynamicItemDelegate.h"
+#include "QtUtils/DynamicStandardItem.h"
 
 class BFRESNode : public Node
 {
@@ -19,7 +19,7 @@ class BFRESNode : public Node
 public:
   explicit BFRESNode(std::shared_ptr<BFRES> bfres, QObject* parent = 0);
   ResultCode LoadFileTreeArea() override;
-  CustomStandardItem* MakeItem() override;
+  DynamicStandardItem* MakeItem() override;
   ResultCode LoadAttributeArea() override;
 
 private:

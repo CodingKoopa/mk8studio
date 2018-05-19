@@ -8,17 +8,17 @@
 #include <QStandardItemModel>
 #include <QTableView>
 
-#include "CustomDelegate.h"
-#include "CustomStandardItem.h"
 #include "Formats/Textures/FTEX.h"
 #include "Nodes/Node.h"
+#include "QtUtils/DynamicItemDelegate.h"
+#include "QtUtils/DynamicStandardItem.h"
 
 class FTEXNode : public Node
 {
   Q_OBJECT
 public:
   explicit FTEXNode(std::shared_ptr<FTEX> ftex, QObject* parent = 0);
-  CustomStandardItem* MakeItem() override;
+  DynamicStandardItem* MakeItem() override;
   ResultCode LoadAttributeArea() override;
   ResultCode LoadMainWidget() override;
 

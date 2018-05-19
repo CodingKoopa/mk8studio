@@ -4,12 +4,12 @@
 
 #include <QStandardItem>
 
-class CustomStandardItem : public QStandardItem
+class DynamicStandardItem : public QStandardItem
 {
 public:
-  CustomStandardItem() = default;
-  CustomStandardItem(QString string);
-  ~CustomStandardItem();
+  DynamicStandardItem() = default;
+  DynamicStandardItem(QString string);
+  ~DynamicStandardItem();
 
   void ExecuteFunction();
   void SetFunction(const std::function<void(quint32 index)>& function);

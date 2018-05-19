@@ -16,8 +16,8 @@
 #include <QTreeView>
 #include <QVBoxLayout>
 
-#include "CustomDelegate.h"
 #include "Nodes/Archives/BFRESNode.h"
+#include "QtUtils/DynamicItemDelegate.h"
 #include "ui_MainWindow.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::MainWindow)

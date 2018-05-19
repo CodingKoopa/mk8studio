@@ -4,7 +4,7 @@
 
 FVTXNode::FVTXNode(std::shared_ptr<FVTX> fvtx, QObject* parent) : Node(parent), m_fvtx(fvtx) {}
 
-CustomStandardItem* FVTXNode::MakeItem()
+DynamicStandardItem* FVTXNode::MakeItem()
 {
   if (!m_header_loaded)
   {
@@ -23,7 +23,7 @@ CustomStandardItem* FVTXNode::MakeItem()
     if (res != ResultCode::Success)
     {
       emit NewStatus(res);
-      return new CustomStandardItem("Unknown");
+      return new DynamicStandardItem("Unknown");
     }
     else
       m_attribute_list = m_fvtx->GetAttributeList();
@@ -34,16 +34,16 @@ CustomStandardItem* FVTXNode::MakeItem()
     if (res != ResultCode::Success)
     {
       emit NewStatus(res);
-      return new CustomStandardItem("Unknown");
+      return new DynamicStandardItem("Unknown");
     }
     else
       m_buffer_list = m_fvtx->GetBufferList();
   }
 
-  CustomStandardItem* fvtx_item = new CustomStandardItem;
+  DynamicStandardItem* fvtx_item = new DynamicStandardItem;
   fvtx_item->setData("FVTX " + QString::number(m_fvtx_header.section_index), Qt::DisplayRole);
   fvtx_item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
-  CustomStandardItem* attribute_group_item = new CustomStandardItem("Attributes");
+  DynamicStandardItem* attribute_group_item = new DynamicStandardItem("Attributes");
   fvtx_item->appendRow(attribute_group_item);
   QVector<QString> attribute_format_name_list = m_fvtx->GetAttributeFormatNameList();
   QVector<FVTX::AttributeNameInfo> attribute_name_info_list = m_fvtx->GetAttributeNameInfoList();
@@ -55,7 +55,7 @@ CustomStandardItem* FVTXNode::MakeItem()
     connect(fvtx_attribute_node, &FVTXAttributeNode::ConnectNode, this, &FVTXNode::ConnectNode);
     attribute_group_item->appendRow(fvtx_attribute_node->MakeItem());
   }
-  CustomStandardItem* buffer_group_item = new CustomStandardItem("Buffers");
+  DynamicStandardItem* buffer_group_item = new DynamicStandardItem("Buffers");
   fvtx_item->appendRow(buffer_group_item);
   for (qint32 buffer = 0; buffer < m_buffer_list.size(); ++buffer)
   {
@@ -83,11 +83,11 @@ ResultCode FVTXNode::LoadAttributeArea()
 
   quint32 row = 0;
   QStandardItemModel* header_attributes_model = new QStandardItemModel;
-  m_delegate_group = CustomItemDelegate::DelegateGroup();
+  m_delegate_group = DynamicItemDelegate::DelegateInfo();
 
   // Magic
   header_attributes_model->setItem(row, 0, new QStandardItem("Magic File Identifier"));
-  CustomStandardItem* magic_item = new CustomStandardItem(m_fvtx_header.magic);
+  DynamicStandardItem* magic_item = new DynamicStandardItem(m_fvtx_header.magic);
   magic_item->SetFunction([this](QString text) { m_fvtx_header.magic = text; });
   header_attributes_model->setItem(row, 1, magic_item);
   m_delegate_group.line_edit_delegates << row;
@@ -95,8 +95,8 @@ ResultCode FVTXNode::LoadAttributeArea()
 
   // Attribute Count
   header_attributes_model->setItem(row, 0, new QStandardItem("Attribute Count"));
-  CustomStandardItem* attribute_count_item =
-      new CustomStandardItem(QString::number(m_fvtx_header.attribute_count));
+  DynamicStandardItem* attribute_count_item =
+      new DynamicStandardItem(QString::number(m_fvtx_header.attribute_count));
   // TODO: Attribute count is actually a char, and not a short.
   attribute_count_item->SetFunction(
       [this](QString text) { m_fvtx_header.attribute_count = text.toUShort(); });
@@ -106,8 +106,8 @@ ResultCode FVTXNode::LoadAttributeArea()
 
   // Buffer Count
   header_attributes_model->setItem(row, 0, new QStandardItem("Buffer Count"));
-  CustomStandardItem* buffer_count_item =
-      new CustomStandardItem(QString::number(m_fvtx_header.buffer_count));
+  DynamicStandardItem* buffer_count_item =
+      new DynamicStandardItem(QString::number(m_fvtx_header.buffer_count));
   // TODO: This is a char.
   buffer_count_item->SetFunction(
       [this](QString text) { m_fvtx_header.buffer_count = text.toUShort(); });
@@ -117,8 +117,8 @@ ResultCode FVTXNode::LoadAttributeArea()
 
   // Section Index
   header_attributes_model->setItem(row, 0, new QStandardItem("Array Index"));
-  CustomStandardItem* array_index_item =
-      new CustomStandardItem(QString::number(m_fvtx_header.section_index));
+  DynamicStandardItem* array_index_item =
+      new DynamicStandardItem(QString::number(m_fvtx_header.section_index));
   array_index_item->SetFunction(
       [this](QString text) { m_fvtx_header.section_index = text.toUShort(); });
   header_attributes_model->setItem(row, 1, array_index_item);
@@ -127,8 +127,8 @@ ResultCode FVTXNode::LoadAttributeArea()
 
   // Number of Verticies
   header_attributes_model->setItem(row, 0, new QStandardItem("Number Of Vertices"));
-  CustomStandardItem* num_vertices_item =
-      new CustomStandardItem(QString::number(m_fvtx_header.number_vertices));
+  DynamicStandardItem* num_vertices_item =
+      new DynamicStandardItem(QString::number(m_fvtx_header.number_vertices));
   num_vertices_item->SetFunction(
       [this](QString text) { m_fvtx_header.number_vertices = text.toUInt(); });
   header_attributes_model->setItem(row, 1, num_vertices_item);
@@ -137,8 +137,8 @@ ResultCode FVTXNode::LoadAttributeArea()
 
   // Vertex Skin Count
   header_attributes_model->setItem(row, 0, new QStandardItem("Skin Cont"));
-  CustomStandardItem* skin_count_item =
-      new CustomStandardItem(QString::number(m_fvtx_header.vertex_skin_count));
+  DynamicStandardItem* skin_count_item =
+      new DynamicStandardItem(QString::number(m_fvtx_header.vertex_skin_count));
   // TODO: This is a char.
   skin_count_item->SetFunction(
       [this](QString text) { m_fvtx_header.vertex_skin_count = text.toUShort(); });
@@ -187,7 +187,7 @@ void FVTXNode::HandleAttributeItemChange(QStandardItem* item)
   if (item->column() != 1)
     return;
 
-  CustomStandardItem* custom_item = dynamic_cast<CustomStandardItem*>(item);
+  DynamicStandardItem* custom_item = dynamic_cast<DynamicStandardItem*>(item);
   if (custom_item)
     custom_item->ExecuteFunction();
 

@@ -12,7 +12,7 @@ class FMDLNode : public Node
 public:
   explicit FMDLNode(std::shared_ptr<FMDL> fmdl, QObject* parent = 0);
 
-  CustomStandardItem* MakeItem() override;
+  DynamicStandardItem* MakeItem() override;
   ResultCode LoadAttributeArea() override;
 
 private:

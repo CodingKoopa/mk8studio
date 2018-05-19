@@ -1,4 +1,4 @@
-#include "CustomDelegate.h"
+#include "DynamicItemDelegate.h"
 
 #include <limits>
 
@@ -6,13 +6,13 @@
 #include <QLineEdit>
 #include <QSpinBox>
 
-CustomItemDelegate::CustomItemDelegate(CustomItemDelegate::DelegateGroup delegates)
+DynamicItemDelegate::DynamicItemDelegate(DynamicItemDelegate::DelegateInfo delegates)
     : m_delegates(delegates)
 {
 }
 
-QWidget* CustomItemDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&,
-                                          const QModelIndex& index) const
+QWidget* DynamicItemDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&,
+                                           const QModelIndex& index) const
 {
   if (index.column() == 0)
     return nullptr;
@@ -50,7 +50,7 @@ QWidget* CustomItemDelegate::createEditor(QWidget* parent, const QStyleOptionVie
   return nullptr;
 }
 
-void CustomItemDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
+void DynamicItemDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
   if (index.column() == 0)
     return;
@@ -78,8 +78,8 @@ void CustomItemDelegate::setEditorData(QWidget* editor, const QModelIndex& index
   }
 }
 
-void CustomItemDelegate::setModelData(QWidget* editor, QAbstractItemModel* model,
-                                      const QModelIndex& index) const
+void DynamicItemDelegate::setModelData(QWidget* editor, QAbstractItemModel* model,
+                                       const QModelIndex& index) const
 {
   if (m_delegates.line_edit_delegates.contains(index.row()))
   {

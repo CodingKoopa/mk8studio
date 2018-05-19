@@ -18,9 +18,9 @@ Node::Node(QObject* parent)
 {
 }
 
-CustomStandardItem* Node::MakeLabelItem(QString label)
+DynamicStandardItem* Node::MakeLabelItem(QString label)
 {
-  CustomStandardItem* attribute_item = new CustomStandardItem;
+  DynamicStandardItem* attribute_item = new DynamicStandardItem;
   attribute_item->setData(label, Qt::DisplayRole);
   attribute_item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
   return attribute_item;
@@ -37,7 +37,7 @@ QScrollArea* Node::MakeAttributeSection(QStandardItemModel* table_view_layout)
   table_view->verticalHeader()->hide();
   table_view->horizontalHeader()->hide();
 
-  table_view->setItemDelegate(new CustomItemDelegate(m_delegate_group));
+  table_view->setItemDelegate(new DynamicItemDelegate(m_delegate_group));
 
   // To have all editors open by default, uncomment this out
   // PROS: Looks nicer, possibly more convienient

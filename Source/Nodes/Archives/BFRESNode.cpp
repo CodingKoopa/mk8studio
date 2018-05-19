@@ -9,9 +9,9 @@
 #include <QTableView>
 
 #include "Common.h"
-#include "CustomDelegate.h"
-#include "CustomStandardItem.h"
 #include "Nodes/Archives/BFRESGroupNode.h"
+#include "QtUtils/DynamicItemDelegate.h"
+#include "QtUtils/DynamicStandardItem.h"
 
 BFRESNode::BFRESNode(std::shared_ptr<BFRES> bfres, QObject* parent) : Node(parent), m_bfres(bfres)
 {
@@ -31,13 +31,13 @@ ResultCode BFRESNode::LoadFileTreeArea()
 
   QStandardItemModel* file_tree_model = new QStandardItemModel(0, 1);
 
-  CustomStandardItem* root_item = MakeItem();
+  DynamicStandardItem* root_item = MakeItem();
   file_tree_model->appendRow(root_item);
 
   m_tree_view = new QTreeView;
   // stretch out table to fit space
   m_tree_view->header()->hide();
-  m_tree_view->setItemDelegate(new CustomItemDelegate(CustomItemDelegate::DelegateGroup()));
+  m_tree_view->setItemDelegate(new DynamicItemDelegate(DynamicItemDelegate::DelegateInfo()));
   m_tree_view->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_tree_view, &QTreeView::customContextMenuRequested, this,
           &BFRESNode::HandleTreeCustomContextMenuRequest);
@@ -59,11 +59,11 @@ ResultCode BFRESNode::LoadFileTreeArea()
   return res;
 }
 
-CustomStandardItem* BFRESNode::MakeItem()
+DynamicStandardItem* BFRESNode::MakeItem()
 {
   emit ConnectNode(this);
 
-  CustomStandardItem* bfres_item = new CustomStandardItem();
+  DynamicStandardItem* bfres_item = new DynamicStandardItem();
   bfres_item->setData(QString(m_bfres->GetName() + " (BFRES)"), Qt::DisplayRole);
   // Store the current instance in a QVariant as an upcasted Node pointer.
   // Will be downcasted back to a BFRES Group Node later.
@@ -89,13 +89,13 @@ ResultCode BFRESNode::LoadAttributeArea()
   emit NewStatus(ResultCode::UpdateStatusBar, "Loading file info...");
 
   QStandardItemModel* header_attributes_model = new QStandardItemModel();
-  m_delegate_group = CustomItemDelegate::DelegateGroup();
+  m_delegate_group = DynamicItemDelegate::DelegateInfo();
 
   int row = 0;
 
   // Magic
   header_attributes_model->setItem(row, 0, new QStandardItem("Magic File Identifier"));
-  CustomStandardItem* magic_item = new CustomStandardItem(m_bfres_header.magic);
+  DynamicStandardItem* magic_item = new DynamicStandardItem(m_bfres_header.magic);
   magic_item->SetFunction([this](QString value) { m_bfres_header.magic = value; });
   header_attributes_model->setItem(row, 1, magic_item);
   m_delegate_group.line_edit_delegates << row;
@@ -149,7 +149,7 @@ ResultCode BFRESNode::LoadAttributeArea()
   m_delegate_group.combo_box_delegates << row;
   m_delegate_group.combo_box_selections << std::distance(
       endian_names.begin(), endian_names.find(static_cast<BFRES::Endianness>(m_bfres_header.bom)));
-  CustomStandardItem* endianness_item = new CustomStandardItem(m_bfres->GetEndianName());
+  DynamicStandardItem* endianness_item = new DynamicStandardItem(m_bfres->GetEndianName());
   endianness_item->SetFunction([this, endian_names](quint32 index) {
     auto it =
         next(endian_names.begin(), std::min(index, static_cast<quint32>(endian_names.size())));
@@ -241,7 +241,7 @@ void BFRESNode::HandleAttributeItemChange(QStandardItem* item)
   qDebug() << "Item changed. Row " << item->row() << " column " << item->column();
 #endif
 
-  CustomStandardItem* custom_item = dynamic_cast<CustomStandardItem*>(item);
+  DynamicStandardItem* custom_item = dynamic_cast<DynamicStandardItem*>(item);
   if (custom_item)
     custom_item->ExecuteFunction();
 }

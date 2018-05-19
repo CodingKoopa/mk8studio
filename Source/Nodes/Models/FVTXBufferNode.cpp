@@ -1,13 +1,13 @@
 #include "Nodes/Models/FVTXBufferNode.h"
-#include "CustomStandardItem.h"
 #include "Formats/Models/FVTX.h"
+#include "QtUtils/DynamicStandardItem.h"
 
 FVTXBufferNode::FVTXBufferNode(const FVTX::Buffer& buffer, QObject* parent)
     : Node(parent), m_buffer(buffer)
 {
 }
 
-CustomStandardItem* FVTXBufferNode::MakeItem()
+DynamicStandardItem* FVTXBufferNode::MakeItem()
 {
   emit ConnectNode(this);
   return MakeLabelItem("Buffer");
@@ -17,7 +17,7 @@ ResultCode FVTXBufferNode::LoadAttributeArea()
 {
   quint32 row = 0;
   QStandardItemModel* header_attributes_model = new QStandardItemModel;
-  m_delegate_group = CustomItemDelegate::DelegateGroup();
+  m_delegate_group = DynamicItemDelegate::DelegateInfo();
 
   // Data Pointer (Runtime)
   header_attributes_model->setItem(row, 0, new QStandardItem("Runtime Data Pointer"));
@@ -77,7 +77,7 @@ void FVTXBufferNode::HandleAttributeItemChange(QStandardItem* item)
   if (item->column() != 1)
     return;
 
-  CustomStandardItem* custom_item = dynamic_cast<CustomStandardItem*>(item);
+  DynamicStandardItem* custom_item = dynamic_cast<DynamicStandardItem*>(item);
   if (custom_item)
     custom_item->ExecuteFunction();
 

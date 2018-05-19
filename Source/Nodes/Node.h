@@ -7,11 +7,11 @@
 #include <QVBoxLayout>
 
 #include "Common.h"
-#include "CustomDelegate.h"
-#include "CustomStandardItem.h"
 #include "File.h"
+#include "QtUtils/DynamicItemDelegate.h"
+#include "QtUtils/DynamicStandardItem.h"
 
-class CustomStandardItem;
+class DynamicStandardItem;
 class Node : public QObject
 {
   Q_OBJECT
@@ -20,7 +20,7 @@ public:
   // Optional because not every file type may have a file tree to show.
   // TODO: maybe a better way of going about making this optional?
   virtual ResultCode LoadFileTreeArea() { return ResultCode::NotAvailable; }
-  virtual CustomStandardItem* MakeItem() = 0;
+  virtual DynamicStandardItem* MakeItem() = 0;
   // Every format must have attributes to show.
   virtual ResultCode LoadAttributeArea() = 0;
   // Same as file trees.
@@ -30,13 +30,13 @@ public:
 
 protected:
   // List of what each table cell's editor should be.
-  CustomItemDelegate::DelegateGroup m_delegate_group;
+  DynamicItemDelegate::DelegateInfo m_delegate_group;
   QTreeView* m_tree_view;
   QWidget* m_main_widget;
   QMenu* m_context_menu;
 
   // Helper function for MakeItem(). TODO: Better name for this.
-  CustomStandardItem* MakeLabelItem(QString label);
+  DynamicStandardItem* MakeLabelItem(QString label);
   QScrollArea* MakeAttributeSection(QStandardItemModel* table_view_layout);
 
 signals:

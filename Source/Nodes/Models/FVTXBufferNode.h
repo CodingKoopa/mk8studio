@@ -9,7 +9,7 @@ class FVTXBufferNode : public Node
 public:
   explicit FVTXBufferNode(const FVTX::Buffer& buffer, QObject* parent = 0);
 
-  CustomStandardItem* MakeItem() override;
+  DynamicStandardItem* MakeItem() override;
   ResultCode LoadAttributeArea() override;
 
 private:

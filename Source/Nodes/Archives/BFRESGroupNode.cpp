@@ -11,7 +11,7 @@ BFRESGroupNode<GroupType>::BFRESGroupNode(std::shared_ptr<ResourceDictionary<Gro
 }
 
 template <typename GroupType>
-CustomStandardItem* BFRESGroupNode<GroupType>::MakeItem()
+DynamicStandardItem* BFRESGroupNode<GroupType>::MakeItem()
 {
   if (!m_header_loaded)
   {
@@ -40,7 +40,7 @@ CustomStandardItem* BFRESGroupNode<GroupType>::MakeItem()
       m_nodes_loaded = true;
   }
 
-  CustomStandardItem* item = MakeGroupDependentItem();
+  DynamicStandardItem* item = MakeGroupDependentItem();
 
   item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
   emit ConnectNode(this);
@@ -48,9 +48,9 @@ CustomStandardItem* BFRESGroupNode<GroupType>::MakeItem()
 }
 
 template <>
-CustomStandardItem* BFRESGroupNode<FMDL>::MakeGroupDependentItem()
+DynamicStandardItem* BFRESGroupNode<FMDL>::MakeGroupDependentItem()
 {
-  CustomStandardItem* group_node = new CustomStandardItem("FMDL Models");
+  DynamicStandardItem* group_node = new DynamicStandardItem("FMDL Models");
 
   // Skip the root node by starting at 1.
   for (quint32 row = 1; row < m_dictionary->Size(); ++row)
@@ -64,9 +64,9 @@ CustomStandardItem* BFRESGroupNode<FMDL>::MakeGroupDependentItem()
 }
 
 template <>
-CustomStandardItem* BFRESGroupNode<FTEX>::MakeGroupDependentItem()
+DynamicStandardItem* BFRESGroupNode<FTEX>::MakeGroupDependentItem()
 {
-  CustomStandardItem* group_node = new CustomStandardItem("FTEX Textures");
+  DynamicStandardItem* group_node = new DynamicStandardItem("FTEX Textures");
 
   // Skip the root node by starting at 1.
   for (quint32 row = 1; row < m_dictionary->Size(); ++row)
@@ -109,7 +109,7 @@ ResultCode BFRESGroupNode<GroupType>::LoadAttributeArea()
       m_nodes_loaded = true;
   }
 
-  m_delegate_group = CustomItemDelegate::DelegateGroup();
+  m_delegate_group = DynamicItemDelegate::DelegateInfo();
 
   QStandardItemModel* group_attributes_model = new QStandardItemModel();
 

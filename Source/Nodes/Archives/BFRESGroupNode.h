@@ -2,11 +2,11 @@
 
 #include <QHeaderView>
 
-#include "CustomStandardItem.h"
 #include "Formats/Archives/BFRES.h"
 #include "Formats/Common/ResourceDictionary.h"
 #include "Formats/Models/FMDL.h"
 #include "Nodes/Node.h"
+#include "QtUtils/DynamicStandardItem.h"
 
 template <typename GroupType>
 class BFRESGroupNode : public Node
@@ -18,9 +18,9 @@ public:
   BFRESGroupNode(const BFRESGroupNode& other);
   BFRESGroupNode& operator=(const BFRESGroupNode& other);
 
-  CustomStandardItem* MakeItem();
+  DynamicStandardItem* MakeItem();
 
-  CustomStandardItem* MakeGroupDependentItem();
+  DynamicStandardItem* MakeGroupDependentItem();
 
   ResultCode LoadAttributeArea();
 

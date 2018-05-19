@@ -10,7 +10,7 @@ public:
   explicit FVTXAttributeNode(const FVTX::Attribute& attribute, QString attribute_format_name,
                              QString attribute_friendly_name, QObject* parent = 0);
 
-  CustomStandardItem* MakeItem() override;
+  DynamicStandardItem* MakeItem() override;
   ResultCode LoadAttributeArea() override;
 
 private:

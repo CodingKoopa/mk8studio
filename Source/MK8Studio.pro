@@ -13,12 +13,11 @@ TEMPLATE = app
 SOURCES +=\
     MainWindow.cpp \
     Main.cpp \
-    CustomDelegate.cpp \
+    QtUtils/DynamicItemDelegate.cpp \
     Nodes/Node.cpp \
     IODialog.cpp \
     Formats/FormatBase.cpp \
     File.cpp \
-    CustomStandardItem.cpp \
     Formats/Models/FMDL.cpp \
     Formats/Textures/GX2ImageBase.cpp \
     Formats/Textures/DDS.cpp \
@@ -31,16 +30,15 @@ SOURCES +=\
     Nodes/Models/FVTXNode.cpp \
     Nodes/Models/FVTXAttributeNode.cpp \
     Nodes/Archives/BFRESGroupNode.cpp \
-    Nodes/Models/FVTXBufferNode.cpp
+    Nodes/Models/FVTXBufferNode.cpp \
+    QtUtils/DynamicStandardItem.cpp
 
 HEADERS  += \
     Common.h \
-    CustomDelegate.h \
     MainWindow.h \
     Nodes/Node.h \
     Formats/FormatBase.h \
     IODialog.h \
-    CustomStandardItem.h \
     File.h \
     Formats/Models/FMDL.h \
     Formats/Textures/GX2ImageBase.h \
@@ -55,7 +53,9 @@ HEADERS  += \
     Nodes/Models/FVTXNode.h \
     Nodes/Models/FVTXAttributeNode.h \
     Formats/Common/ResourceDictionary.h \
-    Nodes/Models/FVTXBufferNode.h
+    Nodes/Models/FVTXBufferNode.h \
+    QtUtils/DynamicItemDelegate.h \
+    QtUtils/DynamicStandardItem.h
 
 FORMS += \
     MainWindow.ui

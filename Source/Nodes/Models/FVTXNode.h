@@ -11,7 +11,7 @@ class FVTXNode : public Node
 public:
   explicit FVTXNode(std::shared_ptr<FVTX> fvtx, QObject* parent = 0);
 
-  CustomStandardItem* MakeItem() override;
+  DynamicStandardItem* MakeItem() override;
   ResultCode LoadAttributeArea() override;
 
 private:

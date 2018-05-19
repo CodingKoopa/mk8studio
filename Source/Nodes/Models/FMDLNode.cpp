@@ -3,7 +3,7 @@
 
 FMDLNode::FMDLNode(std::shared_ptr<FMDL> fmdl, QObject* parent) : Node(parent), m_fmdl(fmdl) {}
 
-CustomStandardItem* FMDLNode::MakeItem()
+DynamicStandardItem* FMDLNode::MakeItem()
 {
   if (!m_header_loaded)
   {
@@ -34,10 +34,10 @@ CustomStandardItem* FMDLNode::MakeItem()
     }
   }
 
-  CustomStandardItem* fmdl_item = new CustomStandardItem;
+  DynamicStandardItem* fmdl_item = new DynamicStandardItem;
   fmdl_item->setData(m_fmdl->GetName() + " (FMDL)", Qt::DisplayRole);
   fmdl_item->setData(QVariant::fromValue<Node*>(static_cast<Node*>(this)), Qt::UserRole + 1);
-  CustomStandardItem* fvtx_group_item = new CustomStandardItem("FVTX Sections");
+  DynamicStandardItem* fvtx_group_item = new DynamicStandardItem("FVTX Sections");
   fmdl_item->appendRow(fvtx_group_item);
   foreach (std::shared_ptr<FVTX> fvtx, *m_fvtx_list)
   {
@@ -69,11 +69,11 @@ ResultCode FMDLNode::LoadAttributeArea()
 
   quint32 row = 0;
   QStandardItemModel* header_attributes_model = new QStandardItemModel;
-  m_delegate_group = CustomItemDelegate::DelegateGroup();
+  m_delegate_group = DynamicItemDelegate::DelegateInfo();
 
   // Magic
   header_attributes_model->setItem(row, 0, new QStandardItem("Magic File Identifier"));
-  CustomStandardItem* magic_item = new CustomStandardItem(m_fmdl_header.magic);
+  DynamicStandardItem* magic_item = new DynamicStandardItem(m_fmdl_header.magic);
   magic_item->SetFunction([this](QString text) { m_fmdl_header.magic = text; });
   header_attributes_model->setItem(row, 1, magic_item);
   m_delegate_group.line_edit_delegates << row;
@@ -124,8 +124,8 @@ ResultCode FMDLNode::LoadAttributeArea()
 
   // FVTX Count
   header_attributes_model->setItem(row, 0, new QStandardItem("FVTX Count"));
-  CustomStandardItem* fvtx_count_item =
-      new CustomStandardItem(QString::number(m_fmdl_header.fvtx_count));
+  DynamicStandardItem* fvtx_count_item =
+      new DynamicStandardItem(QString::number(m_fmdl_header.fvtx_count));
   fvtx_count_item->SetFunction(
       [this](QString text) { m_fmdl_header.fvtx_count = text.toUShort(); });
   header_attributes_model->setItem(row, 1, fvtx_count_item);
@@ -134,8 +134,8 @@ ResultCode FMDLNode::LoadAttributeArea()
 
   // FSHP Count
   header_attributes_model->setItem(row, 0, new QStandardItem("FSHP Count"));
-  CustomStandardItem* fshp_count_item =
-      new CustomStandardItem(QString::number(m_fmdl_header.fshp_count));
+  DynamicStandardItem* fshp_count_item =
+      new DynamicStandardItem(QString::number(m_fmdl_header.fshp_count));
   fshp_count_item->SetFunction(
       [this](QString text) { m_fmdl_header.fshp_count = text.toUShort(); });
   header_attributes_model->setItem(row, 1, fshp_count_item);
@@ -144,8 +144,8 @@ ResultCode FMDLNode::LoadAttributeArea()
 
   // FMAT Count
   header_attributes_model->setItem(row, 0, new QStandardItem("FMAT Count"));
-  CustomStandardItem* fmat_count_item =
-      new CustomStandardItem(QString::number(m_fmdl_header.fmat_count));
+  DynamicStandardItem* fmat_count_item =
+      new DynamicStandardItem(QString::number(m_fmdl_header.fmat_count));
   fmat_count_item->SetFunction(
       [this](QString text) { m_fmdl_header.fmat_count = text.toUShort(); });
   header_attributes_model->setItem(row, 1, fmat_count_item);
@@ -154,8 +154,8 @@ ResultCode FMDLNode::LoadAttributeArea()
 
   // User Data Entry Count
   header_attributes_model->setItem(row, 0, new QStandardItem("User Data Entry Count"));
-  CustomStandardItem* user_data_entry_count_item =
-      new CustomStandardItem(QString::number(m_fmdl_header.user_data_entry_count));
+  DynamicStandardItem* user_data_entry_count_item =
+      new DynamicStandardItem(QString::number(m_fmdl_header.user_data_entry_count));
   user_data_entry_count_item->SetFunction(
       [this](QString text) { m_fmdl_header.user_data_entry_count = text.toUShort(); });
   header_attributes_model->setItem(row, 1, user_data_entry_count_item);
@@ -164,8 +164,8 @@ ResultCode FMDLNode::LoadAttributeArea()
 
   // Number of Verticies
   header_attributes_model->setItem(row, 0, new QStandardItem("Number of Vertices"));
-  CustomStandardItem* num_vertices_item =
-      new CustomStandardItem(QString::number(m_fmdl_header.num_vertices));
+  DynamicStandardItem* num_vertices_item =
+      new DynamicStandardItem(QString::number(m_fmdl_header.num_vertices));
   num_vertices_item->SetFunction(
       [this](QString text) { m_fmdl_header.num_vertices = text.toUShort(); });
   header_attributes_model->setItem(row, 1, num_vertices_item);
@@ -194,7 +194,7 @@ void FMDLNode::HandleAttributeItemChange(QStandardItem* item)
   if (item->column() != 1)
     return;
 
-  CustomStandardItem* custom_item = dynamic_cast<CustomStandardItem*>(item);
+  DynamicStandardItem* custom_item = dynamic_cast<DynamicStandardItem*>(item);
   if (custom_item)
     custom_item->ExecuteFunction();
 

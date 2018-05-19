@@ -4,11 +4,12 @@
 #include <QList>
 #include <QStandardItemModel>
 
-class CustomItemDelegate : public QItemDelegate
+/// @brief Represents a
+class DynamicItemDelegate : public QItemDelegate
 {
   Q_OBJECT
 public:
-  struct DelegateGroup
+  struct DelegateInfo
   {
     QVector<int> line_edit_delegates;
     QVector<int> spin_box_delegates;
@@ -17,7 +18,7 @@ public:
     QVector<int> combo_box_selections;
   };
 
-  CustomItemDelegate(DelegateGroup delegates);
+  DynamicItemDelegate(DelegateInfo delegates);
 
   QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem&,
                         const QModelIndex& index) const override;
@@ -26,5 +27,5 @@ public:
                     const QModelIndex& index) const override;
 
 private:
-  DelegateGroup m_delegates = DelegateGroup();
+  DelegateInfo m_delegates = DelegateInfo();
 };
