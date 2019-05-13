@@ -17,7 +17,7 @@ ResultCode FVTXBufferNode::LoadAttributeArea()
 {
   quint32 row = 0;
   QStandardItemModel* header_attributes_model = new QStandardItemModel;
-  m_delegate_group = DynamicItemDelegate::DelegateInfo();
+  //  m_delegate_group = DynamicItemDelegate::DelegateInfo();
 
   // Data Pointer (Runtime)
   header_attributes_model->setItem(row, 0, new QStandardItem("Runtime Data Pointer"));
@@ -67,7 +67,7 @@ ResultCode FVTXBufferNode::LoadAttributeArea()
   connect(header_attributes_model, &QStandardItemModel::itemChanged, this,
           &FVTXBufferNode::HandleAttributeItemChange);
 
-  emit NewAttributeArea(MakeAttributeSection(header_attributes_model));
+  emit NewAttributeArea(MakeAttributeSectionOld(header_attributes_model));
   return ResultCode::Success;
 }
 

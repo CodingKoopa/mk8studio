@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui widgets
-QMAKE_CXXFLAGS += -std=c++17
+CONFIG   += c++17
 
 TARGET = MK8Studio
 TEMPLATE = app
@@ -13,7 +13,6 @@ TEMPLATE = app
 SOURCES +=\
     MainWindow.cpp \
     Main.cpp \
-    QtUtils/DynamicItemDelegate.cpp \
     Nodes/Node.cpp \
     IODialog.cpp \
     Formats/FormatBase.cpp \
@@ -29,9 +28,9 @@ SOURCES +=\
     Formats/Models/FVTX.cpp \
     Nodes/Models/FVTXNode.cpp \
     Nodes/Models/FVTXAttributeNode.cpp \
-    Nodes/Archives/BFRESGroupNode.cpp \
     Nodes/Models/FVTXBufferNode.cpp \
-    QtUtils/DynamicStandardItem.cpp
+    QtUtils/DynamicStandardItem.cpp \
+    Nodes/Archives/BFRESGroupNode.cpp
 
 HEADERS  += \
     Common.h \
@@ -54,7 +53,6 @@ HEADERS  += \
     Nodes/Models/FVTXAttributeNode.h \
     Formats/Common/ResourceDictionary.h \
     Nodes/Models/FVTXBufferNode.h \
-    QtUtils/DynamicItemDelegate.h \
     QtUtils/DynamicStandardItem.h
 
 FORMS += \

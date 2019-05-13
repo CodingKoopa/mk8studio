@@ -51,14 +51,14 @@ ResultCode FTEXNode::LoadAttributeArea()
 
   quint32 row = 0;
   QStandardItemModel* header_attributes_model = new QStandardItemModel;
-  m_delegate_group = DynamicItemDelegate::DelegateInfo();
+  //  m_delegate_group = DynamicItemDelegate::DelegateInfo();
 
   // Magic
   header_attributes_model->setItem(row, 0, new QStandardItem("Magic File Identifier"));
   DynamicStandardItem* magic_item = new DynamicStandardItem(m_ftex_header.magic);
   magic_item->SetFunction([this](QString text) { m_ftex_header.magic = text; });
   header_attributes_model->setItem(row, 1, magic_item);
-  m_delegate_group.line_edit_delegates << row;
+  //  m_delegate_group.line_edit_delegates << row;
   ++row;
 
   // Dimension
@@ -73,7 +73,7 @@ ResultCode FTEXNode::LoadAttributeArea()
   DynamicStandardItem* width_item = new DynamicStandardItem(QString::number(m_ftex_header.width));
   width_item->SetFunction([this](QString text) { m_ftex_header.width = text.toUInt(); });
   header_attributes_model->setItem(row, 1, width_item);
-  m_delegate_group.spin_box_delegates << row;
+  //  m_delegate_group.spin_box_delegates << row;
   ++row;
 
   // Texture Height
@@ -81,7 +81,7 @@ ResultCode FTEXNode::LoadAttributeArea()
   DynamicStandardItem* height_item = new DynamicStandardItem(QString::number(m_ftex_header.height));
   height_item->SetFunction([this](QString text) { m_ftex_header.height = text.toUInt(); });
   header_attributes_model->setItem(row, 1, height_item);
-  m_delegate_group.spin_box_delegates << row;
+  //  m_delegate_group.spin_box_delegates << row;
   ++row;
 
   // Texture Depth
@@ -105,10 +105,10 @@ ResultCode FTEXNode::LoadAttributeArea()
   QStandardItemModel* format_combo_box_entries = new QStandardItemModel();
   for (auto const& format_info : format_infos)
     format_combo_box_entries->appendRow(new QStandardItem(format_info.second.name));
-  m_delegate_group.combo_box_entries << format_combo_box_entries;
-  m_delegate_group.combo_box_delegates << row;
-  m_delegate_group.combo_box_selections
-      << std::distance(format_infos.begin(), format_infos.find(m_ftex_header.format));
+  //  m_delegate_group.combo_box_entries << format_combo_box_entries;
+  //  m_delegate_group.combo_box_delegates << row;
+  //  m_delegate_group.combo_box_selections
+  //  << std::distance(format_infos.begin(), format_infos.find(m_ftex_header.format));
   DynamicStandardItem* format_item = new DynamicStandardItem(m_ftex->GetFormatInfo().name);
   // Here, index is the index of the overall map, and NOT a key.
   format_item->SetFunction([this, format_infos](quint32 index) {
@@ -161,10 +161,10 @@ ResultCode FTEXNode::LoadAttributeArea()
   QStandardItemModel* tiling_combo_box_entries = new QStandardItemModel();
   for (auto const& tile_mode_info : tile_mode_infos)
     tiling_combo_box_entries->appendRow(new QStandardItem(tile_mode_info.second.name));
-  m_delegate_group.combo_box_entries << tiling_combo_box_entries;
-  m_delegate_group.combo_box_delegates << row;
+  //  m_delegate_group.combo_box_entries << tiling_combo_box_entries;
+  //  m_delegate_group.combo_box_delegates << row;
   // The tile mode corresponds with the index because they're consecutive.
-  m_delegate_group.combo_box_selections << m_ftex_header.tile_mode;
+  //  m_delegate_group.combo_box_selections << m_ftex_header.tile_mode;
   DynamicStandardItem* tile_mode_item = new DynamicStandardItem(m_ftex->GetTileModeInfo().name);
   tile_mode_item->SetFunction(
       [this](quint32 index) { m_ftex_header.tile_mode = static_cast<quint32>(index); });
@@ -188,7 +188,7 @@ ResultCode FTEXNode::LoadAttributeArea()
   DynamicStandardItem* pitch_item = new DynamicStandardItem(QString::number(m_ftex_header.pitch));
   pitch_item->SetFunction([this](QString text) { m_ftex_header.pitch = text.toUInt(); });
   header_attributes_model->setItem(row, 1, pitch_item);
-  m_delegate_group.spin_box_delegates << row;
+  //  m_delegate_group.spin_box_delegates << row;
   ++row;
 
   // Mipmap Offsets
@@ -215,7 +215,7 @@ ResultCode FTEXNode::LoadAttributeArea()
   num_mipmaps_alt_item->SetFunction(
       [this](QString text) { m_ftex_header.num_mips_alt = text.toUInt(); });
   header_attributes_model->setItem(row, 1, num_mipmaps_alt_item);
-  m_delegate_group.spin_box_delegates << row;
+  //  m_delegate_group.spin_box_delegates << row;
   ++row;
 
   // Number of Slices
@@ -224,7 +224,7 @@ ResultCode FTEXNode::LoadAttributeArea()
       new DynamicStandardItem(QString::number(m_ftex_header.num_slices));
   num_slices_item->SetFunction([this](QString text) { m_ftex_header.num_slices = text.toUInt(); });
   header_attributes_model->setItem(row, 1, num_slices_item);
-  m_delegate_group.spin_box_delegates << row;
+  //  m_delegate_group.spin_box_delegates << row;
   ++row;
 
   auto component_names = m_ftex->GetComponentNames();
@@ -234,9 +234,9 @@ ResultCode FTEXNode::LoadAttributeArea()
 
   // Red Channel Selector
   header_attributes_model->setItem(row, 0, new QStandardItem("Texture Red Channel Binding"));
-  m_delegate_group.combo_box_entries << component_selector_combo_box_entries;
-  m_delegate_group.combo_box_delegates << row;
-  m_delegate_group.combo_box_selections << m_ftex_header.red_channel_component;
+  //  m_delegate_group.combo_box_entries << component_selector_combo_box_entries;
+  //  m_delegate_group.combo_box_delegates << row;
+  //  m_delegate_group.combo_box_selections << m_ftex_header.red_channel_component;
   DynamicStandardItem* red_channel_component_item =
       new DynamicStandardItem(component_names[m_ftex_header.red_channel_component]);
   red_channel_component_item->SetFunction(
@@ -246,9 +246,9 @@ ResultCode FTEXNode::LoadAttributeArea()
 
   // Green Channel Selector
   header_attributes_model->setItem(row, 0, new QStandardItem("Texture Green Channel Binding"));
-  m_delegate_group.combo_box_entries << component_selector_combo_box_entries;
-  m_delegate_group.combo_box_delegates << row;
-  m_delegate_group.combo_box_selections << m_ftex_header.green_channel_component;
+  //  m_delegate_group.combo_box_entries << component_selector_combo_box_entries;
+  //  m_delegate_group.combo_box_delegates << row;
+  //  m_delegate_group.combo_box_selections << m_ftex_header.green_channel_component;
   DynamicStandardItem* green_channel_component_item =
       new DynamicStandardItem(component_names[m_ftex_header.green_channel_component]);
   green_channel_component_item->SetFunction(
@@ -258,9 +258,9 @@ ResultCode FTEXNode::LoadAttributeArea()
 
   // Blue Channel Selector
   header_attributes_model->setItem(row, 0, new QStandardItem("Texture Blue Channel Binding"));
-  m_delegate_group.combo_box_entries << component_selector_combo_box_entries;
-  m_delegate_group.combo_box_delegates << row;
-  m_delegate_group.combo_box_selections << m_ftex_header.blue_channel_component;
+  //  m_delegate_group.combo_box_entries << component_selector_combo_box_entries;
+  //  m_delegate_group.combo_box_delegates << row;
+  //  m_delegate_group.combo_box_selections << m_ftex_header.blue_channel_component;
   DynamicStandardItem* blue_channel_component_item =
       new DynamicStandardItem(component_names[m_ftex_header.blue_channel_component]);
   blue_channel_component_item->SetFunction(
@@ -270,9 +270,9 @@ ResultCode FTEXNode::LoadAttributeArea()
 
   // Red Channel Selector
   header_attributes_model->setItem(row, 0, new QStandardItem("Texture Alpha Channel Binding"));
-  m_delegate_group.combo_box_entries << component_selector_combo_box_entries;
-  m_delegate_group.combo_box_delegates << row;
-  m_delegate_group.combo_box_selections << m_ftex_header.alpha_channel_component;
+  //  m_delegate_group.combo_box_entries << component_selector_combo_box_entries;
+  //  m_delegate_group.combo_box_delegates << row;
+  //  m_delegate_group.combo_box_selections << m_ftex_header.alpha_channel_component;
   DynamicStandardItem* alpha_channel_component_item =
       new DynamicStandardItem(component_names[m_ftex_header.alpha_channel_component]);
   alpha_channel_component_item->SetFunction(
@@ -359,7 +359,7 @@ ResultCode FTEXNode::LoadAttributeArea()
   connect(header_attributes_model, &QStandardItemModel::itemChanged, this,
           &FTEXNode::HandleAttributeItemChange);
 
-  m_sections_container = MakeAttributeSection(header_attributes_model);
+  m_sections_container = MakeAttributeSectionOld(header_attributes_model);
 
   emit NewAttributeArea(m_sections_container);
   return ResultCode::Success;

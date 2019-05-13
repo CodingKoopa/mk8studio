@@ -69,14 +69,14 @@ ResultCode FMDLNode::LoadAttributeArea()
 
   quint32 row = 0;
   QStandardItemModel* header_attributes_model = new QStandardItemModel;
-  m_delegate_group = DynamicItemDelegate::DelegateInfo();
+  //  m_delegate_group = DynamicItemDelegate::DelegateInfo();
 
   // Magic
   header_attributes_model->setItem(row, 0, new QStandardItem("Magic File Identifier"));
   DynamicStandardItem* magic_item = new DynamicStandardItem(m_fmdl_header.magic);
   magic_item->SetFunction([this](QString text) { m_fmdl_header.magic = text; });
   header_attributes_model->setItem(row, 1, magic_item);
-  m_delegate_group.line_edit_delegates << row;
+  //  m_delegate_group.line_edit_delegates << row;
   ++row;
 
   // File Name Offset
@@ -129,7 +129,7 @@ ResultCode FMDLNode::LoadAttributeArea()
   fvtx_count_item->SetFunction(
       [this](QString text) { m_fmdl_header.fvtx_count = text.toUShort(); });
   header_attributes_model->setItem(row, 1, fvtx_count_item);
-  m_delegate_group.spin_box_delegates << row;
+  //  m_delegate_group.spin_box_delegates << row;
   ++row;
 
   // FSHP Count
@@ -139,7 +139,7 @@ ResultCode FMDLNode::LoadAttributeArea()
   fshp_count_item->SetFunction(
       [this](QString text) { m_fmdl_header.fshp_count = text.toUShort(); });
   header_attributes_model->setItem(row, 1, fshp_count_item);
-  m_delegate_group.spin_box_delegates << row;
+  //  m_delegate_group.spin_box_delegates << row;
   ++row;
 
   // FMAT Count
@@ -149,7 +149,7 @@ ResultCode FMDLNode::LoadAttributeArea()
   fmat_count_item->SetFunction(
       [this](QString text) { m_fmdl_header.fmat_count = text.toUShort(); });
   header_attributes_model->setItem(row, 1, fmat_count_item);
-  m_delegate_group.spin_box_delegates << row;
+  //  m_delegate_group.spin_box_delegates << row;
   ++row;
 
   // User Data Entry Count
@@ -159,7 +159,7 @@ ResultCode FMDLNode::LoadAttributeArea()
   user_data_entry_count_item->SetFunction(
       [this](QString text) { m_fmdl_header.user_data_entry_count = text.toUShort(); });
   header_attributes_model->setItem(row, 1, user_data_entry_count_item);
-  m_delegate_group.spin_box_delegates << row;
+  //  m_delegate_group.spin_box_delegates << row;
   ++row;
 
   // Number of Verticies
@@ -169,7 +169,7 @@ ResultCode FMDLNode::LoadAttributeArea()
   num_vertices_item->SetFunction(
       [this](QString text) { m_fmdl_header.num_vertices = text.toUShort(); });
   header_attributes_model->setItem(row, 1, num_vertices_item);
-  m_delegate_group.spin_box_delegates << row;
+  //  m_delegate_group.spin_box_delegates << row;
   ++row;
 
   // User Runtime Pointer
@@ -184,7 +184,7 @@ ResultCode FMDLNode::LoadAttributeArea()
   connect(header_attributes_model, &QStandardItemModel::itemChanged, this,
           &FMDLNode::HandleAttributeItemChange);
 
-  emit NewAttributeArea(MakeAttributeSection(header_attributes_model));
+  emit NewAttributeArea(MakeAttributeSectionOld(header_attributes_model));
   return ResultCode::Success;
 }
 

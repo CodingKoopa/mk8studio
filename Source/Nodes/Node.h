@@ -1,14 +1,17 @@
 #pragma once
 
+#include <functional>
+
 #include <QScrollArea>
 #include <QStandardItem>
 #include <QTableView>
+#include <QTableWidget>
 #include <QTreeView>
 #include <QVBoxLayout>
+#include <QVariant>
 
 #include "Common.h"
 #include "File.h"
-#include "QtUtils/DynamicItemDelegate.h"
 #include "QtUtils/DynamicStandardItem.h"
 
 class DynamicStandardItem;
@@ -28,16 +31,35 @@ public:
   // Optional.
   virtual ResultCode SaveFile() { return ResultCode::NotAvailable; }
 
+  typedef std::function<void(QVariant)> HandleEditFunction;
+  typedef QPair<QVector<QString>, quint32> AttributeComboBoxData;
+
+  /// Contains info about a row of an attribute table.
+  struct AttributeTableRow
+  {
+    /// The name of the attribute. This will be used in the first column.
+    QString attribute_name;
+    /// The value of the attribute. This will be used in the second column.
+    QVariant attribute_value;
+    // Whether the value of the attribute should be editable or not. This will be used to set the
+    // flags of the second column.
+    bool editable = false;
+    // The function to execute if the value is edited.
+    HandleEditFunction handle_edit{};
+  };
+
 protected:
-  // List of what each table cell's editor should be.
-  DynamicItemDelegate::DelegateInfo m_delegate_group;
   QTreeView* m_tree_view;
   QWidget* m_main_widget;
   QMenu* m_context_menu;
 
   // Helper function for MakeItem(). TODO: Better name for this.
   DynamicStandardItem* MakeLabelItem(QString label);
-  QScrollArea* MakeAttributeSection(QStandardItemModel* table_view_layout);
+  /// @todo This should be made a static function, but "this" is required to handle
+  /// QTableWidget::itemChanged.
+  QScrollArea* MakeAttributeSection(const QVector<AttributeTableRow>& table_rows,
+                                    std::function<void()> update_data = {});
+  QScrollArea* MakeAttributeSectionOld(QStandardItemModel* table_view_layout);
 
 signals:
   void ConnectNode(Node*);
@@ -51,3 +73,7 @@ protected slots:
   void HandleTreeCustomContextMenuRequest(const QPoint& point);
   virtual void HandleAttributeItemChange(QStandardItem*) { return; }
 };
+
+// Enable functions as a metatype, to store in an item.
+Q_DECLARE_METATYPE(Node::HandleEditFunction)
+Q_DECLARE_METATYPE(Node::AttributeComboBoxData)

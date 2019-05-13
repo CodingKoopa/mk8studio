@@ -10,7 +10,6 @@
 
 #include "Formats/Textures/FTEX.h"
 #include "Nodes/Node.h"
-#include "QtUtils/DynamicItemDelegate.h"
 #include "QtUtils/DynamicStandardItem.h"
 
 class FTEXNode : public Node

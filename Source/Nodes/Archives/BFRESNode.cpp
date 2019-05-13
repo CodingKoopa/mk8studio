@@ -10,7 +10,6 @@
 
 #include "Common.h"
 #include "Nodes/Archives/BFRESGroupNode.h"
-#include "QtUtils/DynamicItemDelegate.h"
 #include "QtUtils/DynamicStandardItem.h"
 
 BFRESNode::BFRESNode(std::shared_ptr<BFRES> bfres, QObject* parent) : Node(parent), m_bfres(bfres)
@@ -37,7 +36,7 @@ ResultCode BFRESNode::LoadFileTreeArea()
   m_tree_view = new QTreeView;
   // stretch out table to fit space
   m_tree_view->header()->hide();
-  m_tree_view->setItemDelegate(new DynamicItemDelegate(DynamicItemDelegate::DelegateInfo()));
+  //  m_tree_view->setItemDelegate(new DynamicItemDelegate(DynamicItemDelegate::DelegateInfo()));
   m_tree_view->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_tree_view, &QTreeView::customContextMenuRequested, this,
           &BFRESNode::HandleTreeCustomContextMenuRequest);
@@ -71,13 +70,11 @@ DynamicStandardItem* BFRESNode::MakeItem()
   m_bfres->ReadDictionaries();
 
   // Allocate a new Node derived object.
-  BFRESGroupNode<FMDL>* fmdl_group_node =
-      new BFRESGroupNode<FMDL>(m_bfres->GetFMDLDictionary(), this);
+  BFRESGroupNode<FMDL>* fmdl_group_node = new BFRESGroupNode<FMDL>(m_bfres->GetFMDLDictionary());
   connect(fmdl_group_node, &BFRESGroupNode<FMDL>::ConnectNode, this, &BFRESNode::ConnectNode);
   bfres_item->appendRow(fmdl_group_node->MakeItem());
 
-  BFRESGroupNode<FTEX>* ftex_group_node =
-      new BFRESGroupNode<FTEX>(m_bfres->GetFTEXDictionary(), this);
+  BFRESGroupNode<FTEX>* ftex_group_node = new BFRESGroupNode<FTEX>(m_bfres->GetFTEXDictionary());
   connect(ftex_group_node, &BFRESGroupNode<FTEX>::ConnectNode, this, &BFRESNode::ConnectNode);
   bfres_item->appendRow(ftex_group_node->MakeItem());
 
@@ -89,80 +86,37 @@ ResultCode BFRESNode::LoadAttributeArea()
   emit NewStatus(ResultCode::UpdateStatusBar, "Loading file info...");
 
   QStandardItemModel* header_attributes_model = new QStandardItemModel();
-  m_delegate_group = DynamicItemDelegate::DelegateInfo();
+  //  m_delegate_group = DynamicItemDelegate::DelegateInfo();
 
   int row = 0;
 
-  // Magic
-  header_attributes_model->setItem(row, 0, new QStandardItem("Magic File Identifier"));
-  DynamicStandardItem* magic_item = new DynamicStandardItem(m_bfres_header.magic);
-  magic_item->SetFunction([this](QString value) { m_bfres_header.magic = value; });
-  header_attributes_model->setItem(row, 1, magic_item);
-  m_delegate_group.line_edit_delegates << row;
-  ++row;
+  QVector<Node::AttributeTableRow> test{
+      {"Magic File Identifier", m_bfres_header.magic},
+      {"Unknown A", QString("0x" + QString::number(m_bfres_header.unknown_a, 16))},
+      {"Unknown B", QString("0x" + QString::number(m_bfres_header.unknown_b, 16))},
+      {"Unknown C", QString("0x" + QString::number(m_bfres_header.unknown_c, 16))},
+      {"Unknown D", QString("0x" + QString::number(m_bfres_header.unknown_d, 16))},
+      {"Unknown E", QString("0x" + QString::number(m_bfres_header.unknown_e, 16))},
+      {"Unknown F", QString("0x" + QString::number(m_bfres_header.unknown_f, 16))},
+      {"Endianess", QVariant::fromValue(Node::AttributeComboBoxData{[this] {
+         QVector<QString> endian_names_vector;
+         auto endian_name_map = m_bfres->GetEndianNames();
+         for (auto const& endian_name : endian_name_map)
+           endian_names_vector << endian_name.second;
+
+         return Node::AttributeComboBoxData(
+             endian_names_vector, std::distance(endian_name_map.begin(),
+                                                endian_name_map.find(static_cast<BFRES::Endianness>(
+                                                    m_bfres_header.bom))));
+       }()})}};
 
   // TODO: Add proper entries for the unknowns, as some are found now.
-
-  // Unknown A
-  header_attributes_model->setItem(row, 0, new QStandardItem("Unknown A"));
-  header_attributes_model->setItem(
-      row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_a, 16))));
-  ++row;
-
-  // Unknown A
-  header_attributes_model->setItem(row, 0, new QStandardItem("Unknown B"));
-  header_attributes_model->setItem(
-      row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_b, 16))));
-  ++row;
-
-  // Unknown A
-  header_attributes_model->setItem(row, 0, new QStandardItem("Unknown C"));
-  header_attributes_model->setItem(
-      row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_c, 16))));
-  ++row;
-
-  // Unknown A
-  header_attributes_model->setItem(row, 0, new QStandardItem("Unknown D"));
-  header_attributes_model->setItem(
-      row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_d, 16))));
-  ++row;
-
-  // Unknown A
-  header_attributes_model->setItem(row, 0, new QStandardItem("Unknown E"));
-  header_attributes_model->setItem(
-      row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_e, 16))));
-  ++row;
-
-  // Unknown A
-  header_attributes_model->setItem(row, 0, new QStandardItem("Unknown F"));
-  header_attributes_model->setItem(
-      row, 1, new QStandardItem(QString("0x" + QString::number(m_bfres_header.unknown_f, 16))));
-  ++row;
-
-  // Endianess
-  header_attributes_model->setItem(row, 0, new QStandardItem("Endianness"));
-  QStandardItemModel* endian_entries = new QStandardItemModel();
-  auto endian_names = m_bfres->GetEndianNames();
-  for (auto const& endian_name : endian_names)
-    endian_entries->appendRow(new QStandardItem(endian_name.second));
-  m_delegate_group.combo_box_entries << endian_entries;
-  m_delegate_group.combo_box_delegates << row;
-  m_delegate_group.combo_box_selections << std::distance(
-      endian_names.begin(), endian_names.find(static_cast<BFRES::Endianness>(m_bfres_header.bom)));
-  DynamicStandardItem* endianness_item = new DynamicStandardItem(m_bfres->GetEndianName());
-  endianness_item->SetFunction([this, endian_names](quint32 index) {
-    auto it =
-        next(endian_names.begin(), std::min(index, static_cast<quint32>(endian_names.size())));
-    m_bfres_header.bom = static_cast<quint16>(it->first);
-  });
-  header_attributes_model->setItem(row, 1, endianness_item);
-  ++row;
 
   // Length
   header_attributes_model->setItem(row, 0, new QStandardItem("Length"));
   header_attributes_model->setItem(row, 1,
                                    new QStandardItem(QString::number(m_bfres_header.length)));
-  m_delegate_group.spin_box_delegates << row;
+  //  m_delegate_group.spin_box_delegates << row;
   ++row;
 
   // Alignment
@@ -215,7 +169,7 @@ ResultCode BFRESNode::LoadAttributeArea()
         row, 0, new QStandardItem("Number of files in group " + QString::number(i)));
     header_attributes_model->setItem(
         row, 1, new QStandardItem(QString::number(m_bfres_header.file_counts[i])));
-    m_delegate_group.spin_box_delegates << row;
+    //    m_delegate_group.spin_box_delegates << row;
     // Skip ahead 2 to get around the file group offsets.
     row += 2;
   }
@@ -228,7 +182,8 @@ ResultCode BFRESNode::LoadAttributeArea()
   connect(header_attributes_model, &QStandardItemModel::itemChanged, this,
           &BFRESNode::HandleAttributeItemChange);
 
-  emit NewAttributeArea(MakeAttributeSection(header_attributes_model));
+  emit NewAttributeArea(
+      MakeAttributeSection(test, [this]() { m_bfres->SetHeader(m_bfres_header); }));
   return ResultCode::Success;
 }
 

@@ -83,14 +83,14 @@ ResultCode FVTXNode::LoadAttributeArea()
 
   quint32 row = 0;
   QStandardItemModel* header_attributes_model = new QStandardItemModel;
-  m_delegate_group = DynamicItemDelegate::DelegateInfo();
+  //  m_delegate_group = DynamicItemDelegate::DelegateInfo();
 
   // Magic
   header_attributes_model->setItem(row, 0, new QStandardItem("Magic File Identifier"));
   DynamicStandardItem* magic_item = new DynamicStandardItem(m_fvtx_header.magic);
   magic_item->SetFunction([this](QString text) { m_fvtx_header.magic = text; });
   header_attributes_model->setItem(row, 1, magic_item);
-  m_delegate_group.line_edit_delegates << row;
+  //  m_delegate_group.line_edit_delegates << row;
   ++row;
 
   // Attribute Count
@@ -101,7 +101,7 @@ ResultCode FVTXNode::LoadAttributeArea()
   attribute_count_item->SetFunction(
       [this](QString text) { m_fvtx_header.attribute_count = text.toUShort(); });
   header_attributes_model->setItem(row, 1, attribute_count_item);
-  m_delegate_group.spin_box_delegates << row;
+  //  m_delegate_group.spin_box_delegates << row;
   ++row;
 
   // Buffer Count
@@ -112,7 +112,7 @@ ResultCode FVTXNode::LoadAttributeArea()
   buffer_count_item->SetFunction(
       [this](QString text) { m_fvtx_header.buffer_count = text.toUShort(); });
   header_attributes_model->setItem(row, 1, buffer_count_item);
-  m_delegate_group.spin_box_delegates << row;
+  //  m_delegate_group.spin_box_delegates << row;
   ++row;
 
   // Section Index
@@ -122,7 +122,7 @@ ResultCode FVTXNode::LoadAttributeArea()
   array_index_item->SetFunction(
       [this](QString text) { m_fvtx_header.section_index = text.toUShort(); });
   header_attributes_model->setItem(row, 1, array_index_item);
-  m_delegate_group.spin_box_delegates << row;
+  //  m_delegate_group.spin_box_delegates << row;
   ++row;
 
   // Number of Verticies
@@ -132,7 +132,7 @@ ResultCode FVTXNode::LoadAttributeArea()
   num_vertices_item->SetFunction(
       [this](QString text) { m_fvtx_header.number_vertices = text.toUInt(); });
   header_attributes_model->setItem(row, 1, num_vertices_item);
-  m_delegate_group.spin_box_delegates << row;
+  //  m_delegate_group.spin_box_delegates << row;
   ++row;
 
   // Vertex Skin Count
@@ -143,7 +143,7 @@ ResultCode FVTXNode::LoadAttributeArea()
   skin_count_item->SetFunction(
       [this](QString text) { m_fvtx_header.vertex_skin_count = text.toUShort(); });
   header_attributes_model->setItem(row, 1, skin_count_item);
-  m_delegate_group.spin_box_delegates << row;
+  //  m_delegate_group.spin_box_delegates << row;
   ++row;
 
   // Attribute Array Offset
@@ -177,7 +177,7 @@ ResultCode FVTXNode::LoadAttributeArea()
   connect(header_attributes_model, &QStandardItemModel::itemChanged, this,
           &FVTXNode::HandleAttributeItemChange);
 
-  emit NewAttributeArea(MakeAttributeSection(header_attributes_model));
+  emit NewAttributeArea(MakeAttributeSectionOld(header_attributes_model));
   return ResultCode::Success;
 }
 

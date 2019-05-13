@@ -10,7 +10,6 @@
 
 #include "Formats/Archives/BFRES.h"
 #include "Nodes/Textures/FTEXNode.h"
-#include "QtUtils/DynamicItemDelegate.h"
 #include "QtUtils/DynamicStandardItem.h"
 
 class BFRESNode : public Node

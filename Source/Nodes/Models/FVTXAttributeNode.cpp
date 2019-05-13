@@ -19,7 +19,7 @@ ResultCode FVTXAttributeNode::LoadAttributeArea()
 {
   quint32 row = 0;
   QStandardItemModel* header_attributes_model = new QStandardItemModel;
-  m_delegate_group = DynamicItemDelegate::DelegateInfo();
+  //  m_delegate_group = DynamicItemDelegate::DelegateInfo();
 
   // Name Offset
   header_attributes_model->setItem(row, 0, new QStandardItem("Name Offset"));
@@ -35,7 +35,7 @@ ResultCode FVTXAttributeNode::LoadAttributeArea()
   buffer_index_item->SetFunction(
       [this](QString text) { m_attribute.buffer_index = text.toUShort(); });
   header_attributes_model->setItem(row, 1, buffer_index_item);
-  m_delegate_group.spin_box_delegates << row;
+  //  m_delegate_group.spin_box_delegates << row;
   ++row;
 
   // Buffer Offset
@@ -50,10 +50,10 @@ ResultCode FVTXAttributeNode::LoadAttributeArea()
   QStandardItemModel* format_combo_box_entries = new QStandardItemModel();
   for (auto const& format_name : format_names)
     format_combo_box_entries->appendRow(new QStandardItem(format_name.second));
-  m_delegate_group.combo_box_entries << format_combo_box_entries;
-  m_delegate_group.combo_box_delegates << row;
-  m_delegate_group.combo_box_selections
-      << std::distance(format_names.begin(), format_names.find(m_attribute.format));
+  //  m_delegate_group.combo_box_entries << format_combo_box_entries;
+  //  m_delegate_group.combo_box_delegates << row;
+  //  m_delegate_group.combo_box_selections
+  //  << std::distance(format_names.begin(), format_names.find(m_attribute.format));
   DynamicStandardItem* format_item = new DynamicStandardItem(m_attribute_format_name);
   format_item->SetFunction([this, format_names](quint32 index) {
     auto it =
@@ -68,7 +68,7 @@ ResultCode FVTXAttributeNode::LoadAttributeArea()
   DynamicStandardItem* magic_item = new DynamicStandardItem(m_attribute.name);
   magic_item->SetFunction([this](QString text) { m_attribute.name = text; });
   header_attributes_model->setItem(row, 1, magic_item);
-  m_delegate_group.line_edit_delegates << row;
+  //  m_delegate_group.line_edit_delegates << row;
   ++row;
 
   // Friendly Name
@@ -82,7 +82,7 @@ ResultCode FVTXAttributeNode::LoadAttributeArea()
   connect(header_attributes_model, &QStandardItemModel::itemChanged, this,
           &FVTXAttributeNode::HandleAttributeItemChange);
 
-  emit NewAttributeArea(MakeAttributeSection(header_attributes_model));
+  emit NewAttributeArea(MakeAttributeSectionOld(header_attributes_model));
   return ResultCode::Success;
 }
 

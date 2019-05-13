@@ -17,7 +17,6 @@
 #include <QVBoxLayout>
 
 #include "Nodes/Archives/BFRESNode.h"
-#include "QtUtils/DynamicItemDelegate.h"
 #include "ui_MainWindow.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::MainWindow)
@@ -66,7 +65,6 @@ void MainWindow::OpenFile(const QString& path)
   }
 
   m_root_node = std::make_unique<BFRESNode>(std::make_shared<BFRES>(m_file), this);
-  m_root_node->LoadAttributeArea();
 
   // Make the connections for the BFRES node and any children.
   connect(m_root_node.get(), &Node::ConnectNode, this, &MainWindow::MakeNodeConnections);
