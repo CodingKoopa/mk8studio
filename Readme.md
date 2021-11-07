@@ -1,9 +1,11 @@
 # Mario Kart 8 Studio
-As the grandiose name of this tool suggests, Mario Kart 8 Studio was a project of mine with tall goals. I wanted to make an editor for Mario Kart 8, one to pull the scene out of its grave, and facilitate the creation of content for Mario Kart 8. My goal was to create a usable editor which works across all platforms, and is completely open source.
+As the grandiose name of this tool suggests, Mario Kart 8 Studio is a project I started with the intent of making an editor for the game Mario Kart 8. My goal was to create a usable editor which works across all platforms, and is completely open source.
 
-Needless to say, this was never realized. However, this project still has a very special place in my heart. This was really my first foray into writing an actual program. I have never known exactly how much I don't know about programming, for nobody does. But building a tool like this has given me much direction into what I need to learn. In addition to the learning experience, I take pride in what I do have to show here. MK8Studio supports opening decompressed BFRES files, exporting, and injecting textures, for a very limited set of texture formats. It's a little janky, but I'm happy that it has gotten this far.
+Although that goal never completely came to fruition, this project still has a special place in my heart because was really my first foray into writing a useful program. Building a tool like this has given me much direction into where I can grow my skills. In addition to the learning experience, I take pride in what I do have to show here. MK8Studio supports opening decompressed BFRES files, exporting, and injecting textures, for a very limited set of texture formats. It's a little janky, but I'm happy that it has gotten this far.
 
-At this point in time, we now have [Switch-Toolbox](https://github.com/KillzXGaming/Switch-Toolbox), a wonderful editor which serves the needs of the MK8 modding scene and more. I still wish to preserve this repository, since it is so near and dear to me.
+The most interesting part of the codebase to me is the [annotated image deswizzling code](Source/Formats/Textures/GX2ImageBase.cpp) that was adapted from [addrlib](https://github.com/decaf-emu/addrlib).
+
+If you are looking for a more functional editor, see [Switch-Toolbox](https://github.com/KillzXGaming/Switch-Toolbox).
 
 Main UI:
 
